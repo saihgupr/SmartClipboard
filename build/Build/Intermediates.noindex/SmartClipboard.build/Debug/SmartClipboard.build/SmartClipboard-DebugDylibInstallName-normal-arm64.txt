@@ -1,0 +1,1 @@
+@rpath/SmartClipboard.debug.dylib

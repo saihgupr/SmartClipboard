@@ -1,11 +1,17 @@
 import Foundation
 
 class GeminiService {
-    // API key found in user environment
-    let apiKey = "AIzaSyBn7A0OzD8hBlEKAkizBkVPJCap5b67IQ8" 
+    // Default fallback API key if not provided by user
+    private let defaultApiKey = "AIzaSyBn7A0OzD8hBlEKAkizBkVPJCap5b67IQ8" 
 
-    func search(query: String, history: [ClipboardItem]) async throws -> [UUID] {
-        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\(apiKey)")!
+    func search(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?) async throws -> [UUID] {
+        let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
+        let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
+        
+        // Remove 'models/' prefix if present
+        let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
+        
+        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(cleanModel):generateContent?key=\(actualApiKey)")!
         
         // Convert our history to JSON so the AI can read it
         let historyJsonData = try JSONEncoder().encode(history)
@@ -54,5 +60,31 @@ class GeminiService {
         }
         
         return []
+    }
+
+    func fetchModels(apiKey: String?) async throws -> [String] {
+        let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
+        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models?key=\(actualApiKey)")!
+        
+        let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "GeminiService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch models"])
+        }
+        
+        struct ModelsResponse: Decodable {
+            struct Model: Decodable {
+                let name: String
+                let supportedGenerationMethods: [String]
+            }
+            let models: [Model]
+        }
+        
+        let modelsResponse = try JSONDecoder().decode(ModelsResponse.self, from: data)
+        // Filter for models that support generating content
+        return modelsResponse.models
+            .filter { $0.supportedGenerationMethods.contains("generateContent") }
+            .map { $0.name.replacingOccurrences(of: "models/", with: "") }
+            .sorted()
     }
 }

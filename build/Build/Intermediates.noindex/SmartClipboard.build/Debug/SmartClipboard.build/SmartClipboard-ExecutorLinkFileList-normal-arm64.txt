@@ -1,0 +1,1 @@
+/Volumes/External/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a
