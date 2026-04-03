@@ -1,0 +1,13 @@
+name: SmartClipboard
+targets:
+  SmartClipboard:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: SmartClipboard
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.chrislapointe.SmartClipboard
+      INFOPLIST_FILE: Info.plist
+      GENERATE_INFOPLIST_FILE: NO
+      CODE_SIGNING_ALLOWED: NO
