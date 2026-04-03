@@ -4,28 +4,41 @@ class GeminiService {
     // Default fallback API key if not provided by user
     private let defaultApiKey = "AIzaSyBn7A0OzD8hBlEKAkizBkVPJCap5b67IQ8" 
 
-    func search(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?) async throws -> [UUID] {
+    struct SearchIntent {
+        let textQuery: String?
+        let startDate: Date?
+        let endDate: Date?
+    }
+
+    func parseSearchIntent(query: String, apiKey: String?, modelName: String?) async throws -> SearchIntent {
         let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
-        // Remove 'models/' prefix if present
         let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
-        
         let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(cleanModel):generateContent?key=\(actualApiKey)")!
         
-        // Convert our history to JSON so the AI can read it
-        let historyJsonData = try JSONEncoder().encode(history)
-        let historyString = String(data: historyJsonData, encoding: .utf8) ?? ""
+        let formatter = ISO8601DateFormatter()
+        let currentDateString = formatter.string(from: Date())
         
         let prompt = """
-        You are an AI assistant helping to search a user's clipboard history.
+        You are an AI assistant parsing search queries for a clipboard manager.
+        The current date and time is \(currentDateString).
+        
         The user has provided a search query: "\(query)"
 
-        Here is the clipboard history (in JSON format):
-        \(historyString)
+        Extract the user's intent into a JSON object with this exact structure:
+        {
+          "textQuery": "Extracted search string, or null if none",
+          "startDateISO": "ISO8601 formatted start date, or null",
+          "endDateISO": "ISO8601 formatted end date, or null"
+        }
 
-        Return a JSON array of the "id"s of the clipboard items that match the user's query.
-        Return ONLY the array of IDs.
+        Rules:
+        - If the user asks for a specific date (e.g., "July 27"), calculate the correct startDateISO and endDateISO for that entire day.
+        - If they specify time, narrow the range.
+        - If they mention text (e.g. "Mouse cat"), put it in textQuery.
+        - If they just search a word and no date, startDateISO and endDateISO should be null.
+        - Return ONLY the JSON object. Do not include markdown formatting like ```json.
         """
         
         let requestBody: [String: Any] = [
@@ -40,7 +53,6 @@ class GeminiService {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        // Parse the response back into Swift UUIDs
         struct GeminiResponse: Decodable {
             struct Candidate: Decodable {
                 struct Content: Decodable {
@@ -52,14 +64,35 @@ class GeminiService {
             let candidates: [Candidate]
         }
         
+        struct SearchIntentDTO: Decodable {
+            let textQuery: String?
+            let startDateISO: String?
+            let endDateISO: String?
+        }
+        
         let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
         if let text = geminiResponse.candidates.first?.content.parts.first?.text,
            let textData = text.data(using: .utf8) {
-            let ids = try JSONDecoder().decode([UUID].self, from: textData)
-            return ids
+            
+            let dto = try JSONDecoder().decode(SearchIntentDTO.self, from: textData)
+            
+            var start: Date? = nil
+            var end: Date? = nil
+            let autoFormatter = ISO8601DateFormatter()
+            autoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let looseFormatter = ISO8601DateFormatter()
+            
+            if let s = dto.startDateISO {
+                start = autoFormatter.date(from: s) ?? looseFormatter.date(from: s)
+            }
+            if let e = dto.endDateISO {
+                end = autoFormatter.date(from: e) ?? looseFormatter.date(from: e)
+            }
+            
+            return SearchIntent(textQuery: dto.textQuery, startDate: start, endDate: end)
         }
         
-        return []
+        return SearchIntent(textQuery: query, startDate: nil, endDate: nil)
     }
 
     func fetchModels(apiKey: String?) async throws -> [String] {

@@ -1,7 +1,10 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @StateObject private var clipboardManager = ClipboardManager()
+    @EnvironmentObject private var clipboardManager: ClipboardManager
+    @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
+    
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
@@ -15,7 +18,7 @@ struct ContentView: View {
     private let geminiService = GeminiService()
 
     var displayItems: [ClipboardItem] {
-        searchQuery.isEmpty ? clipboardManager.history : searchResults
+        searchQuery.isEmpty ? history : searchResults
     }
 
     var body: some View {
@@ -126,14 +129,24 @@ struct ContentView: View {
         isSearching = true
         Task {
             do {
-                let matchedIds = try await geminiService.search(
-                    query: searchQuery, 
-                    history: clipboardManager.history,
+                let intent = try await geminiService.parseSearchIntent(
+                    query: searchQuery,
                     apiKey: apiKey,
                     modelName: selectedModel
                 )
+                
                 await MainActor.run {
-                    self.searchResults = self.clipboardManager.history.filter { matchedIds.contains($0.id) }
+                    var filtered = self.history
+                    
+                    if let start = intent.startDate, let end = intent.endDate {
+                        filtered = filtered.filter { $0.timestamp >= start && $0.timestamp <= end }
+                    }
+                    
+                    if let textQ = intent.textQuery, !textQ.isEmpty {
+                        filtered = filtered.filter { $0.content.localizedCaseInsensitiveContains(textQ) }
+                    }
+                    
+                    self.searchResults = filtered
                     self.isSearching = false
                 }
             } catch {
