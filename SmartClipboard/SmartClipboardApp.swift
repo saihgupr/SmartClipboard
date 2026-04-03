@@ -33,8 +33,8 @@ struct SmartClipboardApp: App {
         MenuBarExtra("Smart Clipboard", systemImage: "doc.on.clipboard") {
             ContentView()
                 .environmentObject(clipboardManager)
+                .modelContainer(sharedModelContainer)
         }
         .menuBarExtraStyle(.window)
-        .modelContainer(sharedModelContainer)
     }
 }
