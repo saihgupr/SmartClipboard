@@ -81,10 +81,33 @@ class GeminiService {
         }
         
         let modelsResponse = try JSONDecoder().decode(ModelsResponse.self, from: data)
-        // Filter for models that support generating content
+        
+        // Filter for models that support generating content and are relevant for general app use
         return modelsResponse.models
             .filter { $0.supportedGenerationMethods.contains("generateContent") }
             .map { $0.name.replacingOccurrences(of: "models/", with: "") }
+            .filter { modelName in
+                let name = modelName.lowercased()
+                
+                // Keep standard Gemini and Gemma (Instruction Tuned) models
+                let isGemini = name.contains("gemini")
+                let isGemma = name.contains("gemma") && name.contains("-it")
+                
+                guard isGemini || isGemma else { return false }
+                
+                // Exclude specialized or internal-only keywords
+                // We exclude things like robotics, lyria (music), and internal experiments (banana)
+                let exclusions = [
+                    "robotics", "lyria", "computer-use", "image", "tts", 
+                    "customtools", "banana", "deep-research"
+                ]
+                
+                for exclusion in exclusions {
+                    if name.contains(exclusion) { return false }
+                }
+                
+                return true
+            }
             .sorted()
     }
 }

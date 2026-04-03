@@ -42,9 +42,23 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // API Key Section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("API Key")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
+                        HStack {
+                            Text("API Key")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            
+                            Spacer()
+                            
+                            Link(destination: URL(string: "https://aistudio.google.com/app/apikey")!) {
+                                HStack(spacing: 4) {
+                                    Text("Get Key")
+                                    Image(systemName: "arrow.up.right")
+                                }
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.blue)
+                            }
+                        }
                         
                         SecureField("Enter your Gemini API Key", text: $apiKey)
                             .textFieldStyle(.roundedBorder)
