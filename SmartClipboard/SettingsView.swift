@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var availableModels: [String] = []
     @State private var isLoadingModels = false
     @State private var errorMessage: String?
+    @State private var showSuccessMessage = false
     
     var onDismiss: () -> Void
     
@@ -60,8 +61,35 @@ struct SettingsView: View {
                             }
                         }
                         
-                        SecureField("Enter your Gemini API Key", text: $apiKey)
-                            .textFieldStyle(.roundedBorder)
+                        HStack {
+                            SecureField("Enter your Gemini API Key", text: $apiKey)
+                                .textFieldStyle(.roundedBorder)
+                            
+                            Button(action: { fetchModels() }) {
+                                if isLoadingModels {
+                                    ProgressView()
+                                        .scaleEffect(0.5)
+                                        .frame(width: 40, height: 20)
+                                } else {
+                                    Text("Test")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .frame(width: 40)
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(isLoadingModels)
+                        }
+                        
+                        if showSuccessMessage {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                Text("Connection successful!")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.green)
+                            .transition(.opacity)
+                        }
                         
                         Text("If empty, a default evaluation key will be used.")
                             .font(.caption)
@@ -138,11 +166,17 @@ struct SettingsView: View {
     func fetchModels() {
         isLoadingModels = true
         errorMessage = nil
+        showSuccessMessage = false
+        
         Task {
             do {
                 let models = try await geminiService.fetchModels(apiKey: apiKey)
                 await MainActor.run {
                     self.availableModels = models
+                    withAnimation {
+                        self.showSuccessMessage = true
+                    }
+                    
                     // Ensure the current selection is valid or default it
                     if !models.contains(selectedModel) && !models.isEmpty {
                         if models.contains("gemini-1.5-flash") {
@@ -152,6 +186,13 @@ struct SettingsView: View {
                         }
                     }
                     self.isLoadingModels = false
+                    
+                    // Hide success message after 3 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation {
+                            self.showSuccessMessage = false
+                        }
+                    }
                 }
             } catch {
                 await MainActor.run {
