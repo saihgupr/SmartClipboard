@@ -8,9 +8,10 @@ class GeminiService {
         let textQuery: String?
         let startDate: Date?
         let endDate: Date?
+        let semanticMatchIds: [UUID]?
     }
 
-    func parseSearchIntent(query: String, apiKey: String?, modelName: String?) async throws -> SearchIntent {
+    func parseSearchIntent(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?) async throws -> SearchIntent {
         let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
@@ -19,6 +20,9 @@ class GeminiService {
         
         let formatter = ISO8601DateFormatter()
         let currentDateString = formatter.string(from: Date())
+        
+        // Take at most the last 200 items to keep prompt within limits
+        let searchContext = history.prefix(200).map { "ID: \($0.id.uuidString)\nDate: \($0.timestamp)\nContent: \($0.content.prefix(500))" }.joined(separator: "\n---\n")
         
         let prompt = """
         You are an AI assistant parsing search queries for a clipboard manager.
@@ -30,15 +34,20 @@ class GeminiService {
         {
           "textQuery": "Extracted search string, or null if none",
           "startDateISO": "ISO8601 formatted start date, or null",
-          "endDateISO": "ISO8601 formatted end date, or null"
+          "endDateISO": "ISO8601 formatted end date, or null",
+          "semanticMatchIds": ["ID1", "ID2"] // Only populate if doing semantic/contextual search over the items below, otherwise empty array []
         }
 
         Rules:
-        - If the user asks for a specific date (e.g., "July 27"), calculate the correct startDateISO and endDateISO for that entire day.
-        - If they specify time, narrow the range.
+        - If the user asks for a specific date (e.g., "July 27"), calculate the correct startDateISO and endDateISO.
         - If they mention text (e.g. "Mouse cat"), put it in textQuery.
-        - If they just search a word and no date, startDateISO and endDateISO should be null.
+        - IF the user asks a semantic or conceptual query (e.g. "passwords", "links", "something I wrote about pizza"), evaluate the provided recent clipboard items below and put the matching ID strings in semanticMatchIds.
         - Return ONLY the JSON object. Do not include markdown formatting like ```json.
+        
+        Recent Clipboard Items for Semantic Search:
+        ---
+        \(searchContext)
+        ---
         """
         
         let requestBody: [String: Any] = [
@@ -68,31 +77,45 @@ class GeminiService {
             let textQuery: String?
             let startDateISO: String?
             let endDateISO: String?
+            let semanticMatchIds: [String]?
         }
         
         let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
-        if let text = geminiResponse.candidates.first?.content.parts.first?.text,
-           let textData = text.data(using: .utf8) {
+        if let text = geminiResponse.candidates.first?.content.parts.first?.text {
             
-            let dto = try JSONDecoder().decode(SearchIntentDTO.self, from: textData)
-            
-            var start: Date? = nil
-            var end: Date? = nil
-            let autoFormatter = ISO8601DateFormatter()
-            autoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let looseFormatter = ISO8601DateFormatter()
-            
-            if let s = dto.startDateISO {
-                start = autoFormatter.date(from: s) ?? looseFormatter.date(from: s)
+            var cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if cleanText.hasPrefix("```json") {
+                cleanText.removeFirst(7)
+            } else if cleanText.hasPrefix("```") {
+                cleanText.removeFirst(3)
             }
-            if let e = dto.endDateISO {
-                end = autoFormatter.date(from: e) ?? looseFormatter.date(from: e)
+            if cleanText.hasSuffix("```") {
+                cleanText.removeLast(3)
             }
+            cleanText = cleanText.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            return SearchIntent(textQuery: dto.textQuery, startDate: start, endDate: end)
+            if let textData = cleanText.data(using: .utf8) {
+                let dto = try JSONDecoder().decode(SearchIntentDTO.self, from: textData)
+                
+                var start: Date? = nil
+                var end: Date? = nil
+                let autoFormatter = ISO8601DateFormatter()
+                autoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let looseFormatter = ISO8601DateFormatter()
+                
+                if let s = dto.startDateISO {
+                    start = autoFormatter.date(from: s) ?? looseFormatter.date(from: s)
+                }
+                if let e = dto.endDateISO {
+                    end = autoFormatter.date(from: e) ?? looseFormatter.date(from: e)
+                }
+                
+                let uuids = dto.semanticMatchIds?.compactMap { UUID(uuidString: $0) }
+                return SearchIntent(textQuery: dto.textQuery, startDate: start, endDate: end, semanticMatchIds: uuids)
+            }
         }
         
-        return SearchIntent(textQuery: query, startDate: nil, endDate: nil)
+        return SearchIntent(textQuery: query, startDate: nil, endDate: nil, semanticMatchIds: nil)
     }
 
     func fetchModels(apiKey: String?) async throws -> [String] {
