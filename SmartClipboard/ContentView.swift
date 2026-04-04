@@ -214,20 +214,30 @@ struct ContentView: View {
                 if item.content.localizedCaseInsensitiveContains(searchQuery) { return true }
                 
                 let isToday = Calendar.current.isDateInToday(item.timestamp)
+                
+                // 2. Natural relative day matching
+                let lowerQuery = searchQuery.lowercased().trimmingCharacters(in: .whitespaces)
+                if "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4 {
+                    if Calendar.current.isDateInYesterday(item.timestamp) { return true }
+                }
+                if "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3 {
+                    if isToday { return true }
+                }
+                
                 let timeStr = Self.timeFormatter.string(from: item.timestamp)
                 
-                // 2. Exact time string? Only match if it's today
+                // 3. Exact time string? Only match if it's today
                 if isToday && timeStr.localizedCaseInsensitiveContains(searchQuery) {
                     return true
                 }
                 
-                // 3. Date-only match (e.g. searching "4/4/26") works for all days
+                // 4. Date-only match (e.g. searching "4/4/26") works for all days
                 let dateOnlyStr = Self.dateFormatter.string(from: item.timestamp)
                 if dateOnlyStr.localizedCaseInsensitiveContains(searchQuery) {
                     return true
                 }
                 
-                // 4. Full string match (date + time)
+                // 5. Full string match (date + time)
                 let fullStr = Self.fullFormatter.string(from: item.timestamp)
                 if fullStr.localizedCaseInsensitiveContains(searchQuery) {
                     // Stop it from matching if the query was PURELY the time string
