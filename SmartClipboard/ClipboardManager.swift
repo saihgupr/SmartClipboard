@@ -81,9 +81,41 @@ class ClipboardManager: ObservableObject {
     }
     
     func copyToClipboard(item: ClipboardItem) {
+        copyToClipboard(content: item.content)
+    }
+
+    func copyToClipboard(content: String) {
         pasteboard.clearContents()
-        pasteboard.setString(item.content, forType: .string)
+        pasteboard.setString(content, forType: .string)
         // Update change count so we don't re-save what we just copied
         lastChangeCount = pasteboard.changeCount 
+    }
+
+    func paste(content: String) {
+        copyToClipboard(content: content)
+        
+        // Hide our app window to refocus the previous app
+        NSApp.hide(nil)
+        
+        // Short delay to ensure the previous app is focused
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let src = CGEventSource(stateID: .combinedSessionState)
+            
+            // CMD down
+            let cmdd = CGEvent(keyboardEventSource: src, virtualKey: 0x37, keyDown: true)
+            // v down
+            let vd = CGEvent(keyboardEventSource: src, virtualKey: 0x09, keyDown: true)
+            vd?.flags = .maskCommand
+            // v up
+            let vu = CGEvent(keyboardEventSource: src, virtualKey: 0x09, keyDown: false)
+            vu?.flags = .maskCommand
+            // CMD up
+            let cmdu = CGEvent(keyboardEventSource: src, virtualKey: 0x37, keyDown: false)
+            
+            cmdd?.post(tap: .cgAnnotatedSessionEventTap)
+            vd?.post(tap: .cgAnnotatedSessionEventTap)
+            vu?.post(tap: .cgAnnotatedSessionEventTap)
+            cmdu?.post(tap: .cgAnnotatedSessionEventTap)
+        }
     }
 }

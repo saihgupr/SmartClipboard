@@ -159,24 +159,61 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(displayItems) { item in
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(formatTimestamp(item.timestamp))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Text(item.content)
-                            .font(.system(.body, design: .monospaced))
-                            .lineLimit(3)
-                            .foregroundColor(.primary)
-                    }
-                    .padding(.vertical, 4)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        clipboardManager.copyToClipboard(item: item)
+                List {
+                    let items = displayItems
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        HStack(spacing: 12) {
+                            if index < 10 {
+                                Text("\(index == 9 ? 0 : index + 1)")
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 15)
+                                    .padding(4)
+                                    .background(Color(NSColor.quaternaryLabelColor))
+                                    .cornerRadius(4)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(formatTimestamp(item.timestamp))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(item.content)
+                                    .font(.system(.body, design: .monospaced))
+                                    .lineLimit(3)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            clipboardManager.paste(content: item.content)
+                        }
                     }
                 }
                 .listStyle(.sidebar)
+                .background {
+                    // Invisible buttons for keyboard shortcuts
+                    ZStack {
+                        let items = displayItems
+                        // Shortcut for items 1-9
+                        ForEach(0..<min(items.count, 9), id: \.self) { i in
+                            Button("") {
+                                clipboardManager.paste(content: items[i].content)
+                            }
+                            .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
+                            .opacity(0)
+                        }
+                        // Shortcut for item 10 (Cmd+0)
+                        if items.count >= 10 {
+                            Button("") {
+                                clipboardManager.paste(content: items[9].content)
+                            }
+                            .keyboardShortcut("0", modifiers: .command)
+                            .opacity(0)
+                        }
+                    }
+                }
             }
         }
     }
