@@ -1,6 +1,9 @@
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
+    
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
     
@@ -8,6 +11,7 @@ struct SettingsView: View {
     @State private var isLoadingModels = false
     @State private var errorMessage: String?
     @State private var showSuccessMessage = false
+    @State private var showClearConfirmation = false
     
     var onDismiss: () -> Void
     
@@ -150,6 +154,38 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
+                    Divider()
+                    
+                    // Danger Zone
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Danger Zone")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.red)
+                        
+                        Button(role: .destructive, action: { showClearConfirmation = true }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Clear Clipboard History")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+                        .alert("Clear History", isPresented: $showClearConfirmation) {
+                            Button("Cancel", role: .cancel) {}
+                            Button("Clear All", role: .destructive) {
+                                clearHistory()
+                            }
+                        } message: {
+                            Text("Are you sure you want to clear your entire clipboard history? This cannot be undone.")
+                        }
+                        
+                        Text("Permanently deletes all saved clipboard data.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
                     Spacer()
                 }
                 .padding()
@@ -200,6 +236,15 @@ struct SettingsView: View {
                     self.isLoadingModels = false
                 }
             }
+        }
+    }
+    
+    func clearHistory() {
+        do {
+            try modelContext.delete(model: ClipboardItem.self)
+            try modelContext.save()
+        } catch {
+            print("Failed to clear history: \(error)")
         }
     }
 }
