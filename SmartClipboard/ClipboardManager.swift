@@ -26,9 +26,18 @@ class ClipboardManager: ObservableObject {
         self.modelContext = modelContext
         lastChangeCount = pasteboard.changeCount
         startPolling()
-        
+
         // Run an initial pruning of old records
         pruneOldRecords()
+
+        // Install global hotkeys (Cmd+N and Option+N) that work from any app
+        GlobalHotkeyManager.shared.onPasteItem = { [weak self] index in
+            self?.pasteItem(at: index)
+        }
+        GlobalHotkeyManager.shared.onPasteMultiple = { [weak self] count in
+            self?.pasteMultiple(count: count)
+        }
+        GlobalHotkeyManager.shared.install()
     }
 
     func startPolling() {
@@ -91,16 +100,22 @@ class ClipboardManager: ObservableObject {
         lastChangeCount = pasteboard.changeCount 
     }
 
-    func paste(content: String) {
+    func paste(content: String, isGlobalHotkey: Bool = false) {
         copyToClipboard(content: content)
-        
-        // Hide our app window to refocus the previous app
-        NSApp.hide(nil)
-        
-        // Short delay to ensure the previous app is focused
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+
+        // If SmartClipboard's window is frontmost, hide it so focus returns to the
+        // previous app. When triggered via global hotkey the app is already in the
+        // background, so we skip the hide.
+        let needsHide = !isGlobalHotkey && NSApp.isActive
+        if needsHide {
+            NSApp.hide(nil)
+        }
+
+        // Give the previously focused app time to reclaim focus before Cmd+V lands.
+        let delay: Double = needsHide ? 0.15 : 0.05
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             let src = CGEventSource(stateID: .combinedSessionState)
-            
+
             // CMD down
             let cmdd = CGEvent(keyboardEventSource: src, virtualKey: 0x37, keyDown: true)
             // v down
@@ -111,11 +126,43 @@ class ClipboardManager: ObservableObject {
             vu?.flags = .maskCommand
             // CMD up
             let cmdu = CGEvent(keyboardEventSource: src, virtualKey: 0x37, keyDown: false)
-            
+
             cmdd?.post(tap: .cgAnnotatedSessionEventTap)
             vd?.post(tap: .cgAnnotatedSessionEventTap)
             vu?.post(tap: .cgAnnotatedSessionEventTap)
             cmdu?.post(tap: .cgAnnotatedSessionEventTap)
+        }
+    }
+
+    // MARK: - Global hotkey handlers
+
+    /// Fetches the item at the given 0-based index (newest-first) and pastes it.
+    func pasteItem(at index: Int) {
+        var descriptor = FetchDescriptor<ClipboardItem>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        descriptor.fetchLimit = index + 1
+        guard let items = try? modelContext.fetch(descriptor),
+              index < items.count else { return }
+        paste(content: items[index].content, isGlobalHotkey: true)
+    }
+
+    /// Fetches the most-recent `count` items and pastes them oldest→newest.
+    func pasteMultiple(count: Int) {
+        var descriptor = FetchDescriptor<ClipboardItem>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        descriptor.fetchLimit = count
+        guard let items = try? modelContext.fetch(descriptor) else { return }
+        // Reverse so oldest lands in the target app first
+        pasteSequentially(Array(items.prefix(count).reversed()))
+    }
+
+    private func pasteSequentially(_ items: [ClipboardItem], index: Int = 0) {
+        guard index < items.count else { return }
+        paste(content: items[index].content, isGlobalHotkey: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.pasteSequentially(items, index: index + 1)
         }
     }
 }

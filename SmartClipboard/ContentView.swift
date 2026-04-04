@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
@@ -192,28 +193,6 @@ struct ContentView: View {
                     }
                 }
                 .listStyle(.sidebar)
-                .background {
-                    // Invisible buttons for keyboard shortcuts
-                    ZStack {
-                        let items = displayItems
-                        // Shortcut for items 1-9
-                        ForEach(0..<min(items.count, 9), id: \.self) { i in
-                            Button("") {
-                                clipboardManager.paste(content: items[i].content)
-                            }
-                            .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
-                            .opacity(0)
-                        }
-                        // Shortcut for item 10 (Cmd+0)
-                        if items.count >= 10 {
-                            Button("") {
-                                clipboardManager.paste(content: items[9].content)
-                            }
-                            .keyboardShortcut("0", modifiers: .command)
-                            .opacity(0)
-                        }
-                    }
-                }
             }
         }
     }
