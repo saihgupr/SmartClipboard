@@ -9,6 +9,11 @@ struct ContentView: View {
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
     
+    enum Field {
+        case search
+    }
+    @FocusState private var focusedField: Field?
+    
     // User Settings
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
@@ -67,9 +72,23 @@ struct ContentView: View {
             } else {
                 mainView
                     .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
+                    .onAppear {
+                        focusedField = .search
+                    }
             }
         }
         .frame(width: 380, height: 500)
+        .onAppear {
+            focusedField = .search
+        }
+        .onChange(of: showingSettings) { newValue in
+            if !newValue {
+                // Focus search bar when returning from settings
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    focusedField = .search
+                }
+            }
+        }
     }
     
     var mainView: some View {
@@ -84,6 +103,7 @@ struct ContentView: View {
                     
                     TextField("Search instantly, or hit Return for AI search...", text: $searchQuery)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .focused($focusedField, equals: .search)
                         .onChange(of: searchQuery) { _ in
                             performLocalSearch()
                         }
