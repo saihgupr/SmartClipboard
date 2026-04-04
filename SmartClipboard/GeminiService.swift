@@ -11,7 +11,7 @@ class GeminiService {
         let semanticMatchIds: [UUID]?
     }
 
-    func parseSearchIntent(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?) async throws -> SearchIntent {
+    func parseSearchIntent(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?, searchDepth: Int = 200) async throws -> SearchIntent {
         let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
@@ -21,8 +21,8 @@ class GeminiService {
         let formatter = ISO8601DateFormatter()
         let currentDateString = formatter.string(from: Date())
         
-        // Take at most the last 200 items to keep prompt within limits
-        let searchContext = history.prefix(200).map { "ID: \($0.id.uuidString)\nDate: \($0.timestamp)\nContent: \($0.content.prefix(500))" }.joined(separator: "\n---\n")
+        // Take at most the specified number of items to keep prompt within limits
+        let searchContext = history.prefix(searchDepth).map { "ID: \($0.id.uuidString)\nDate: \($0.timestamp)\nContent: \($0.content.prefix(500))" }.joined(separator: "\n---\n")
         
         let prompt = """
         You are an AI assistant parsing search queries for a clipboard manager.

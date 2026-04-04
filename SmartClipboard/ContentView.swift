@@ -12,6 +12,7 @@ struct ContentView: View {
     // User Settings
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
+    @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     
     @State private var showingSettings = false
     
@@ -222,7 +223,8 @@ struct ContentView: View {
                     query: searchQuery,
                     history: history,
                     apiKey: apiKey,
-                    modelName: selectedModel
+                    modelName: selectedModel,
+                    searchDepth: semanticSearchDepth
                 )
                 
                 await MainActor.run {

@@ -6,6 +6,7 @@ struct SettingsView: View {
     
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
+    @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     
     @State private var availableModels: [String] = []
     @State private var isLoadingModels = false
@@ -150,6 +151,32 @@ struct SettingsView: View {
                         }
                         
                         Text("Polls the latest models from the Google AI registry to ensure you have access to the newest versions.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Divider()
+                    
+                    // Search Depth Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Semantic Search Depth")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Slider(value: Binding(get: {
+                                Double(semanticSearchDepth)
+                            }, set: { newValue in
+                                semanticSearchDepth = Int(newValue)
+                            }), in: 200...2000, step: 50)
+                            
+                            Text("\(semanticSearchDepth)")
+                                .font(.caption)
+                                .monospacedDigit()
+                                .frame(width: 40, alignment: .trailing)
+                        }
+                        
+                        Text("Higher values search further back in history but use more AI tokens (max 2000).")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
