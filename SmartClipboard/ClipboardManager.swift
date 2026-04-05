@@ -22,6 +22,9 @@ class ClipboardManager: ObservableObject {
     private var timer: Timer?
     private let modelContext: ModelContext
 
+    /// Tracks if the app has macOS Accessibility permissions required for simulated keystrokes (Cmd+V).
+    @Published var hasAccessibilityPermission: Bool = AXIsProcessTrusted()
+
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         lastChangeCount = pasteboard.changeCount
@@ -38,14 +41,29 @@ class ClipboardManager: ObservableObject {
             self?.pasteMultiple(count: count)
         }
         GlobalHotkeyManager.shared.install()
+
+        // Check permissions immediately
+        refreshAccessibilityPermission()
     }
 
     func startPolling() {
-        // Check the clipboard every 1 second
+        // Check the clipboard and accessibility permissions every 1 second
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.checkForChanges()
+                
+                // If we don't have permission, keep checking so the warning can disappear automatically
+                if self?.hasAccessibilityPermission == false {
+                    self?.refreshAccessibilityPermission()
+                }
             }
+        }
+    }
+
+    func refreshAccessibilityPermission() {
+        let trusted = AXIsProcessTrusted()
+        if hasAccessibilityPermission != trusted {
+            hasAccessibilityPermission = trusted
         }
     }
 

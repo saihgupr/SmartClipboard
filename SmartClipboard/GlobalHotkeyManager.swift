@@ -54,13 +54,18 @@ final class GlobalHotkeyManager {
                 let id = Int(hkID.id)
 
                 Task { @MainActor in
+                    print("[GlobalHotkeyManager] Hotkey fired: ID \(id)")
+                    
                     if id >= 1 && id <= 10 {
                         // Cmd+1…9 → index 0…8; Cmd+0 → index 9
                         let index = (id == 10) ? 9 : id - 1
+                        print("[GlobalHotkeyManager] Pasting index: \(index)")
                         mgr.onPasteItem?(index)
                     } else if id >= 11 && id <= 19 {
                         // Option+1…9 → paste last N items
-                        mgr.onPasteMultiple?(id - 10)
+                        let count = id - 10
+                        print("[GlobalHotkeyManager] Pasting multiple: \(count)")
+                        mgr.onPasteMultiple?(count)
                     }
                 }
                 return noErr

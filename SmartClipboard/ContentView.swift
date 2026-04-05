@@ -148,6 +148,34 @@ struct ContentView: View {
             
             Divider()
             
+            if !clipboardManager.hasAccessibilityPermission {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Accessibility Required")
+                            .font(.headline)
+                        Spacer()
+                        Button("Fix") {
+                            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                    
+                    Text("Enable SmartClipboard in System Settings > Privacy > Accessibility to use global shortcuts.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(12)
+                .background(Color.orange.opacity(0.1))
+                
+                Divider()
+            }
+            
             // Clipboard List
             if displayItems.isEmpty {
                 VStack(spacing: 12) {
