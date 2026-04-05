@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     @AppStorage("launchAtLogin") private var launchAtLogin = false
+    @AppStorage("historyRetentionDays") private var historyRetentionDays: Int = 180
     
     @State private var availableModels: [String] = []
     @State private var isLoadingModels = false
@@ -216,6 +217,38 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
+                    Divider()
+                    
+                    // Data Management Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Data Management")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Label("History Retention", systemImage: "clock.arrow.2.circlepath")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Picker("", selection: $historyRetentionDays) {
+                                Text("7 Days").tag(7)
+                                Text("30 Days").tag(30)
+                                Text("90 Days").tag(90)
+                                Text("180 Days (6 mo)").tag(180)
+                                Text("1 Year").tag(365)
+                                Text("Forever").tag(0)
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.menu)
+                            .frame(width: 120)
+                        }
+                        
+                        Text("Controls how long clipboard items are kept before automatic deletion.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                     
                     Spacer()
                 }

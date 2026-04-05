@@ -241,42 +241,92 @@ struct ContentView: View {
             return
         }
         
+        let query = searchQuery.trimmingCharacters(in: .whitespaces)
+        let lowerQuery = query.lowercased()
+        
+        // --- 1. Attempt to parse query as a date/time ---
+        // We'll ignore the year for most matches since history is short.
+        let calendar = Calendar.current
+        let now = Date()
+        let currentYear = calendar.component(.year, from: now)
+        
+        // Try multiple formats
+        let formats = [
+            "M/d", "M-d", "M.d",
+            "MMM d", "MMMM d",
+            "d MMM", "d MMMM"
+        ]
+        
+        var queryDay: Int?
+        var queryMonth: Int?
+        var queryWeekday: Int? // 1=Sun, 2=Mon...
+        
+        let df = DateFormatter()
+        df.locale = Locale.current
+        
+        for format in formats {
+            df.dateFormat = format
+            if let date = df.date(from: query) {
+                let comps = calendar.dateComponents([.month, .day], from: date)
+                queryDay = comps.day
+                queryMonth = comps.month
+                break
+            }
+        }
+        
+        // Try parsing weekday
+        let weekdays = calendar.standaloneWeekdaySymbols // ["Sunday", "Monday", ...]
+        let shortWeekdays = calendar.shortStandaloneWeekdaySymbols // ["Sun", "Mon", ...]
+        if let index = weekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
+            queryWeekday = index + 1
+        } else if let index = shortWeekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
+            queryWeekday = index + 1
+        }
+
         // Instant Local Search
         self.searchResults = history.filter { item in
-            // 1. Text match
-            if item.content.localizedCaseInsensitiveContains(searchQuery) { return true }
+            // A. Direct Text Match
+            if item.content.localizedCaseInsensitiveContains(query) { return true }
             
-            let isToday = Calendar.current.isDateInToday(item.timestamp)
+            let itemDate = item.timestamp
+            let itemComps = calendar.dateComponents([.year, .month, .day, .weekday], from: itemDate)
             
-            // 2. Natural relative day matching
-            let lowerQuery = searchQuery.lowercased().trimmingCharacters(in: .whitespaces)
+            // B. Explicit Month/Day match (Ignoring Year)
+            if let qM = queryMonth, let qD = queryDay {
+                if itemComps.month == qM && itemComps.day == qD {
+                    return true
+                }
+            }
+            
+            // C. Weekday match (e.g. "Monday")
+            if let qW = queryWeekday {
+                if itemComps.weekday == qW {
+                    return true
+                }
+            }
+            
+            // D. Natural relative day matching (Today/Yesterday)
             if "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4 {
-                if Calendar.current.isDateInYesterday(item.timestamp) { return true }
+                if calendar.isDateInYesterday(itemDate) { return true }
             }
             if "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3 {
-                if isToday { return true }
+                if calendar.isDateInToday(itemDate) { return true }
             }
             
-            let timeStr = Self.timeFormatter.string(from: item.timestamp)
-            
-            // 3. Exact time string? Only match if it's today
-            if isToday && timeStr.localizedCaseInsensitiveContains(searchQuery) {
-                return true
-            }
-            
-            // 4. Date-only match (e.g. searching "4/4/26") works for all days
-            let dateOnlyStr = Self.dateFormatter.string(from: item.timestamp)
-            if dateOnlyStr.localizedCaseInsensitiveContains(searchQuery) {
-                return true
-            }
-            
-            // 5. Full string match (date + time)
-            let fullStr = Self.fullFormatter.string(from: item.timestamp)
-            if fullStr.localizedCaseInsensitiveContains(searchQuery) {
-                // Stop it from matching if the query was PURELY the time string
-                if timeStr.localizedCaseInsensitiveContains(searchQuery) {
-                    return false 
+            // E. Time-only match (e.g. "10:30")
+            let timeStr = Self.timeFormatter.string(from: itemDate)
+            if timeStr.localizedCaseInsensitiveContains(query) {
+                // If it's today, it's a very strong match
+                if calendar.isDateInToday(itemDate) { return true }
+                // Otherwise only match if the query explicitly included the colon or AM/PM
+                if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
+                    return true
                 }
+            }
+            
+            // F. Full formatted string fallback (M/D/YY etc.)
+            let fullStr = Self.fullFormatter.string(from: itemDate)
+            if fullStr.localizedCaseInsensitiveContains(query) {
                 return true
             }
             
