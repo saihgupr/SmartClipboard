@@ -79,24 +79,30 @@ class ClipboardManager: ObservableObject {
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
 
-        if let newString = pasteboard.string(forType: .string) {
-            // Prevent saving duplicates back-to-back by checking the most recent item in DB
-            let descriptor = FetchDescriptor<ClipboardItem>(sortBy: [SortDescriptor(\.timestamp, order: .reverse)])
-            var fetchLimitDescriptor = descriptor
-            fetchLimitDescriptor.fetchLimit = 1
+        if let newString = pasteboard.string(forType: .string), !newString.isEmpty {
+            // Check for any existing item with the same content to implement "move-to-top"
+            let predicate = #Predicate<ClipboardItem> { $0.content == newString }
+            var descriptor = FetchDescriptor<ClipboardItem>(predicate: predicate)
+            descriptor.fetchLimit = 1
             
             do {
-                let recentItems = try modelContext.fetch(fetchLimitDescriptor)
-                if recentItems.first?.content != newString {
+                let existingItems = try modelContext.fetch(descriptor)
+                
+                if let existingItem = existingItems.first {
+                    // Item already exists - just update its timestamp to move it to top
+                    existingItem.timestamp = Date()
+                } else {
+                    // New unique item - insert it
                     let item = ClipboardItem(content: newString)
                     modelContext.insert(item)
-                    try modelContext.save()
-                    
-                    // Periodically prune. In a real app we might only do this once a day, but for safety:
-                    pruneOldRecords()
                 }
+                
+                try modelContext.save()
+                
+                // Periodically prune old records based on retention settings
+                pruneOldRecords()
             } catch {
-                print("Failed to save new clipboard item: \(error)")
+                print("Failed to handle new clipboard item: \(error)")
             }
         }
     }
