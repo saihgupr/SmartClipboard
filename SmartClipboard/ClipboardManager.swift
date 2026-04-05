@@ -177,7 +177,7 @@ class ClipboardManager: ObservableObject {
             let activeApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
             let effectiveBundleID = targetBundleID ?? activeApp
             
-            if let bid = effectiveBundleID, self.shiftEnterBundleIDs.contains(bid) {
+            if !isGlobalHotkey, let bid = effectiveBundleID, self.shiftEnterBundleIDs.contains(bid) {
                 print("[ClipboardManager] Injecting Shift+Enter for \(bid)")
                 
                 // Shift down
