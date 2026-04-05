@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 struct AppSpecificSettingsView: View {
     @AppStorage("shiftEnterApps") private var shiftEnterAppsJSON: String = "[]"
@@ -93,18 +94,24 @@ struct AppSpecificSettingsView: View {
     private func addApplication() {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
+        panel.canChooseDirectories = true
         panel.canChooseFiles = true
+        panel.treatsFilePackagesAsDirectories = false
         panel.allowedContentTypes = [.application]
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         
-        if panel.runModal() == .OK, let url = panel.url {
-            if let bundle = Bundle(url: url), let bundleID = bundle.bundleIdentifier {
-                var currentIDs = getIDs()
-                if !currentIDs.contains(bundleID) {
-                    currentIDs.append(bundleID)
-                    saveIDs(currentIDs)
-                    loadApps()
+        // Ensure the app is active so the panel gets focus
+        NSApp.activate(ignoringOtherApps: true)
+        
+        panel.begin { response in
+            if response == .OK, let url = panel.url {
+                if let bundle = Bundle(url: url), let bundleID = bundle.bundleIdentifier {
+                    var currentIDs = getIDs()
+                    if !currentIDs.contains(bundleID) {
+                        currentIDs.append(bundleID)
+                        saveIDs(currentIDs)
+                        loadApps()
+                    }
                 }
             }
         }
