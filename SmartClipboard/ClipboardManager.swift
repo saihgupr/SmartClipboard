@@ -244,8 +244,45 @@ class ClipboardManager: ObservableObject {
 
     private func pasteSequentially(_ items: [ClipboardItem], index: Int = 0) {
         guard index < items.count else { return }
+        
+        // Paste current item
         paste(content: items[index].content, isGlobalHotkey: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        
+        // If there are more items, send an Enter/Shift+Enter to separate them
+        if index < items.count - 1 {
+            let delay: Double = 0.15 // Slight delay to ensure paste finished
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let src = CGEventSource(stateID: .combinedSessionState)
+                
+                // Determine if we need Shift+Enter vs Enter
+                let activeApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                let useShift = activeApp != nil && self.shiftEnterBundleIDs.contains(activeApp!)
+                
+                if useShift {
+                    // Send Shift+Enter to avoid submission
+                    let shdown = CGEvent(keyboardEventSource: src, virtualKey: 0x38, keyDown: true)
+                    let retd = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: true)
+                    retd?.flags = .maskShift
+                    let retu = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: false)
+                    retu?.flags = .maskShift
+                    let shup = CGEvent(keyboardEventSource: src, virtualKey: 0x38, keyDown: false)
+                    
+                    shdown?.post(tap: .cgAnnotatedSessionEventTap)
+                    retd?.post(tap: .cgAnnotatedSessionEventTap)
+                    retu?.post(tap: .cgAnnotatedSessionEventTap)
+                    shup?.post(tap: .cgAnnotatedSessionEventTap)
+                } else {
+                    // Send standard Enter
+                    let retd = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: true)
+                    let retu = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: false)
+                    retd?.post(tap: .cgAnnotatedSessionEventTap)
+                    retu?.post(tap: .cgAnnotatedSessionEventTap)
+                }
+            }
+        }
+
+        // Increase delay between items slightly for reliability
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
             self?.pasteSequentially(items, index: index + 1)
         }
     }

@@ -6,7 +6,7 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>4D7C249B-E53F-4983-8836-79062CA004E3</key>
+		<key>48274C9E-47BE-422D-9EE7-EFFA263D65DC</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>4D7C249B-E53F-4983-8836-79062CA004E3.xcactivitylog</string>
+			<string>48274C9E-47BE-422D-9EE7-EFFA263D65DC.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -40,13 +40,13 @@
 			<key>signature</key>
 			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>797107221.30188501</real>
+			<real>797107895.679901</real>
 			<key>timeStoppedRecording</key>
-			<real>797107227.00897503</real>
+			<real>797107900.27212</real>
 			<key>title</key>
 			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>4D7C249B-E53F-4983-8836-79062CA004E3</string>
+			<string>48274C9E-47BE-422D-9EE7-EFFA263D65DC</string>
 		</dict>
 		<key>A68ED697-9C5F-4DB3-AEAD-DB2556F7CC89</key>
 		<dict>
