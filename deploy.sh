@@ -2,6 +2,10 @@
 
 # deploy.sh - SmartClipboard Build & Install Script
 
+BUNDLE_ID="com.chrislapointe.SmartClipboard"
+APP_PATH="/Applications/SmartClipboard.app"
+TCC_DB="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
+
 # 1. Generate Xcode project
 echo "🔄 Generating Xcode project..."
 xcodegen generate
@@ -16,11 +20,23 @@ xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./buil
 
 # 4. Install to /Applications
 echo "📦 Installing to /Applications..."
-rm -rf /Applications/SmartClipboard.app
-cp -R ./build/Build/Products/Release/SmartClipboard.app /Applications/
+rm -rf "$APP_PATH"
+cp -R ./build/Build/Products/Release/SmartClipboard.app "$APP_PATH"
 
-# 5. Launch
+# 5. Grant Accessibility permission (dev convenience — avoids manual approval each build)
+echo "🔐 Granting Accessibility permission..."
+if [ -f "$TCC_DB" ]; then
+    sqlite3 "$TCC_DB" "INSERT OR REPLACE INTO access \
+        (service, client, client_type, auth_value, auth_reason, auth_version, indirect_object_identifier, flags, last_modified) \
+        VALUES ('kTCCServiceAccessibility', '$BUNDLE_ID', 0, 2, 4, 1, 'UNUSED', 0, strftime('%s','now'));" 2>/dev/null && \
+        echo "   ✅ Accessibility granted" || \
+        echo "   ⚠️  Could not auto-grant (Full Disk Access required). Grant manually once in System Settings."
+else
+    echo "   ⚠️  TCC database not found at expected path."
+fi
+
+# 6. Launch
 echo "🚀 Launching SmartClipboard..."
-open /Applications/SmartClipboard.app
+open "$APP_PATH"
 
 echo "✅ Deployment complete!"
