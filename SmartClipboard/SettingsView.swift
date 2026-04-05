@@ -187,6 +187,11 @@ struct SettingsView: View {
                     
                     Divider()
                     
+                    // App-Specific Section
+                    AppSpecificSettingsView()
+                    
+                    Divider()
+                    
                     // Search Depth Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Semantic Search Depth")

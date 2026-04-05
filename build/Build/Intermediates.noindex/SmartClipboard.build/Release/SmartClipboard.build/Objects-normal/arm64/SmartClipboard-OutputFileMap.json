@@ -8,6 +8,11 @@
     "pch" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-Bridging-header.pch",
     "swift-dependencies" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.swiftdeps"
   },
+  "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/SmartClipboard/AppSpecificSettingsView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o",
+    "llvm-bc" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.bc",
+    "object" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o"
+  },
   "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ClipboardManager.swift" : {
     "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.o",
     "llvm-bc" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.bc",

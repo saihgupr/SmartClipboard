@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		02A8E0F5D17E6F1246E6E772 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D563318C5A4FFEBC09D8C3 /* ClipboardManager.swift */; };
 		1F6E2A484DE642B167BFF14E /* SmartClipboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CCD9BB36808A677F805482 /* SmartClipboardApp.swift */; };
+		36A9C0A7B831D83B1CA94148 /* AppSpecificSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C5CAF99A0F05EDE8EA9768 /* AppSpecificSettingsView.swift */; };
 		4D7D93073E0B3EE50BD7FF69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EAC0A09C92C2EE17D38C59 /* ContentView.swift */; };
 		56039F47B084642C6F75A8A1 /* StatusItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E9B26355DBBD671BAEEEFF /* StatusItemManager.swift */; };
 		C8CEB5DDE8171BF7436206FB /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D18AA6316AA6DA7B4BCDFB /* GlobalHotkeyManager.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		02C5CAF99A0F05EDE8EA9768 /* AppSpecificSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSpecificSettingsView.swift; sourceTree = "<group>"; };
 		05EAC0A09C92C2EE17D38C59 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		110A42EA26F3F681BEC4735F /* SmartClipboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartClipboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11F32C9216609895F6E4177D /* SmartClipboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SmartClipboard.entitlements; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 		B4816ECEFCC0669F4466DC21 /* SmartClipboard */ = {
 			isa = PBXGroup;
 			children = (
+				02C5CAF99A0F05EDE8EA9768 /* AppSpecificSettingsView.swift */,
 				89D563318C5A4FFEBC09D8C3 /* ClipboardManager.swift */,
 				05EAC0A09C92C2EE17D38C59 /* ContentView.swift */,
 				AA4046CC8C119279E3CCB0EC /* GeminiService.swift */,
@@ -113,6 +116,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36A9C0A7B831D83B1CA94148 /* AppSpecificSettingsView.swift in Sources */,
 				02A8E0F5D17E6F1246E6E772 /* ClipboardManager.swift in Sources */,
 				4D7D93073E0B3EE50BD7FF69 /* ContentView.swift in Sources */,
 				FCAE13886FA2BAEBDFB20910 /* GeminiService.swift in Sources */,
