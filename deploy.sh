@@ -11,8 +11,8 @@ echo "🔪 Stopping current instance..."
 killall SmartClipboard &>/dev/null || true
 
 # 3. Build the app
-echo "🏗️ Building SmartClipboard (Release)..."
-xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./build build
+echo "🏗️ Building SmartClipboard (Release) with Ad-Hoc signing..."
+xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./build build CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE="Manual"
 
 # 4. Install to /Applications
 echo "📦 Installing to /Applications..."

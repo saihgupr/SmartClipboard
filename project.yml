@@ -10,4 +10,7 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: com.chrislapointe.SmartClipboard
       INFOPLIST_FILE: Info.plist
       GENERATE_INFOPLIST_FILE: NO
-      CODE_SIGNING_ALLOWED: NO
+      CODE_SIGNING_ALLOWED: YES
+      CODE_SIGNING_STYLE: Manual
+      CODE_SIGN_IDENTITY: "-"
+      CODE_SIGN_ENTITLEMENTS: SmartClipboard/SmartClipboard.entitlements
