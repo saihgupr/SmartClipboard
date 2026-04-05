@@ -6,48 +6,6 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>892BE065-F964-4E0F-899A-B99422420288</key>
-		<dict>
-			<key>className</key>
-			<string>IDECommandLineBuildLog</string>
-			<key>documentTypeString</key>
-			<string>&lt;nil&gt;</string>
-			<key>domainType</key>
-			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
-			<key>fileName</key>
-			<string>892BE065-F964-4E0F-899A-B99422420288.xcactivitylog</string>
-			<key>hasPrimaryLog</key>
-			<true/>
-			<key>primaryObservable</key>
-			<dict>
-				<key>highLevelStatus</key>
-				<string>S</string>
-				<key>totalNumberOfAnalyzerIssues</key>
-				<integer>0</integer>
-				<key>totalNumberOfErrors</key>
-				<integer>0</integer>
-				<key>totalNumberOfTestFailures</key>
-				<integer>0</integer>
-				<key>totalNumberOfWarnings</key>
-				<integer>0</integer>
-			</dict>
-			<key>schemeIdentifier-containerName</key>
-			<string>SmartClipboard project</string>
-			<key>schemeIdentifier-schemeName</key>
-			<string>SmartClipboard</string>
-			<key>schemeIdentifier-sharedScheme</key>
-			<integer>1</integer>
-			<key>signature</key>
-			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
-			<key>timeStartedRecording</key>
-			<real>797084302.02800798</real>
-			<key>timeStoppedRecording</key>
-			<real>797084303.47943199</real>
-			<key>title</key>
-			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
-			<key>uniqueIdentifier</key>
-			<string>892BE065-F964-4E0F-899A-B99422420288</string>
-		</dict>
 		<key>BFDB7087-EC99-4D7D-B298-C985BCC9D339</key>
 		<dict>
 			<key>className</key>

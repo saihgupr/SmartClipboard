@@ -216,7 +216,7 @@ struct ContentView: View {
                         .padding(.vertical, 4)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            clipboardManager.paste(content: item.content)
+                            clipboardManager.paste(item: item)
                         }
                     }
                 }

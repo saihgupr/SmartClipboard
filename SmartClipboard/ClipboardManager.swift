@@ -6,7 +6,7 @@ import SwiftData
 final class ClipboardItem: Identifiable {
     @Attribute(.unique) let id: UUID
     let content: String
-    let timestamp: Date
+    var timestamp: Date
     
     init(id: UUID = UUID(), content: String, timestamp: Date = Date()) {
         self.id = id
@@ -118,6 +118,14 @@ class ClipboardManager: ObservableObject {
         lastChangeCount = pasteboard.changeCount 
     }
 
+    func paste(item: ClipboardItem, isGlobalHotkey: Bool = false) {
+        // Move to top by updating timestamp
+        item.timestamp = Date()
+        try? modelContext.save()
+        
+        paste(content: item.content, isGlobalHotkey: isGlobalHotkey)
+    }
+
     func paste(content: String, isGlobalHotkey: Bool = false) {
         copyToClipboard(content: content)
 
@@ -162,7 +170,7 @@ class ClipboardManager: ObservableObject {
         descriptor.fetchLimit = index + 1
         guard let items = try? modelContext.fetch(descriptor),
               index < items.count else { return }
-        paste(content: items[index].content, isGlobalHotkey: true)
+        paste(item: items[index], isGlobalHotkey: true)
     }
 
     /// Fetches the most-recent `count` items and pastes them oldest→newest.
