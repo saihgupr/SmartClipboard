@@ -12,5 +12,5 @@ targets:
       GENERATE_INFOPLIST_FILE: NO
       CODE_SIGNING_ALLOWED: YES
       CODE_SIGNING_STYLE: Manual
-      CODE_SIGN_IDENTITY: "-"
+      CODE_SIGN_IDENTITY: "Apple Development: chrisxlapointe@icloud.com (W3GLW5YKN6)"
       CODE_SIGN_ENTITLEMENTS: SmartClipboard/SmartClipboard.entitlements

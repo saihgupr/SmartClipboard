@@ -534,18 +534,18 @@ relocations:
   - { offset: 0x12E304, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard0aB3AppV7SwiftUI0C0AadEP4body4BodyQzvgTW', symObjAddr: 0x644, symBinAddr: 0x100021560, symSize: 0xB4 }
   - { offset: 0x12E372, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard0aB3AppV7SwiftUI0C0AadEPxycfCTW', symObjAddr: 0x6F8, symBinAddr: 0x100021614, symSize: 0xA0 }
   - { offset: 0x12E3EB, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x798, symBinAddr: 0x1000216B4, symSize: 0x34 }
-  - { offset: 0x12E83C, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfETo', symObjAddr: 0x4E4, symBinAddr: 0x100021F10, symSize: 0x58 }
-  - { offset: 0x12E86B, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCMa', symObjAddr: 0x53C, symBinAddr: 0x100021F68, symSize: 0x20 }
-  - { offset: 0x12E87F, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGACyxq_GAA0G0A2aORzAA0gK0R_rlWl', symObjAddr: 0x800, symBinAddr: 0x1000221E8, symSize: 0x90 }
-  - { offset: 0x12E893, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI30_EnvironmentKeyWritingModifierVy14SmartClipboard0H7ManagerCSgGACyxGAA04ViewF0AAWl', symObjAddr: 0x914, symBinAddr: 0x100022278, symSize: 0x50 }
-  - { offset: 0x12E8A7, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGWOh', symObjAddr: 0x964, symBinAddr: 0x1000222C8, symSize: 0x48 }
-  - { offset: 0x12E8FF, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC12setupPopover33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0x0, symBinAddr: 0x100021A2C, symSize: 0x248 }
-  - { offset: 0x12E9F4, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCF', symObjAddr: 0x248, symBinAddr: 0x100021C74, symSize: 0x80 }
-  - { offset: 0x12EA6F, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC13togglePopover33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCF', symObjAddr: 0x2C8, symBinAddr: 0x100021CF4, symSize: 0x11C }
-  - { offset: 0x12EAB7, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTo', symObjAddr: 0x3E4, symBinAddr: 0x100021E10, symSize: 0x50 }
-  - { offset: 0x12EAD2, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC7quitApp33_B166284F7CD89C39567EF5CFD58010D3LLyyFTo', symObjAddr: 0x434, symBinAddr: 0x100021E60, symSize: 0x50 }
-  - { offset: 0x12EB15, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCACycfcTo', symObjAddr: 0x484, symBinAddr: 0x100021EB0, symSize: 0x2C }
-  - { offset: 0x12EB74, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfD', symObjAddr: 0x4B0, symBinAddr: 0x100021EDC, symSize: 0x34 }
-  - { offset: 0x12EC4C, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfCTf4nnd_n', symObjAddr: 0x55C, symBinAddr: 0x100021F88, symSize: 0x260 }
-  - { offset: 0x12ECED, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC15showContextMenu33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x9AC, symBinAddr: 0x100022310, symSize: 0x15C }
+  - { offset: 0x12E841, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfETo', symObjAddr: 0x4E4, symBinAddr: 0x100021F10, symSize: 0x58 }
+  - { offset: 0x12E870, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCMa', symObjAddr: 0x53C, symBinAddr: 0x100021F68, symSize: 0x20 }
+  - { offset: 0x12E884, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGACyxq_GAA0G0A2aORzAA0gK0R_rlWl', symObjAddr: 0x800, symBinAddr: 0x1000221E8, symSize: 0x90 }
+  - { offset: 0x12E898, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI30_EnvironmentKeyWritingModifierVy14SmartClipboard0H7ManagerCSgGACyxGAA04ViewF0AAWl', symObjAddr: 0x914, symBinAddr: 0x100022278, symSize: 0x50 }
+  - { offset: 0x12E8AC, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGWOh', symObjAddr: 0x964, symBinAddr: 0x1000222C8, symSize: 0x48 }
+  - { offset: 0x12E904, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC12setupPopover33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0x0, symBinAddr: 0x100021A2C, symSize: 0x248 }
+  - { offset: 0x12E9F9, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCF', symObjAddr: 0x248, symBinAddr: 0x100021C74, symSize: 0x80 }
+  - { offset: 0x12EA74, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC13togglePopover33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCF', symObjAddr: 0x2C8, symBinAddr: 0x100021CF4, symSize: 0x11C }
+  - { offset: 0x12EABC, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTo', symObjAddr: 0x3E4, symBinAddr: 0x100021E10, symSize: 0x50 }
+  - { offset: 0x12EAD7, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC7quitApp33_B166284F7CD89C39567EF5CFD58010D3LLyyFTo', symObjAddr: 0x434, symBinAddr: 0x100021E60, symSize: 0x50 }
+  - { offset: 0x12EB1A, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCACycfcTo', symObjAddr: 0x484, symBinAddr: 0x100021EB0, symSize: 0x2C }
+  - { offset: 0x12EB79, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfD', symObjAddr: 0x4B0, symBinAddr: 0x100021EDC, symSize: 0x34 }
+  - { offset: 0x12EC51, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfCTf4nnd_n', symObjAddr: 0x55C, symBinAddr: 0x100021F88, symSize: 0x260 }
+  - { offset: 0x12ECF2, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC15showContextMenu33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x9AC, symBinAddr: 0x100022310, symSize: 0x170 }
 ...

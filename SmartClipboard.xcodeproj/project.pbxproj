@@ -133,7 +133,7 @@
 				CODE_SIGNING_ALLOWED = YES;
 				CODE_SIGNING_STYLE = Manual;
 				CODE_SIGN_ENTITLEMENTS = SmartClipboard/SmartClipboard.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development: chrisxlapointe@icloud.com (W3GLW5YKN6)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -271,7 +271,7 @@
 				CODE_SIGNING_ALLOWED = YES;
 				CODE_SIGNING_STYLE = Manual;
 				CODE_SIGN_ENTITLEMENTS = SmartClipboard/SmartClipboard.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development: chrisxlapointe@icloud.com (W3GLW5YKN6)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;

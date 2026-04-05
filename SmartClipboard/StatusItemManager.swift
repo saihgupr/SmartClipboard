@@ -69,7 +69,9 @@ final class StatusItemManager: NSObject {
     
     private func showContextMenu(_ sender: NSStatusBarButton) {
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Quit SmartClipboard", action: #selector(quitApp), keyEquivalent: "q"))
+        let quitItem = NSMenuItem(title: "Quit SmartClipboard", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
         
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)

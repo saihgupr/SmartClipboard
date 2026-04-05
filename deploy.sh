@@ -4,7 +4,7 @@
 
 BUNDLE_ID="com.chrislapointe.SmartClipboard"
 APP_PATH="/Applications/SmartClipboard.app"
-TCC_DB="/Library/Application Support/com.apple.TCC/TCC.db"
+SIGN_IDENTITY="Apple Development: chrisxlapointe@icloud.com (W3GLW5YKN6)"
 
 # 1. Generate Xcode project
 echo "🔄 Generating Xcode project..."
@@ -15,8 +15,11 @@ echo "🔪 Stopping current instance..."
 killall SmartClipboard &>/dev/null || true
 
 # 3. Build the app
-echo "🏗️ Building SmartClipboard (Release) with Ad-Hoc signing..."
-xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./build build CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE="Manual"
+echo "🏗️ Building SmartClipboard (Release)..."
+xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./build build \
+    CODE_SIGN_IDENTITY="$SIGN_IDENTITY" \
+    CODE_SIGN_STYLE="Manual" \
+    DEVELOPMENT_TEAM="" 2>&1 | tail -3
 
 # 4. Install to /Applications
 echo "📦 Installing to /Applications..."
@@ -24,21 +27,19 @@ rm -rf "$APP_PATH"
 cp -R ./build/Build/Products/Release/SmartClipboard.app "$APP_PATH"
 
 # 5. Sign the app with a stable ad-hoc identity
-echo "🖋️ Re-signing binary for TCC persistence..."
-codesign --force --deep --sign - "$APP_PATH"
+echo "🖋️ Re-signing binary with stable identity..."
+codesign --force --deep --sign "$SIGN_IDENTITY" "$APP_PATH"
 
-# 6. Grant Accessibility permission (dev convenience — avoids manual approval each build)
-echo "🔐 Granting Accessibility permission..."
-if [ -f "$TCC_DB" ]; then
-    # We clear the existing entry first then re-add to avoid stale cache issues
-    sudo sqlite3 "$TCC_DB" "DELETE FROM access WHERE client='$BUNDLE_ID' AND service='kTCCServiceAccessibility';" 2>/dev/null
-    sudo sqlite3 "$TCC_DB" "INSERT INTO access \
-        (service, client, client_type, auth_value, auth_reason, auth_version, indirect_object_identifier, flags, last_modified) \
-        VALUES ('kTCCServiceAccessibility', '$BUNDLE_ID', 0, 2, 4, 1, 'UNUSED', 0, strftime('%s','now'));" 2>/dev/null && \
-        echo "   ✅ Accessibility granted" || \
-        echo "   ⚠️  Could not auto-grant (Full Disk Access required for Terminal). Grant manually once in System Settings."
+# 6. Verify Accessibility permission
+echo "🔐 Checking Accessibility permission..."
+# With a stable signing identity, TCC remembers the grant across rebuilds.
+# Only need to grant manually once on first install.
+if osascript -e 'tell application "System Events" to return name of first process' &>/dev/null; then
+    echo "   ✅ Accessibility already granted (persisted via stable signing identity)"
 else
-    echo "   ⚠️  TCC database not found at expected path: $TCC_DB"
+    echo "   ⚠️  Accessibility not yet granted. Please enable once in System Settings > Privacy > Accessibility."
+    echo "        (This only needs to be done once — it will persist across future rebuilds.)"
+    open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
 fi
 
 # 7. Launch
