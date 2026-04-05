@@ -4,8 +4,8 @@ import SwiftData
 
 @Model
 final class ClipboardItem: Identifiable {
-    @Attribute(.unique) let id: UUID
-    let content: String
+    @Attribute(.unique) var id: UUID
+    var content: String
     var timestamp: Date
     
     init(id: UUID = UUID(), content: String, timestamp: Date = Date()) {
@@ -65,6 +65,13 @@ class ClipboardManager: ObservableObject {
         if hasAccessibilityPermission != trusted {
             hasAccessibilityPermission = trusted
         }
+    }
+
+    /// Triggers the macOS system prompt to request Accessibility permissions.
+    func requestAccessibilityPermission() {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        AXIsProcessTrustedWithOptions(options as CFDictionary)
+        refreshAccessibilityPermission()
     }
 
     func checkForChanges() {

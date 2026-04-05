@@ -82,8 +82,8 @@ struct ContentView: View {
         .onAppear {
             focusedField = .search
         }
-        .onChange(of: showingSettings) { newValue in
-            if !newValue {
+        .onChange(of: showingSettings) {
+            if !showingSettings {
                 // Focus search bar when returning from settings
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     focusedField = .search
@@ -105,7 +105,7 @@ struct ContentView: View {
                     TextField("Search instantly, or hit Return for AI search...", text: $searchQuery)
                         .textFieldStyle(PlainTextFieldStyle())
                         .focused($focusedField, equals: .search)
-                        .onChange(of: searchQuery) { _ in
+                        .onChange(of: searchQuery) {
                             performLocalSearch()
                         }
                         .onSubmit {
@@ -157,6 +157,7 @@ struct ContentView: View {
                             .font(.headline)
                         Spacer()
                         Button("Fix") {
+                            clipboardManager.requestAccessibilityPermission()
                             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
                                 NSWorkspace.shared.open(url)
                             }

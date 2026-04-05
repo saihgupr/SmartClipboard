@@ -10,6 +10,7 @@
 		02A8E0F5D17E6F1246E6E772 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D563318C5A4FFEBC09D8C3 /* ClipboardManager.swift */; };
 		1F6E2A484DE642B167BFF14E /* SmartClipboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CCD9BB36808A677F805482 /* SmartClipboardApp.swift */; };
 		4D7D93073E0B3EE50BD7FF69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EAC0A09C92C2EE17D38C59 /* ContentView.swift */; };
+		56039F47B084642C6F75A8A1 /* StatusItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E9B26355DBBD671BAEEEFF /* StatusItemManager.swift */; };
 		C8CEB5DDE8171BF7436206FB /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D18AA6316AA6DA7B4BCDFB /* GlobalHotkeyManager.swift */; };
 		E1FC233C262D1C152266D3F7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887F596C632ECB32BDF81FCD /* SettingsView.swift */; };
 		FCAE13886FA2BAEBDFB20910 /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4046CC8C119279E3CCB0EC /* GeminiService.swift */; };
@@ -22,6 +23,7 @@
 		39D18AA6316AA6DA7B4BCDFB /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 		887F596C632ECB32BDF81FCD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		89D563318C5A4FFEBC09D8C3 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
+		96E9B26355DBBD671BAEEEFF /* StatusItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemManager.swift; sourceTree = "<group>"; };
 		AA4046CC8C119279E3CCB0EC /* GeminiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiService.swift; sourceTree = "<group>"; };
 		F6CCD9BB36808A677F805482 /* SmartClipboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartClipboardApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -45,6 +47,7 @@
 				887F596C632ECB32BDF81FCD /* SettingsView.swift */,
 				11F32C9216609895F6E4177D /* SmartClipboard.entitlements */,
 				F6CCD9BB36808A677F805482 /* SmartClipboardApp.swift */,
+				96E9B26355DBBD671BAEEEFF /* StatusItemManager.swift */,
 			);
 			path = SmartClipboard;
 			sourceTree = "<group>";
@@ -116,6 +119,7 @@
 				C8CEB5DDE8171BF7436206FB /* GlobalHotkeyManager.swift in Sources */,
 				E1FC233C262D1C152266D3F7 /* SettingsView.swift in Sources */,
 				1F6E2A484DE642B167BFF14E /* SmartClipboardApp.swift in Sources */,
+				56039F47B084642C6F75A8A1 /* StatusItemManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

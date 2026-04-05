@@ -412,6 +412,13 @@
     "moduleName" : "Security"
   },
   {
+    "clangModuleMapPath" : "\/Volumes\/External\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/ServiceManagement.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/chrislapointe\/Projects\/CurrentProjects\/SmartClipboard\/build\/ModuleCache.noindex\/ServiceManagement-E32F2VNVF4ZVBXO4N7NT43QE9.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "ServiceManagement"
+  },
+  {
     "clangModuleMapPath" : "\/Volumes\/External\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/Spatial\/module.modulemap",
     "clangModulePath" : "\/Users\/chrislapointe\/Projects\/CurrentProjects\/SmartClipboard\/build\/ModuleCache.noindex\/Spatial-4831J1QW6X8OYVU0YMBNRIU6Q.pcm",
     "isBridgingHeaderDependency" : false,

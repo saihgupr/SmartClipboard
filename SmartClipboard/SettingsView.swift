@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import ServiceManagement
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -7,6 +8,7 @@ struct SettingsView: View {
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
+    @AppStorage("launchAtLogin") private var launchAtLogin = false
     
     @State private var availableModels: [String] = []
     @State private var isLoadingModels = false
@@ -46,6 +48,34 @@ struct SettingsView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // Quick Options Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Quick Options")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        Toggle("Launch SmartClipboard at Login", isOn: $launchAtLogin)
+                            .toggleStyle(.switch)
+                            .onChange(of: launchAtLogin) {
+                                updateLoginItem(enabled: launchAtLogin)
+                            }
+                        
+                        Button(action: { NSApplication.shared.terminate(nil) }) {
+                            HStack {
+                                Image(systemName: "power")
+                                Text("Quit SmartClipboard")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Text("These settings apply immediately to your app experience.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Divider()
+                    
                     // API Key Section
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -181,37 +211,6 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    Divider()
-                    
-                    // Danger Zone
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Danger Zone")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.red)
-                        
-                        Button(role: .destructive, action: { showClearConfirmation = true }) {
-                            HStack {
-                                Image(systemName: "trash")
-                                Text("Clear Clipboard History")
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                        .alert("Clear History", isPresented: $showClearConfirmation) {
-                            Button("Cancel", role: .cancel) {}
-                            Button("Clear All", role: .destructive) {
-                                clearHistory()
-                            }
-                        } message: {
-                            Text("Are you sure you want to clear your entire clipboard history? This cannot be undone.")
-                        }
-                        
-                        Text("Permanently deletes all saved clipboard data.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
                     
                     Spacer()
                 }
@@ -266,12 +265,15 @@ struct SettingsView: View {
         }
     }
     
-    func clearHistory() {
+    func updateLoginItem(enabled: Bool) {
         do {
-            try modelContext.delete(model: ClipboardItem.self)
-            try modelContext.save()
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
         } catch {
-            print("Failed to clear history: \(error)")
+            print("Failed to update login item: \(error)")
         }
     }
 }

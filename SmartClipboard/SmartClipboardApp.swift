@@ -23,18 +23,18 @@ struct SmartClipboardApp: App {
     }()
 
     @StateObject private var clipboardManager: ClipboardManager
+    private var statusItemManager: StatusItemManager?
 
     init() {
         let container = sharedModelContainer
         _clipboardManager = StateObject(wrappedValue: ClipboardManager(modelContext: container.mainContext))
+        self.statusItemManager = StatusItemManager(clipboardManager: ClipboardManager(modelContext: container.mainContext), modelContainer: container)
     }
 
     var body: some Scene {
-        MenuBarExtra("Smart Clipboard", systemImage: "doc.on.clipboard") {
-            ContentView()
-                .environmentObject(clipboardManager)
-                .modelContainer(sharedModelContainer)
+        Settings { 
+            // Required for apps without a main window, though we'll use our custom SettingsView.
+            EmptyView()
         }
-        .menuBarExtraStyle(.window)
     }
 }
