@@ -101,6 +101,11 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    func delete(item: ClipboardItem) {
+        modelContext.delete(item)
+        try? modelContext.save()
+    }
+    
     /// Deletes items older than 6 months (approx 180 days)
     private func pruneOldRecords() {
         let sixMonthsAgo = Calendar.current.date(byAdding: .day, value: -180, to: Date())!

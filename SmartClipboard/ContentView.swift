@@ -219,6 +219,15 @@ struct ContentView: View {
                         .onTapGesture {
                             clipboardManager.paste(item: item)
                         }
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    clipboardManager.delete(item: item)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
                 .listStyle(.sidebar)
