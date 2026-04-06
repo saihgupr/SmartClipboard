@@ -124,6 +124,8 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Clear search")
+                        .help("Clear search")
                     }
                 }
                 .padding(.vertical, 8)
