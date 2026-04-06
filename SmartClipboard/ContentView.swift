@@ -283,16 +283,30 @@ struct ContentView: View {
             queryWeekday = index + 1
         }
 
+        // Precompute boolean prefixes to avoid string allocation/comparison per item
+        let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
+        let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
+
+        // Fast path: if the query doesn't look like a time or date at all, we can skip expensive date formatting
+        // (digits, slashes, dashes, colons, am, pm)
+        let containsDigits = query.rangeOfCharacter(from: .decimalDigits) != nil
+        let mightBeTimeOrDate = containsDigits ||
+                                lowerQuery.contains("am") ||
+                                lowerQuery.contains("pm") ||
+                                query.contains("/") ||
+                                query.contains("-") ||
+                                query.contains(":")
+
         // Instant Local Search
         self.searchResults = history.filter { item in
             // A. Direct Text Match
             if item.content.localizedCaseInsensitiveContains(query) { return true }
             
             let itemDate = item.timestamp
-            let itemComps = calendar.dateComponents([.year, .month, .day, .weekday], from: itemDate)
             
             // B. Explicit Month/Day match (Ignoring Year)
             if let qM = queryMonth, let qD = queryDay {
+                let itemComps = calendar.dateComponents([.month, .day], from: itemDate)
                 if itemComps.month == qM && itemComps.day == qD {
                     return true
                 }
@@ -300,34 +314,37 @@ struct ContentView: View {
             
             // C. Weekday match (e.g. "Monday")
             if let qW = queryWeekday {
-                if itemComps.weekday == qW {
+                let itemWeekday = calendar.component(.weekday, from: itemDate)
+                if itemWeekday == qW {
                     return true
                 }
             }
             
             // D. Natural relative day matching (Today/Yesterday)
-            if "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4 {
+            if matchesYesterday {
                 if calendar.isDateInYesterday(itemDate) { return true }
             }
-            if "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3 {
+            if matchesToday {
                 if calendar.isDateInToday(itemDate) { return true }
             }
             
-            // E. Time-only match (e.g. "10:30")
-            let timeStr = Self.timeFormatter.string(from: itemDate)
-            if timeStr.localizedCaseInsensitiveContains(query) {
-                // If it's today, it's a very strong match
-                if calendar.isDateInToday(itemDate) { return true }
-                // Otherwise only match if the query explicitly included the colon or AM/PM
-                if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
+            if mightBeTimeOrDate {
+                // E. Time-only match (e.g. "10:30")
+                let timeStr = Self.timeFormatter.string(from: itemDate)
+                if timeStr.localizedCaseInsensitiveContains(query) {
+                    // If it's today, it's a very strong match
+                    if calendar.isDateInToday(itemDate) { return true }
+                    // Otherwise only match if the query explicitly included the colon or AM/PM
+                    if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
+                        return true
+                    }
+                }
+
+                // F. Full formatted string fallback (M/D/YY etc.)
+                let fullStr = Self.fullFormatter.string(from: itemDate)
+                if fullStr.localizedCaseInsensitiveContains(query) {
                     return true
                 }
-            }
-            
-            // F. Full formatted string fallback (M/D/YY etc.)
-            let fullStr = Self.fullFormatter.string(from: itemDate)
-            if fullStr.localizedCaseInsensitiveContains(query) {
-                return true
             }
             
             return false
