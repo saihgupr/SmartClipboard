@@ -1,7 +1,7 @@
 import Foundation
 
 class GeminiService {
-    enum GeminiError: Error, LocalizedError {
+    enum GeminiError: LocalizedError {
         case missingApiKey
 
         var errorDescription: String? {
