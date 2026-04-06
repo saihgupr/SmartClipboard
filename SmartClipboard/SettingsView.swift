@@ -127,7 +127,7 @@ struct SettingsView: View {
                             .transition(.opacity)
                         }
                         
-                        Text("If empty, a default evaluation key will be used.")
+                        Text("API key is required for AI features.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
