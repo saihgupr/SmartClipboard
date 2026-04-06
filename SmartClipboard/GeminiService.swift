@@ -1,8 +1,16 @@
 import Foundation
 
 class GeminiService {
-    // Default fallback API key if not provided by user
-    private let defaultApiKey = "AIzaSyBn7A0OzD8hBlEKAkizBkVPJCap5b67IQ8" 
+    enum GeminiError: Error, LocalizedError {
+        case missingApiKey
+
+        var errorDescription: String? {
+            switch self {
+            case .missingApiKey:
+                return "API key is missing. Please configure it in Settings."
+            }
+        }
+    }
 
     struct SearchIntent {
         let textQuery: String?
@@ -12,7 +20,9 @@ class GeminiService {
     }
 
     func parseSearchIntent(query: String, history: [ClipboardItem], apiKey: String?, modelName: String?, searchDepth: Int = 200) async throws -> SearchIntent {
-        let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
+        guard let actualApiKey = apiKey, !actualApiKey.isEmpty else {
+            throw GeminiError.missingApiKey
+        }
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
         let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
@@ -119,7 +129,9 @@ class GeminiService {
     }
 
     func fetchModels(apiKey: String?) async throws -> [String] {
-        let actualApiKey = (apiKey == nil || apiKey!.isEmpty) ? defaultApiKey : apiKey!
+        guard let actualApiKey = apiKey, !actualApiKey.isEmpty else {
+            throw GeminiError.missingApiKey
+        }
         let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models?key=\(actualApiKey)")!
         
         let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
