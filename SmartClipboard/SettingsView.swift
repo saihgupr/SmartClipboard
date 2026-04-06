@@ -57,8 +57,8 @@ struct SettingsView: View {
                         
                         Toggle("Launch SmartClipboard at Login", isOn: $launchAtLogin)
                             .toggleStyle(.switch)
-                            .onChange(of: launchAtLogin) {
-                                updateLoginItem(enabled: launchAtLogin)
+                            .onChange(of: launchAtLogin) { oldValue, newValue in
+                                updateLoginItem(enabled: newValue)
                             }
                         
                         Button(action: { NSApplication.shared.terminate(nil) }) {

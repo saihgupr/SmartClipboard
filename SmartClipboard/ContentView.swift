@@ -82,8 +82,8 @@ struct ContentView: View {
         .onAppear {
             focusedField = .search
         }
-        .onChange(of: showingSettings) {
-            if !showingSettings {
+        .onChange(of: showingSettings) { oldValue, newValue in
+            if !newValue {
                 // Focus search bar when returning from settings
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     focusedField = .search
@@ -105,7 +105,7 @@ struct ContentView: View {
                     TextField("Search instantly, or hit Return for AI search...", text: $searchQuery)
                         .textFieldStyle(PlainTextFieldStyle())
                         .focused($focusedField, equals: .search)
-                        .onChange(of: searchQuery) {
+                        .onChange(of: searchQuery) { oldValue, newValue in
                             performLocalSearch()
                         }
                         .onSubmit {
