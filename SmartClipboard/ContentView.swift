@@ -143,6 +143,7 @@ struct ContentView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
                 .help("AI Settings")
             }
             .padding()

@@ -75,6 +75,8 @@ struct AppSpecificSettingsView: View {
                                     .foregroundColor(.secondary.opacity(0.5))
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Remove \(app.name)")
+                            .help("Remove \(app.name)")
                         }
                         .padding(8)
                         .background(Color.secondary.opacity(0.05))

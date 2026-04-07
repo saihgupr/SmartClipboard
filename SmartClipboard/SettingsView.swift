@@ -30,6 +30,8 @@ struct SettingsView: View {
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+                .help("Back")
                 
                 Spacer()
                 
@@ -154,6 +156,8 @@ struct SettingsView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .foregroundColor(.blue)
+                                .accessibilityLabel("Refresh Models")
+                                .help("Refresh Models")
                             }
                         }
                         
