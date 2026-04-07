@@ -1,3 +1,4 @@
+import AppKit
 import Carbon
 
 /// Registers system-wide hotkeys using the Carbon Event Manager.
@@ -12,11 +13,17 @@ final class GlobalHotkeyManager {
     /// Called on the main actor with the count of recent items to paste in sequence.
     var onPasteMultiple: ((Int) -> Void)?
 
+    /// Called when the "Toggle UI" hotkey is fired.
+    var onToggleUI: (() -> Void)?
+
     private var hotKeyRefs: [EventHotKeyRef?] = []
+    private var toggleUIKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
 
     private let cmdKey = 0x0100
     private let optionKey = 0x0800
+    private let controlKey = 0x1000
+    private let shiftKey = 0x0200
 
     private init() {}
 
@@ -56,7 +63,9 @@ final class GlobalHotkeyManager {
                 Task { @MainActor in
                     print("[GlobalHotkeyManager] Hotkey fired: ID \(id)")
                     
-                    if id >= 1 && id <= 10 {
+                    if id == 100 {
+                        mgr.onToggleUI?()
+                    } else if id >= 1 && id <= 10 {
                         // Cmd+1…9 → index 0…8; Cmd+0 → index 9
                         let index = (id == 10) ? 9 : id - 1
                         print("[GlobalHotkeyManager] Pasting index: \(index)")
@@ -79,6 +88,12 @@ final class GlobalHotkeyManager {
     func uninstall() {
         hotKeyRefs.compactMap { $0 }.forEach { UnregisterEventHotKey($0) }
         hotKeyRefs.removeAll()
+
+        if let ref = toggleUIKeyRef {
+            UnregisterEventHotKey(ref)
+            toggleUIKeyRef = nil
+        }
+
         if let h = eventHandler {
             RemoveEventHandler(h)
             eventHandler = nil
@@ -118,6 +133,27 @@ final class GlobalHotkeyManager {
                                 hkID, GetApplicationEventTarget(), 0, &ref)
             hotKeyRefs.append(ref)
         }
+    }
+
+    func registerToggleUIHotkey(keyCode: Int, modifiers: NSEvent.ModifierFlags) {
+        // Unregister existing if any
+        if let ref = toggleUIKeyRef {
+            UnregisterEventHotKey(ref)
+            toggleUIKeyRef = nil
+        }
+
+        var carbonModifiers: Int = 0
+        if modifiers.contains(.command) { carbonModifiers |= cmdKey }
+        if modifiers.contains(.option) { carbonModifiers |= optionKey }
+        if modifiers.contains(.control) { carbonModifiers |= controlKey }
+        if modifiers.contains(.shift) { carbonModifiers |= shiftKey }
+
+        let sig = fourCC("SCLP")
+        let hkID = EventHotKeyID(signature: sig, id: 100) // 100 for Toggle UI
+        
+        print("[GlobalHotkeyManager] Registering Toggle UI: key \(keyCode), mods \(carbonModifiers)")
+        RegisterEventHotKey(UInt32(keyCode), UInt32(carbonModifiers),
+                            hkID, GetApplicationEventTarget(), 0, &toggleUIKeyRef)
     }
 
     private func fourCC(_ s: String) -> OSType {

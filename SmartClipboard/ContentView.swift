@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
+    @State private var selectedIndex: Int = -1
     
     enum Field {
         case search
@@ -90,6 +91,58 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            setupKeyboardMonitor()
+        }
+        .onDisappear {
+            removeKeyboardMonitor()
+        }
+    }
+    
+    @State private var keyboardMonitor: Any?
+    
+    private func setupKeyboardMonitor() {
+        removeKeyboardMonitor()
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // Handle only navigation and paste if settings is not shown
+            guard !showingSettings else { return event }
+            
+            let items = displayItems
+            guard !items.isEmpty else { return event }
+            
+            switch event.keyCode {
+            case 125: // Down
+                if selectedIndex < items.count - 1 {
+                    selectedIndex += 1
+                }
+                return nil
+            case 126: // Up
+                if selectedIndex > 0 {
+                    selectedIndex -= 1
+                } else if selectedIndex == 0 {
+                    selectedIndex = -1
+                    focusedField = .search
+                }
+                return nil
+            case 36: // Enter
+                if selectedIndex >= 0 && selectedIndex < items.count {
+                    clipboardManager.paste(item: items[selectedIndex])
+                    return nil
+                }
+                return event // Let search field submit if nothing selected
+            default:
+                break
+            }
+            
+            return event
+        }
+    }
+    
+    private func removeKeyboardMonitor() {
+        if let monitor = keyboardMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyboardMonitor = nil
+        }
     }
     
     var mainView: some View {
@@ -106,10 +159,13 @@ struct ContentView: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .focused($focusedField, equals: .search)
                         .onChange(of: searchQuery) { oldValue, newValue in
+                            selectedIndex = -1 // Reset selection on search change
                             performLocalSearch()
                         }
                         .onSubmit {
-                            performAISearch()
+                            if selectedIndex < 0 {
+                                performAISearch()
+                            }
                         }
                     
                     if isSearching {
@@ -218,6 +274,9 @@ struct ContentView: View {
                             }
                         }
                         .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .background(selectedIndex == index ? Color.blue.opacity(0.1) : Color.clear)
+                        .cornerRadius(6)
                         .contentShape(Rectangle())
                         .onTapGesture {
                             clipboardManager.paste(item: item)
@@ -251,7 +310,7 @@ struct ContentView: View {
         // We'll ignore the year for most matches since history is short.
         let calendar = Calendar.current
         let now = Date()
-        let currentYear = calendar.component(.year, from: now)
+        _ = calendar.component(.year, from: now)
         
         // Try multiple formats
         let formats = [

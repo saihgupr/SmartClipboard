@@ -17,6 +17,16 @@ final class StatusItemManager: NSObject {
         
         setupStatusItem()
         setupPopover()
+        
+        // Register the "Toggle UI" hotkey trigger
+        GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
+            DispatchQueue.main.async {
+                self?.toggleUI()
+            }
+        }
+        
+        // Initial hotkey registration
+        registerSavedHotkey()
     }
     
     private func setupStatusItem() {
@@ -52,18 +62,31 @@ final class StatusItemManager: NSObject {
         if event?.type == .rightMouseUp {
             showContextMenu(sender)
         } else {
-            togglePopover(sender)
+            toggleUI()
         }
     }
     
-    private func togglePopover(_ sender: NSStatusBarButton) {
-        guard let popover = popover else { return }
+    func toggleUI() {
+        guard let button = statusItem?.button, let popover = popover else { return }
         
         if popover.isShown {
-            popover.performClose(sender)
+            popover.performClose(button)
         } else {
-            popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+    
+    private func registerSavedHotkey() {
+        let keyCode = UserDefaults.standard.integer(forKey: "toggleUIKeyCode")
+        let modifiersRaw = UserDefaults.standard.integer(forKey: "toggleUIModifiers")
+        
+        // Only register if we have a valid keyCode (0 can be a valid keyCode but we check if set)
+        if keyCode != 0 || modifiersRaw != 0 {
+            GlobalHotkeyManager.shared.registerToggleUIHotkey(
+                keyCode: keyCode,
+                modifiers: NSEvent.ModifierFlags(rawValue: UInt(modifiersRaw))
+            )
         }
     }
     

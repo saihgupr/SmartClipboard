@@ -79,6 +79,21 @@ struct SettingsView: View {
                     
                     Divider()
                     
+                    // Shortcuts Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Keyboard Shortcuts")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        ShortcutRecorderView()
+                        
+                        Text("This shortcut toggles the clipboard window from anywhere.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Divider()
+                    
                     // API Key Section
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {

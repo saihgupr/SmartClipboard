@@ -38,6 +38,11 @@
     "llvm-bc" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SettingsView.bc",
     "object" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SettingsView.o"
   },
+  "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ShortcutRecorderView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o",
+    "llvm-bc" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.bc",
+    "object" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o"
+  },
   "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/SmartClipboard/SmartClipboardApp.swift" : {
     "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.o",
     "llvm-bc" : "/Users/chrislapointe/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.bc",
