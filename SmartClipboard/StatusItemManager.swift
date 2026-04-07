@@ -18,6 +18,13 @@ final class StatusItemManager: NSObject {
         setupStatusItem()
         setupPopover()
         
+        // Close UI on paste from ClipboardManager
+        clipboardManager.onPaste = { [weak self] in
+            DispatchQueue.main.async {
+                self?.closeUI()
+            }
+        }
+        
         // Register the "Toggle UI" hotkey trigger
         GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
             DispatchQueue.main.async {
@@ -78,6 +85,12 @@ final class StatusItemManager: NSObject {
                 window.backgroundColor = .clear
             }
             popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+    
+    func closeUI() {
+        if popover?.isShown == true {
+            popover?.performClose(nil)
         }
     }
     

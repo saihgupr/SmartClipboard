@@ -27,8 +27,9 @@ struct SmartClipboardApp: App {
 
     init() {
         let container = sharedModelContainer
-        _clipboardManager = StateObject(wrappedValue: ClipboardManager(modelContext: container.mainContext))
-        self.statusItemManager = StatusItemManager(clipboardManager: ClipboardManager(modelContext: container.mainContext), modelContainer: container)
+        let manager = ClipboardManager(modelContext: container.mainContext)
+        _clipboardManager = StateObject(wrappedValue: manager)
+        self.statusItemManager = StatusItemManager(clipboardManager: manager, modelContainer: container)
     }
 
     var body: some Scene {

@@ -22,6 +22,9 @@ class ClipboardManager: ObservableObject {
     private var lastChangeCount: Int = 0
     private var timer: Timer?
     private let modelContext: ModelContext
+    
+    /// Optional callback invoked when a paste operation is triggered from the UI.
+    var onPaste: (() -> Void)?
 
     /// Tracks if the app has macOS Accessibility permissions required for simulated keystrokes (Cmd+V).
     @Published var hasAccessibilityPermission: Bool = AXIsProcessTrusted()
@@ -180,6 +183,7 @@ class ClipboardManager: ObservableObject {
         // background, so we skip the hide.
         let needsHide = !isGlobalHotkey && NSApp.isActive
         if needsHide {
+            onPaste?()
             NSApp.hide(nil)
         }
 
