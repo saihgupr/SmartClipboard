@@ -79,6 +79,21 @@ class ClipboardManager: ObservableObject {
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
 
+        // Security: Prevent saving sensitive clipboard items (e.g. from password managers)
+        let types = pasteboard.types ?? []
+        let sensitiveTypes: [NSPasteboard.PasteboardType] = [
+            .init("org.nspasteboard.TransientType"),
+            .init("org.nspasteboard.ConcealedType"),
+            .init("com.agilebits.onepassword")
+        ]
+
+        for sensitiveType in sensitiveTypes {
+            if types.contains(sensitiveType) {
+                print("Ignored sensitive clipboard item of type: \(sensitiveType.rawValue)")
+                return
+            }
+        }
+
         if let newString = pasteboard.string(forType: .string), !newString.isEmpty {
             // Check for any existing item with the same content to implement "move-to-top"
             let predicate = #Predicate<ClipboardItem> { $0.content == newString }
