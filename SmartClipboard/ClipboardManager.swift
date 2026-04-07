@@ -173,20 +173,6 @@ class ClipboardManager: ObservableObject {
     }
 
     func paste(content: String, isGlobalHotkey: Bool = false) {
-        // Determine the target application's bundle identifier
-        // If triggered via global hotkey, the frontmost app is the target.
-        // If triggered via UI, SmartClipboard is currently active.
-        let targetBundleID: String?
-        if isGlobalHotkey {
-            targetBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        } else {
-            // This is trickier as we are currently frontmost. 
-            // In many cases, we can try to guess or just allow it to handle global hotkeys mostly.
-            // For now, we'll try to get the frontmost app *before* we hide. 
-            // Better would be to have tracked this when the app was activated.
-            targetBundleID = nil // We'll skip for UI triggers for now to be safe, or just check what's behind us.
-        }
-
         copyToClipboard(content: content)
 
         // If SmartClipboard's window is frontmost, hide it so focus returns to the
@@ -201,35 +187,6 @@ class ClipboardManager: ObservableObject {
         let delay: Double = needsHide ? 0.15 : 0.05
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             let src = CGEventSource(stateID: .combinedSessionState)
-
-            // Check if we should send Shift+Enter
-            // If it was a UI trigger, we might have lost the targetBundleID above.
-            // Let's re-fetch the frontmost app now that we've hidden ourselves.
-            let activeApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-            let effectiveBundleID = targetBundleID ?? activeApp
-            
-            if !isGlobalHotkey, let bid = effectiveBundleID, self.shiftEnterBundleIDs.contains(bid) {
-                print("[ClipboardManager] Injecting Shift+Enter for \(bid)")
-                
-                // Shift down
-                let shdown = CGEvent(keyboardEventSource: src, virtualKey: 0x38, keyDown: true)
-                // Return down (with shift mask)
-                let retd = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: true)
-                retd?.flags = .maskShift
-                // Return up
-                let retu = CGEvent(keyboardEventSource: src, virtualKey: 0x24, keyDown: false)
-                retu?.flags = .maskShift
-                // Shift up
-                let shup = CGEvent(keyboardEventSource: src, virtualKey: 0x38, keyDown: false)
-                
-                shdown?.post(tap: .cgAnnotatedSessionEventTap)
-                retd?.post(tap: .cgAnnotatedSessionEventTap)
-                retu?.post(tap: .cgAnnotatedSessionEventTap)
-                shup?.post(tap: .cgAnnotatedSessionEventTap)
-                
-                // Tiny delay after Shift+Enter before Cmd+V
-                Thread.sleep(forTimeInterval: 0.05)
-            }
 
             // CMD down
             let cmdd = CGEvent(keyboardEventSource: src, virtualKey: 0x37, keyDown: true)
