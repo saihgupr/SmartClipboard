@@ -300,6 +300,13 @@ struct ContentView: View {
                                 query.contains("-") ||
                                 query.contains(":")
 
+        // ⚡ Bolt Performance Optimization:
+        // Pre-compute date boundaries to avoid calling slow Calendar operations inside the filter loop.
+        // Direct Date comparisons are orders of magnitude faster than calendar.isDateInToday(itemDate).
+        let todayStart = calendar.startOfDay(for: now)
+        let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+        let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
+
         // Instant Local Search
         self.searchResults = history.filter { item in
             // A. Direct Text Match
@@ -325,10 +332,10 @@ struct ContentView: View {
             
             // D. Natural relative day matching (Today/Yesterday)
             if matchesYesterday {
-                if calendar.isDateInYesterday(itemDate) { return true }
+                if itemDate >= yesterdayStart && itemDate < todayStart { return true }
             }
             if matchesToday {
-                if calendar.isDateInToday(itemDate) { return true }
+                if itemDate >= todayStart && itemDate < tomorrowStart { return true }
             }
             
             if mightBeTimeOrDate {
@@ -336,7 +343,7 @@ struct ContentView: View {
                 let timeStr = Self.timeFormatter.string(from: itemDate)
                 if timeStr.localizedCaseInsensitiveContains(query) {
                     // If it's today, it's a very strong match
-                    if calendar.isDateInToday(itemDate) { return true }
+                    if itemDate >= todayStart && itemDate < tomorrowStart { return true }
                     // Otherwise only match if the query explicitly included the colon or AM/PM
                     if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
                         return true
