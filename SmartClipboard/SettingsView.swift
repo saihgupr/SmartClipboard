@@ -63,15 +63,14 @@ struct SettingsView: View {
                                 updateLoginItem(enabled: newValue)
                             }
                         
-                        HStack {
-                            Spacer()
-                            Button(action: { NSApplication.shared.terminate(nil) }) {
+                        Button(action: { NSApplication.shared.terminate(nil) }) {
+                            HStack {
+                                Image(systemName: "power")
                                 Text("Quit SmartClipboard")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
                             }
-                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(.bordered)
                         
                         Text("These settings apply immediately to your app experience.")
                             .font(.caption)

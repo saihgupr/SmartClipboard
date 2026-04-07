@@ -48,7 +48,7 @@
 			<key>uniqueIdentifier</key>
 			<string>5647DBA4-184B-4A59-A49C-1640197784A6</string>
 		</dict>
-		<key>9E1FD197-0C1C-49DB-A675-069570E3B199</key>
+		<key>E50C81AE-EC31-400E-A6C8-96BE56A3B41F</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -57,7 +57,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>9E1FD197-0C1C-49DB-A675-069570E3B199.xcactivitylog</string>
+			<string>E50C81AE-EC31-400E-A6C8-96BE56A3B41F.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -82,13 +82,13 @@
 			<key>signature</key>
 			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>797271155.44102204</real>
+			<real>797272147.34107101</real>
 			<key>timeStoppedRecording</key>
-			<real>797271173.64871204</real>
+			<real>797272159.39402699</real>
 			<key>title</key>
 			<string>Building project SmartClipboard with scheme SmartClipboard and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>9E1FD197-0C1C-49DB-A675-069570E3B199</string>
+			<string>E50C81AE-EC31-400E-A6C8-96BE56A3B41F</string>
 		</dict>
 	</dict>
 </dict>
