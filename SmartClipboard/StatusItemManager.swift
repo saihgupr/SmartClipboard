@@ -73,6 +73,10 @@ final class StatusItemManager: NSObject {
             popover.performClose(button)
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if let window = popover.contentViewController?.view.window {
+                window.isOpaque = false
+                window.backgroundColor = .clear
+            }
             popover.contentViewController?.view.window?.makeKey()
         }
     }

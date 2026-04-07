@@ -80,6 +80,8 @@ struct ContentView: View {
             }
         }
         .frame(width: 380, height: 500)
+        .background(Color(NSColor.windowBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .onAppear {
             focusedField = .search
         }
