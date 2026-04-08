@@ -26,7 +26,13 @@ class GeminiService {
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
         let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
-        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(cleanModel):generateContent?key=\(actualApiKey)")!
+
+        var components = URLComponents(string: "https://generativelanguage.googleapis.com/v1beta/models/\(cleanModel):generateContent")!
+        components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
+
+        guard let url = components.url else {
+            throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to construct valid URL."])
+        }
         
         let formatter = ISO8601DateFormatter()
         let currentDateString = formatter.string(from: Date())
@@ -132,7 +138,13 @@ class GeminiService {
         guard let actualApiKey = apiKey, !actualApiKey.isEmpty else {
             throw GeminiError.missingApiKey
         }
-        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models?key=\(actualApiKey)")!
+
+        var components = URLComponents(string: "https://generativelanguage.googleapis.com/v1beta/models")!
+        components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
+
+        guard let url = components.url else {
+            throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to construct valid URL."])
+        }
         
         let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
         
