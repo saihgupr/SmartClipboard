@@ -79,6 +79,9 @@ struct ContentView: View {
                     .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
                     .onAppear {
                         focusedField = .search
+                        if !displayItems.isEmpty {
+                            selectedIndex = 0
+                        }
                     }
             }
         }
@@ -87,6 +90,9 @@ struct ContentView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .onAppear {
             focusedField = .search
+            if !displayItems.isEmpty {
+                selectedIndex = 0
+            }
         }
         .onChange(of: showingSettings) { oldValue, newValue in
             if !newValue {
@@ -164,8 +170,8 @@ struct ContentView: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .focused($focusedField, equals: .search)
                         .onChange(of: searchQuery) { oldValue, newValue in
-                            selectedIndex = -1 // Reset selection on search change
                             performLocalSearch()
+                            selectedIndex = displayItems.isEmpty ? -1 : 0
                         }
                         .onSubmit {
                             if selectedIndex < 0 {
@@ -466,6 +472,7 @@ struct ContentView: View {
                     }
                     
                     self.searchResults = filtered
+                    self.selectedIndex = filtered.isEmpty ? -1 : 0
                     self.isSearching = false
                 }
             } catch {
