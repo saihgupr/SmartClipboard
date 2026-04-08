@@ -47,10 +47,13 @@ struct ContentView: View {
     }()
     
     // Format timestamp for UI depending on how old it is
-    private func formatTimestamp(_ date: Date) -> String {
-        if Calendar.current.isDateInToday(date) {
+    // ⚡ Bolt Optimization: Use pre-computed date boundaries for direct Date comparisons
+    // instead of Calendar.current.isDateInToday(date) inside the loop, significantly
+    // improving render performance for large lists.
+    private func formatTimestamp(_ date: Date, todayStart: Date, tomorrowStart: Date, yesterdayStart: Date) -> String {
+        if date >= todayStart && date < tomorrowStart {
             return Self.timeFormatter.string(from: date)
-        } else if Calendar.current.isDateInYesterday(date) {
+        } else if date >= yesterdayStart && date < todayStart {
             return "Yesterday, " + Self.timeFormatter.string(from: date)
         } else {
             return Self.fullFormatter.string(from: date)
@@ -252,6 +255,12 @@ struct ContentView: View {
             } else {
                 List {
                     let items = displayItems
+                    let now = Date()
+                    let calendar = Calendar.current
+                    let todayStart = calendar.startOfDay(for: now)
+                    let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+                    let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
+
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         HStack(spacing: 12) {
                             if index < 10 {
@@ -265,7 +274,7 @@ struct ContentView: View {
                             }
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text(formatTimestamp(item.timestamp))
+                                Text(formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 
