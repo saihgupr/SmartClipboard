@@ -51,6 +51,7 @@ struct ShortcutRecorderView: View {
                         .foregroundColor(.secondary.opacity(0.5))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear Shortcut")
                 .help("Clear Shortcut")
             }
         }
