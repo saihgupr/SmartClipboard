@@ -178,12 +178,15 @@ class ClipboardManager: ObservableObject {
     func paste(content: String, isGlobalHotkey: Bool = false) {
         copyToClipboard(content: content)
 
+        // Always trigger the callback if someone is listening.
+        // StatusItemManager uses this to close the popover.
+        onPaste?()
+
         // If SmartClipboard's window is frontmost, hide it so focus returns to the
         // previous app. When triggered via global hotkey the app is already in the
         // background, so we skip the hide.
         let needsHide = !isGlobalHotkey && NSApp.isActive
         if needsHide {
-            onPaste?()
             NSApp.hide(nil)
         }
 

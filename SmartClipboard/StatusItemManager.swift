@@ -3,6 +3,7 @@ import AppKit
 import SwiftData
 
 /// Manages the menu bar icon (NSStatusItem) and provides custom left-click/right-click behavior.
+@MainActor
 final class StatusItemManager: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
