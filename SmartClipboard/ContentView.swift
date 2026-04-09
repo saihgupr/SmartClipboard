@@ -259,8 +259,15 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    let items = displayItems
+                ScrollViewReader { proxy in
+                    List {
+                        // Dummy element at the top to scroll to
+                        Color.clear
+                            .frame(height: 0)
+                            .id("top")
+                            .listRowInsets(EdgeInsets())
+                        
+                        let items = displayItems
                     let now = Date()
                     let calendar = Calendar.current
                     let todayStart = calendar.startOfDay(for: now)
@@ -307,9 +314,22 @@ struct ContentView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
+                    } // closes ForEach
+                    } // closes List
+                    .listStyle(.sidebar)
+                    .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
+                        searchQuery = ""
+                        // Small delay to ensure state updates before selecting/scrolling
+                        DispatchQueue.main.async {
+                            if !history.isEmpty {
+                                selectedIndex = 0
+                                proxy.scrollTo("top", anchor: .top)
+                            } else {
+                                selectedIndex = -1
+                            }
+                        }
                     }
-                }
-                .listStyle(.sidebar)
+                } // closes ScrollViewReader
             }
         }
     }

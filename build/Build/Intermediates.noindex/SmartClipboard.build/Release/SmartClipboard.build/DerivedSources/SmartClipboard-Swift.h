@@ -304,7 +304,6 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 
 #if defined(__OBJC__)
 
-/// Manages the menu bar icon (NSStatusItem) and provides custom left-click/right-click behavior.
 SWIFT_CLASS("_TtC14SmartClipboard17StatusItemManager")
 @interface StatusItemManager : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
