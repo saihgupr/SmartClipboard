@@ -383,6 +383,35 @@ struct ContentView: View {
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
+        var matchingDateRanges: [(start: Date, end: Date)] = []
+        if queryMonth != nil || queryWeekday != nil {
+            let oldestDate = history.last?.timestamp ?? calendar.date(byAdding: .day, value: -180, to: todayStart)!
+            let oldestStartOfDay = calendar.startOfDay(for: oldestDate)
+
+            var currentDay = todayStart
+            while currentDay >= oldestStartOfDay {
+                var matches = false
+                if let qM = queryMonth, let qD = queryDay {
+                    let comps = calendar.dateComponents([.month, .day], from: currentDay)
+                    if comps.month == qM && comps.day == qD {
+                        matches = true
+                    }
+                }
+                if let qW = queryWeekday, !matches {
+                    let weekday = calendar.component(.weekday, from: currentDay)
+                    if weekday == qW {
+                        matches = true
+                    }
+                }
+
+                if matches {
+                    let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDay)!
+                    matchingDateRanges.append((start: currentDay, end: nextDay))
+                }
+                currentDay = calendar.date(byAdding: .day, value: -1, to: currentDay)!
+            }
+        }
+
         // Instant Local Search
         self.searchResults = history.filter { item in
             // A. Direct Text Match
@@ -390,18 +419,10 @@ struct ContentView: View {
             
             let itemDate = item.timestamp
             
-            // B. Explicit Month/Day match (Ignoring Year)
-            if let qM = queryMonth, let qD = queryDay {
-                let itemComps = calendar.dateComponents([.month, .day], from: itemDate)
-                if itemComps.month == qM && itemComps.day == qD {
-                    return true
-                }
-            }
-            
-            // C. Weekday match (e.g. "Monday")
-            if let qW = queryWeekday {
-                let itemWeekday = calendar.component(.weekday, from: itemDate)
-                if itemWeekday == qW {
+            // B & C: Pre-computed Month/Day or Weekday match
+            // Checks if itemDate falls within any of the pre-computed valid full-day ranges
+            for range in matchingDateRanges {
+                if itemDate >= range.start && itemDate < range.end {
                     return true
                 }
             }
