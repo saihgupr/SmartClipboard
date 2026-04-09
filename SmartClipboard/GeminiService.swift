@@ -27,7 +27,10 @@ class GeminiService {
         
         let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
 
-        var components = URLComponents(string: "https://generativelanguage.googleapis.com/v1beta/models/\(cleanModel):generateContent")!
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "generativelanguage.googleapis.com"
+        components.path = "/v1beta/models/\(cleanModel):generateContent"
         components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
 
         guard let url = components.url else {
@@ -139,7 +142,10 @@ class GeminiService {
             throw GeminiError.missingApiKey
         }
 
-        var components = URLComponents(string: "https://generativelanguage.googleapis.com/v1beta/models")!
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "generativelanguage.googleapis.com"
+        components.path = "/v1beta/models"
         components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
 
         guard let url = components.url else {
