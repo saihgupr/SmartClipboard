@@ -131,7 +131,8 @@ struct SettingsView: View {
                                 }
                             }
                             .buttonStyle(.bordered)
-                            .disabled(isLoadingModels)
+                            .disabled(isLoadingModels || apiKey.isEmpty)
+                            .help(apiKey.isEmpty ? "Enter an API key first" : "Test connection")
                         }
                         
                         if showSuccessMessage {
@@ -170,9 +171,10 @@ struct SettingsView: View {
                                         .font(.caption)
                                 }
                                 .buttonStyle(.plain)
-                                .foregroundColor(.blue)
+                                .foregroundColor(apiKey.isEmpty ? .secondary.opacity(0.5) : .blue)
                                 .accessibilityLabel("Refresh Models")
-                                .help("Refresh Models")
+                                .help(apiKey.isEmpty ? "Enter an API key first" : "Refresh Models")
+                                .disabled(apiKey.isEmpty)
                             }
                         }
                         
@@ -182,6 +184,8 @@ struct SettingsView: View {
                                     fetchModels()
                                 }
                                 .buttonStyle(.bordered)
+                                .disabled(apiKey.isEmpty)
+                                .help(apiKey.isEmpty ? "Enter an API key first" : "Fetch Available Models")
                             }
                         } else {
                             Picker("", selection: $selectedModel) {

@@ -254,8 +254,10 @@ struct ContentView: View {
                         .font(.system(size: 32))
                         .foregroundColor(.secondary.opacity(0.5))
                     
-                    Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found")
+                    Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : "No matches found. Hit Return to search with AI.")
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
