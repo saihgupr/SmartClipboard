@@ -131,7 +131,8 @@ struct SettingsView: View {
                                 }
                             }
                             .buttonStyle(.bordered)
-                            .disabled(isLoadingModels)
+                            .disabled(isLoadingModels || apiKey.isEmpty)
+                            .help(apiKey.isEmpty ? "Please enter an API key first" : "Test API Key connection")
                         }
                         
                         if showSuccessMessage {
@@ -182,6 +183,8 @@ struct SettingsView: View {
                                     fetchModels()
                                 }
                                 .buttonStyle(.bordered)
+                                .disabled(apiKey.isEmpty)
+                                .help(apiKey.isEmpty ? "Please enter an API key first" : "Fetch available AI models")
                             }
                         } else {
                             Picker("", selection: $selectedModel) {
