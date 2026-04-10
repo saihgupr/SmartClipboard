@@ -256,6 +256,20 @@ struct ContentView: View {
                     
                     Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found")
                         .foregroundColor(.secondary)
+
+                    if searchQuery.isEmpty {
+                        Text("Copy some text to get started")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.8))
+                    } else {
+                        Button("Clear Search") {
+                            searchQuery = ""
+                            performLocalSearch()
+                            selectedIndex = displayItems.isEmpty ? -1 : 0
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
