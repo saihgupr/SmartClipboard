@@ -9,12 +9,13 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 ## ✨ Features
 
 - **🚀 Always Accessible**: Lives in your macOS menu bar for quick access anytime.
-- **🧠 Semantic Search**: Ask natural language questions like "Where was that API key?" or "Find that snippet about database migrations" using Gemini 1.5 Flash.
-- **🛡️ Privacy First**: Automatically filters sensitive data. SmartClipboard respects your privacy by ignoring content from password managers (like 1Password and Keychain) and items marked as transient or concealed.
-- **🕒 Clipboard History**: Automatically tracks and stores your clipboard items with customizable retention.
-- **⚡ High Performance**: Ultra-fast local search and history filtering, optimized for large datasets.
-- **♿ Fully Accessible**: Designed with accessibility in mind, featuring full screen-reader support and helpful tooltips.
-- **🔄 Quick Restore**: Click any item in the history to instantly copy it back to your system clipboard.
+- **🔳 Dual UI Modes**: Triggering the app from the menu bar opens a focused popover, while using the global hotkey reveals a **center-screen floating window** (Spotlight-style).
+- **⌨️ Global Shortcut**: Get instant access with a customizable global hotkey configured in Settings.
+- **🧠 Semantic Search**: Ask natural language questions like "Where was that API key?" or "Find that snippet about database migrations" using Gemini 1.5 Pro or Flash.
+- **⚡ High Performance**: Ultra-fast local search and history filtering, optimized for near-zero latency even with large history datasets.
+- **🛡️ Privacy & Security**: Automatically filters sensitive data from password managers (1Password, Keychain). Uses safe URL construction and respects transient/concealed pasteboard flags.
+- **🎨 Actionable UX**: Intuitive empty states and clear tooltips ensure you're never stuck without knowing what to do next.
+- **🔄 Quick Restore**: Click any item or use keyboard shortcuts (Cmd+1-0) to instantly paste content back to your system clipboard.
 
 ## 🛠️ Technology Stack
 
