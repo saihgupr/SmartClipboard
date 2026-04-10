@@ -736,18 +736,18 @@ relocations:
   - { offset: 0x13C7F3, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard0aB3AppV7SwiftUI0C0AadEP4body4BodyQzvgTW', symObjAddr: 0x5F0, symBinAddr: 0x100031D38, symSize: 0xB4 }
   - { offset: 0x13C88A, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard0aB3AppV7SwiftUI0C0AadEPxycfCTW', symObjAddr: 0x6A4, symBinAddr: 0x100031DEC, symSize: 0xC4 }
   - { offset: 0x13C91A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x768, symBinAddr: 0x100031EB0, symSize: 0x34 }
-  - { offset: 0x13CA76, size: 0x8, addend: 0x0, symName: '_$sSo18NSNotificationNamea14SmartClipboardE10uiWillShowABvpZ', symObjAddr: 0x9698, symBinAddr: 0x1000549B0, symSize: 0x0 }
+  - { offset: 0x13CA76, size: 0x8, addend: 0x0, symName: '_$sSo18NSNotificationNamea14SmartClipboardE10uiWillShowABvpZ', symObjAddr: 0x9690, symBinAddr: 0x1000549B0, symSize: 0x0 }
   - { offset: 0x13CA84, size: 0x8, addend: 0x0, symName: '_$sSo18NSNotificationNamea14SmartClipboardE10uiWillShow_WZ', symObjAddr: 0x2C, symBinAddr: 0x100032228, symSize: 0x34 }
-  - { offset: 0x13CCEC, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfETo', symObjAddr: 0x1154, symBinAddr: 0x100033350, symSize: 0x68 }
-  - { offset: 0x13CD1B, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCMa', symObjAddr: 0x11BC, symBinAddr: 0x1000333B8, symSize: 0x20 }
-  - { offset: 0x13CD2F, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU_TA', symObjAddr: 0x1200, symBinAddr: 0x1000333FC, symSize: 0x28 }
-  - { offset: 0x13CD43, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU0_TA', symObjAddr: 0x1238, symBinAddr: 0x100033424, symSize: 0x28 }
-  - { offset: 0x13CD57, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU0_yyYbScMYccfU_TA', symObjAddr: 0x13EC, symBinAddr: 0x100033594, symSize: 0x8 }
-  - { offset: 0x13CD6B, size: 0x8, addend: 0x0, symName: _block_copy_helper, symObjAddr: 0x13F4, symBinAddr: 0x10003359C, symSize: 0x10 }
-  - { offset: 0x13CD7F, size: 0x8, addend: 0x0, symName: _block_destroy_helper, symObjAddr: 0x1404, symBinAddr: 0x1000335AC, symSize: 0x8 }
-  - { offset: 0x13CD93, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU_yyYbScMYccfU_TA', symObjAddr: 0x1494, symBinAddr: 0x1000335B4, symSize: 0x8 }
-  - { offset: 0x13CDA7, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGACyxq_GAA0G0A2aORzAA0gK0R_rlWl', symObjAddr: 0x149C, symBinAddr: 0x1000335BC, symSize: 0xB0 }
-  - { offset: 0x13CDBB, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGWOh', symObjAddr: 0x15D0, symBinAddr: 0x10003366C, symSize: 0x48 }
+  - { offset: 0x13CCEC, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfETo', symObjAddr: 0x111C, symBinAddr: 0x100033318, symSize: 0x68 }
+  - { offset: 0x13CD1B, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCMa', symObjAddr: 0x1184, symBinAddr: 0x100033380, symSize: 0x20 }
+  - { offset: 0x13CD2F, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU_TA', symObjAddr: 0x11C8, symBinAddr: 0x1000333C4, symSize: 0x28 }
+  - { offset: 0x13CD43, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU0_TA', symObjAddr: 0x1200, symBinAddr: 0x1000333EC, symSize: 0x28 }
+  - { offset: 0x13CD57, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU0_yyYbScMYccfU_TA', symObjAddr: 0x13B4, symBinAddr: 0x10003355C, symSize: 0x8 }
+  - { offset: 0x13CD6B, size: 0x8, addend: 0x0, symName: _block_copy_helper, symObjAddr: 0x13BC, symBinAddr: 0x100033564, symSize: 0x10 }
+  - { offset: 0x13CD7F, size: 0x8, addend: 0x0, symName: _block_destroy_helper, symObjAddr: 0x13CC, symBinAddr: 0x100033574, symSize: 0x8 }
+  - { offset: 0x13CD93, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU_yyYbScMYccfU_TA', symObjAddr: 0x145C, symBinAddr: 0x10003357C, symSize: 0x8 }
+  - { offset: 0x13CDA7, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGACyxq_GAA0G0A2aORzAA0gK0R_rlWl', symObjAddr: 0x1464, symBinAddr: 0x100033584, symSize: 0xB0 }
+  - { offset: 0x13CDBB, size: 0x8, addend: 0x0, symName: '_$s7SwiftUI15ModifiedContentVy14SmartClipboard0D4ViewVAA30_EnvironmentKeyWritingModifierVyAD0F7ManagerCSgGGWOh', symObjAddr: 0x1598, symBinAddr: 0x100033634, symSize: 0x48 }
   - { offset: 0x13D032, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0Ctcfc', symObjAddr: 0x60, symBinAddr: 0x10003225C, symSize: 0x34C }
   - { offset: 0x13D189, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC12setupPopover33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0x3AC, symBinAddr: 0x1000325A8, symSize: 0x248 }
   - { offset: 0x13D29A, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC15setupMainWindow33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0x5F4, symBinAddr: 0x1000327F0, symSize: 0x33C }
@@ -755,11 +755,11 @@ relocations:
   - { offset: 0x13D3FD, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC09clipboardE014modelContainerAcA0bE0C_9SwiftData05ModelH0CtcfcyycfU0_yyYbScMYccfU_', symObjAddr: 0xBD0, symBinAddr: 0x100032DCC, symSize: 0x54 }
   - { offset: 0x13D44F, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTo', symObjAddr: 0xC24, symBinAddr: 0x100032E20, symSize: 0x4C }
   - { offset: 0x13D480, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC16toggleMainWindow33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0xC70, symBinAddr: 0x100032E6C, symSize: 0x174 }
-  - { offset: 0x13D4D9, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC13togglePopover33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0xDE4, symBinAddr: 0x100032FE0, symSize: 0x2C0 }
-  - { offset: 0x13D559, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC7quitApp33_B166284F7CD89C39567EF5CFD58010D3LLyyFTo', symObjAddr: 0x10A4, symBinAddr: 0x1000332A0, symSize: 0x50 }
-  - { offset: 0x13D597, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCACycfcTo', symObjAddr: 0x10F4, symBinAddr: 0x1000332F0, symSize: 0x2C }
-  - { offset: 0x13D5F6, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfD', symObjAddr: 0x1120, symBinAddr: 0x10003331C, symSize: 0x34 }
-  - { offset: 0x13D620, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC19registerSavedHotkey33_B166284F7CD89C39567EF5CFD58010D3LLyyFTf4d_n', symObjAddr: 0x1260, symBinAddr: 0x10003344C, symSize: 0x148 }
-  - { offset: 0x13D6CC, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC15showContextMenu33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x1618, symBinAddr: 0x1000336B4, symSize: 0x170 }
-  - { offset: 0x13D77D, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x1788, symBinAddr: 0x100033824, symSize: 0x70 }
+  - { offset: 0x13D4D9, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC13togglePopover33_B166284F7CD89C39567EF5CFD58010D3LLyyF', symObjAddr: 0xDE4, symBinAddr: 0x100032FE0, symSize: 0x288 }
+  - { offset: 0x13D565, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC7quitApp33_B166284F7CD89C39567EF5CFD58010D3LLyyFTo', symObjAddr: 0x106C, symBinAddr: 0x100033268, symSize: 0x50 }
+  - { offset: 0x13D5A3, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCACycfcTo', symObjAddr: 0x10BC, symBinAddr: 0x1000332B8, symSize: 0x2C }
+  - { offset: 0x13D602, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerCfD', symObjAddr: 0x10E8, symBinAddr: 0x1000332E4, symSize: 0x34 }
+  - { offset: 0x13D62C, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC19registerSavedHotkey33_B166284F7CD89C39567EF5CFD58010D3LLyyFTf4d_n', symObjAddr: 0x1228, symBinAddr: 0x100033414, symSize: 0x148 }
+  - { offset: 0x13D6D8, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC15showContextMenu33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x15E0, symBinAddr: 0x10003367C, symSize: 0x170 }
+  - { offset: 0x13D789, size: 0x8, addend: 0x0, symName: '_$s14SmartClipboard17StatusItemManagerC06handlecD5Click33_B166284F7CD89C39567EF5CFD58010D3LLyySo17NSStatusBarButtonCFTf4dn_n', symObjAddr: 0x1750, symBinAddr: 0x1000337EC, symSize: 0x70 }
 ...

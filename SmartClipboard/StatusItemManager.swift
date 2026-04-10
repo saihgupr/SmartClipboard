@@ -131,8 +131,9 @@ final class StatusItemManager: NSObject {
             if let window = popover.contentViewController?.view.window {
                 window.isOpaque = false
                 window.backgroundColor = .clear
+                window.makeKey()
             }
-            popover.contentViewController?.view.window?.makeKey()
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
     
