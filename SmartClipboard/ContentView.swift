@@ -329,6 +329,14 @@ struct ContentView: View {
                             }
                         }
                     }
+                    .onChange(of: selectedIndex) { oldValue, newValue in
+                        let items = displayItems
+                        if newValue >= 0 && newValue < items.count {
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                proxy.scrollTo(items[newValue].id)
+                            }
+                        }
+                    }
                 } // closes ScrollViewReader
             }
         }
