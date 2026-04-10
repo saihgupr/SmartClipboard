@@ -7,3 +7,8 @@
 
 **Learning:** Calling `Calendar.current.isDateInToday` or similar calendar operations directly inside a SwiftUI `ForEach` rendering loop causes significant performance bottlenecks, especially with large lists, as it forces date component calculations per item per render cycle.
 **Action:** Always pre-compute date boundaries outside of the render loop (e.g. `todayStart`, `tomorrowStart`) and use direct `Date` comparisons (`date >= todayStart && date < tomorrowStart`), passing them to child views or formatting functions.
+
+## 2024-04-10 - DateFormatter Cache Invalidation in Loops
+
+**Learning:** Mutating a `DateFormatter`'s `dateFormat` property repeatedly inside a loop invalidates its internal ICU cache, multiplying the performance penalty of formatting. Furthermore, fetching calendar symbol arrays inside loops causes continuous allocations.
+**Action:** Extract formatters into statically allocated arrays, pre-configuring each with its required format. Extract calendar symbol arrays into static properties.

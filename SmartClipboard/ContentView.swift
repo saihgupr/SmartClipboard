@@ -46,6 +46,25 @@ struct ContentView: View {
         return f
     }()
     
+    // ⚡ Bolt Optimization: Extract expensive formatter and calendar properties into static variables
+    // to prevent continuous allocations on every keystroke in performLocalSearch.
+    private static let queryDateFormatters: [DateFormatter] = {
+        let formats = [
+            "M/d", "M-d", "M.d",
+            "MMM d", "MMMM d",
+            "d MMM", "d MMMM"
+        ]
+        return formats.map { format in
+            let df = DateFormatter()
+            df.locale = Locale.current
+            df.dateFormat = format
+            return df
+        }
+    }()
+
+    private static let weekdays: [String] = Calendar.current.standaloneWeekdaySymbols
+    private static let shortWeekdays: [String] = Calendar.current.shortStandaloneWeekdaySymbols
+
     // Format timestamp for UI depending on how old it is
     // ⚡ Bolt Optimization: Use pre-computed date boundaries for direct Date comparisons
     // instead of Calendar.current.isDateInToday(date) inside the loop, significantly
@@ -357,22 +376,12 @@ struct ContentView: View {
         let now = Date()
         _ = calendar.component(.year, from: now)
         
-        // Try multiple formats
-        let formats = [
-            "M/d", "M-d", "M.d",
-            "MMM d", "MMMM d",
-            "d MMM", "d MMMM"
-        ]
-        
         var queryDay: Int?
         var queryMonth: Int?
         var queryWeekday: Int? // 1=Sun, 2=Mon...
         
-        let df = DateFormatter()
-        df.locale = Locale.current
-        
-        for format in formats {
-            df.dateFormat = format
+        // ⚡ Bolt Optimization: Use statically allocated formatters to avoid ICU cache invalidation
+        for df in Self.queryDateFormatters {
             if let date = df.date(from: query) {
                 let comps = calendar.dateComponents([.month, .day], from: date)
                 queryDay = comps.day
@@ -381,12 +390,10 @@ struct ContentView: View {
             }
         }
         
-        // Try parsing weekday
-        let weekdays = calendar.standaloneWeekdaySymbols // ["Sunday", "Monday", ...]
-        let shortWeekdays = calendar.shortStandaloneWeekdaySymbols // ["Sun", "Mon", ...]
-        if let index = weekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
+        // Try parsing weekday using static symbol arrays
+        if let index = Self.weekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
             queryWeekday = index + 1
-        } else if let index = shortWeekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
+        } else if let index = Self.shortWeekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
             queryWeekday = index + 1
         }
 
