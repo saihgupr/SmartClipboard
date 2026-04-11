@@ -58,9 +58,9 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // macOS Tahoe Polished Search Header
-            HStack(spacing: 10) {
-                HStack {
+            // macOS Tahoe Polished Search Header - Perfectly Symmetric
+            HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                         .font(.system(size: 13, weight: .medium))
@@ -92,8 +92,8 @@ struct ContentView: View {
                         .help("AI Search")
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 10)
+                .frame(height: 32) // Fixed height for internal search bar
                 .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
                 .cornerRadius(8)
                 .overlay(
@@ -104,21 +104,21 @@ struct ContentView: View {
                 if #available(macOS 13.0, *) {
                     SettingsLink {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 14))
+                            .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
                 } else {
                     Button(action: openSettings) {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 14))
+                            .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .frame(height: 60) // Fixed total header height for perfect symmetry
             .background(.ultraThinMaterial)
             
             Divider()
@@ -147,7 +147,7 @@ struct ContentView: View {
                                 timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart)
                             )
                             .tag(item.id)
-                            .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                            .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
                             .onTapGesture {
                                 selectedItemId = item.id
                                 clipboardManager.paste(item: item)
@@ -165,8 +165,11 @@ struct ContentView: View {
                     .scrollContentBackground(.hidden)
                     .onChange(of: selectedItemId) { _, newValue in
                         if let id = newValue {
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                proxy.scrollTo(id)
+                            // Center the selection so it's always fully visible
+                            DispatchQueue.main.async {
+                                withAnimation(.easeInOut(duration: 0.12)) {
+                                    proxy.scrollTo(id, anchor: .center)
+                                }
                             }
                         }
                     }
@@ -184,7 +187,7 @@ struct ContentView: View {
             searchQuery = ""
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
-                selectedItemId = displayItems.first?.id
+                selectedItemId = history.first?.id
             }
         }
     }
@@ -206,8 +209,8 @@ struct ContentView: View {
                 return nil
             case 126: // Up
                 guard !items.isEmpty else { return event }
-                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }), idx > 0 {
-                    selectedItemId = items[idx - 1].id
+                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
+                    if idx > 0 { selectedItemId = items[idx - 1].id }
                 }
                 return nil
             case 36: // Enter
@@ -342,8 +345,8 @@ struct ClipboardRow: View {
             
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
         .contentShape(Rectangle())
     }
 }
