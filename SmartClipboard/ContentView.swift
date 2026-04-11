@@ -185,7 +185,7 @@ struct ContentView: View {
                         .font(.system(size: 14))
                         .padding(.leading, 8)
                     
-                    TextField("Search instantly, or hit Return for AI search...", text: $searchQuery)
+                    TextField("Search items...", text: $searchQuery)
                         .textFieldStyle(PlainTextFieldStyle())
                         .focused($focusedField, equals: .search)
                         .onChange(of: searchQuery) { oldValue, newValue in
@@ -193,9 +193,8 @@ struct ContentView: View {
                             selectedIndex = displayItems.isEmpty ? -1 : 0
                         }
                         .onSubmit {
-                            if selectedIndex < 0 {
-                                performAISearch()
-                            }
+                            // Hit Return to paste if something is selected, 
+                            // but no longer triggers AI search automatically.
                         }
                     
                     if isSearching {
@@ -203,15 +202,14 @@ struct ContentView: View {
                             .frame(width: 14, height: 14)
                     } else if !searchQuery.isEmpty {
                         Button(action: { 
-                            searchQuery = "" 
-                            performLocalSearch()
+                            performAISearch()
                         }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
+                            Image(systemName: "sparkles")
+                                .foregroundColor(.blue)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Clear search")
-                        .help("Clear search")
+                        .accessibilityLabel("AI Search")
+                        .help("AI Search")
                     }
                 }
                 .padding(.vertical, 8)
