@@ -118,11 +118,11 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 14)    // Balanced Top Padding
-            .padding(.bottom, 14) // Balanced Bottom Padding
-            // Removed double ultraThinMaterial background here
+            .padding(.top, 16)    // Matching standard popover top padding
+            .padding(.bottom, 12) // Balanced bottom padding for the header
             
             Divider()
+                .opacity(0.5)
             
             if !clipboardManager.hasAccessibilityPermission {
                 accessibilityWarning
@@ -164,7 +164,7 @@ struct ContentView: View {
                     }
                     .listStyle(.sidebar)
                     .scrollContentBackground(.hidden)
-                    .accentColor(.blue) // Force native blue selection highlight
+                    .accentColor(.blue)
                     .onChange(of: selectedItemId) { _, newValue in
                         if let id = newValue {
                             DispatchQueue.main.async {
@@ -178,7 +178,7 @@ struct ContentView: View {
             }
         }
         .frame(width: 380, height: 500)
-        .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow).ignoresSafeArea())
+        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow).ignoresSafeArea())
         .onAppear {
             setupKeyboardMonitor()
             isSearchFocused = true
@@ -186,6 +186,7 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
             searchQuery = ""
+            // Aggressive focus and selection on show
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
                 selectedItemId = displayItems.first?.id
@@ -210,8 +211,8 @@ struct ContentView: View {
                 return nil
             case 126: // Up
                 guard !items.isEmpty else { return event }
-                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
-                    if idx > 0 { selectedItemId = items[idx - 1].id }
+                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }), idx > 0 {
+                    selectedItemId = items[idx - 1].id
                 }
                 return nil
             case 36: // Enter
@@ -221,9 +222,15 @@ struct ContentView: View {
                     return nil
                 }
             default:
+                // Type-to-search redirection: if not focused, but printable key pressed
                 if !isSearchFocused, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                     let unicode = chars.unicodeScalars.first?.value ?? 0
-                    if (unicode >= 32 && unicode < 127) || unicode > 160 { isSearchFocused = true }
+                    if (unicode >= 32 && unicode < 127) || unicode > 160 {
+                        isSearchFocused = true
+                        // Manually append the character if the focus delay might miss it
+                        searchQuery.append(chars)
+                        return nil // Intercepted and handled
+                    }
                 }
             }
             return event

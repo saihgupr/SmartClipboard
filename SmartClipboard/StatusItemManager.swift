@@ -25,33 +25,23 @@ final class StatusItemManager: NSObject {
         setupPopover()
         setupMainWindow()
         
-        // Close UI on paste from ClipboardManager
         clipboardManager.onPaste = { [weak self] in
-            DispatchQueue.main.async {
-                self?.closeUI()
-            }
+            DispatchQueue.main.async { self?.closeUI() }
         }
         
-        // Register the "Toggle UI" hotkey trigger
         GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
-            DispatchQueue.main.async {
-                self?.toggleUI(fromHotkey: true)
-            }
+            DispatchQueue.main.async { self?.toggleUI(fromHotkey: true) }
         }
         
-        // Initial hotkey registration
         registerSavedHotkey()
     }
     
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
         if let button = statusItem?.button {
             button.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: "Smart Clipboard")
             button.action = #selector(handleStatusItemClick(_:))
             button.target = self
-            
-            // Allow receiving right-click events
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
     }
@@ -61,7 +51,6 @@ final class StatusItemManager: NSObject {
         popover.contentSize = NSSize(width: 380, height: 500)
         popover.behavior = .transient
         
-        // Wrap ContentView in a hosting controller with proper environment and model container
         let contentView = ContentView()
             .environmentObject(clipboardManager)
             .modelContainer(modelContainer)
@@ -71,6 +60,7 @@ final class StatusItemManager: NSObject {
     }
     
     private func setupMainWindow() {
+        // Use .titled but with hidden/transparent titlebar to maintain native rounded corners and shadows
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 380, height: 500),
             styleMask: [.nonactivatingPanel, .titled, .fullSizeContentView],
@@ -86,10 +76,14 @@ final class StatusItemManager: NSObject {
         panel.hidesOnDeactivate = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         
-        // Background styling to match the popover
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
+        
+        // Remove standard titlebar buttons to make it look like a clean panel
+        panel.standardWindowButton(.closeButton)?.isHidden = true
+        panel.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        panel.standardWindowButton(.zoomButton)?.isHidden = true
         
         let contentView = ContentView()
             .environmentObject(clipboardManager)
@@ -100,9 +94,7 @@ final class StatusItemManager: NSObject {
     }
     
     @objc private func handleStatusItemClick(_ sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent
-        
-        if event?.type == .rightMouseUp {
+        if NSApp.currentEvent?.type == .rightMouseUp {
             showContextMenu(sender)
         } else {
             toggleUI(fromHotkey: false)
@@ -119,13 +111,10 @@ final class StatusItemManager: NSObject {
     
     private func togglePopover() {
         guard let button = statusItem?.button, let popover = popover else { return }
-        
         if popover.isShown {
             popover.performClose(button)
         } else {
-            // Close window if open
             mainWindow?.orderOut(nil)
-            
             NotificationCenter.default.post(name: .uiWillShow, object: nil)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             if let window = popover.contentViewController?.view.window {
@@ -139,15 +128,10 @@ final class StatusItemManager: NSObject {
     
     private func toggleMainWindow() {
         guard let window = mainWindow else { return }
-        
         if window.isVisible {
             window.orderOut(nil)
         } else {
-            // Close popover if open
-            if popover?.isShown == true {
-                popover?.performClose(nil)
-            }
-            
+            if popover?.isShown == true { popover?.performClose(nil) }
             NotificationCenter.default.post(name: .uiWillShow, object: nil)
             window.center()
             window.makeKeyAndOrderFront(nil)
@@ -156,17 +140,13 @@ final class StatusItemManager: NSObject {
     }
     
     func closeUI() {
-        if popover?.isShown == true {
-            popover?.performClose(nil)
-        }
+        if popover?.isShown == true { popover?.performClose(nil) }
         mainWindow?.orderOut(nil)
     }
     
     private func registerSavedHotkey() {
         let keyCode = UserDefaults.standard.integer(forKey: "toggleUIKeyCode")
         let modifiersRaw = UserDefaults.standard.integer(forKey: "toggleUIModifiers")
-        
-        // Only register if we have a valid keyCode (0 can be a valid keyCode but we check if set)
         if keyCode != 0 || modifiersRaw != 0 {
             GlobalHotkeyManager.shared.registerToggleUIHotkey(
                 keyCode: keyCode,
@@ -177,20 +157,16 @@ final class StatusItemManager: NSObject {
     
     private func showContextMenu(_ sender: NSStatusBarButton) {
         let menu = NSMenu()
-        
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
-        
         menu.addItem(NSMenuItem.separator())
-        
         let quitItem = NSMenuItem(title: "Quit SmartClipboard", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
-        
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
-        statusItem?.menu = nil // Reset so next left-click works correctly
+        statusItem?.menu = nil
     }
     
     @objc private func openSettings() {
@@ -202,7 +178,5 @@ final class StatusItemManager: NSObject {
         }
     }
     
-    @objc private func quitApp() {
-        NSApplication.shared.terminate(nil)
-    }
+    @objc private func quitApp() { NSApplication.shared.terminate(nil) }
 }
