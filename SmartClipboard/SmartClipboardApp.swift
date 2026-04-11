@@ -33,9 +33,8 @@ struct SmartClipboardApp: App {
     }
 
     var body: some Scene {
-        Settings { 
-            // Required for apps without a main window, though we'll use our custom SettingsView.
-            EmptyView()
+        Settings {
+            SettingsView()
         }
     }
 }
