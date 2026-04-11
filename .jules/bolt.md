@@ -12,3 +12,8 @@
 
 **Learning:** Mutating a `DateFormatter`'s `dateFormat` property repeatedly inside a loop invalidates its internal ICU cache, multiplying the performance penalty of formatting. Furthermore, fetching calendar symbol arrays inside loops causes continuous allocations.
 **Action:** Extract formatters into statically allocated arrays, pre-configuring each with its required format. Extract calendar symbol arrays into static properties.
+
+## 2024-05-24 - Overly broad fast-paths causing O(N) operations
+
+**Learning:** Implementing "fast-paths" that are too broad (e.g., checking if a query string contains ANY digits to determine if it MIGHT be a date) can have disastrous performance implications. In a local search filter, a query like "bug 123" triggered expensive O(N) `DateFormatter` calculations on every single item in history, destroying search responsiveness.
+**Action:** Fast-path conditional flags must be strict. When attempting to bypass expensive formatting inside a loop, ensure the check is highly specific (e.g., requires specific date delimiters like `:`, `/`, `-`, or explicit month/weekday match) rather than a generic digit check.
