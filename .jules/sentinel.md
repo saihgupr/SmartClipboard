@@ -12,3 +12,7 @@
 **Vulnerability:** Safe `URLComponents` construction was missing. Constructing `URLComponents(string:)!` with string interpolation directly risks crashing the application (Denial of Service) via forced unwrap, and creates potential for URL injection if unencoded or unexpected characters are present in injected variables.
 **Learning:** Always use safe construction of URLs with user or external data (like `cleanModel`) by assigning individual properties (`scheme`, `host`, `path`, `queryItems`) onto a default `URLComponents()` instance instead of using interpolated string formatting.
 **Prevention:** Avoid string interpolation with forced unwrapped `URL(string:)!` or `URLComponents(string:)!`. Construct URL components programmatically and let foundation handle encoding.
+## 2024-05-18 - Prevent API Key Exposure via URL Parameters
+**Vulnerability:** The Gemini API key was transmitted as a URL query parameter (`?key=...`).
+**Learning:** Placing sensitive tokens like API keys in URLs exposes them to intermediate proxy logs, server access logs, and network monitoring tools in plain text, making them susceptible to theft.
+**Prevention:** Always transmit sensitive tokens using secure HTTP headers (e.g., `x-goog-api-key`, `Authorization`) instead of URL query parameters.

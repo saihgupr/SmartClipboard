@@ -31,7 +31,6 @@ class GeminiService {
         components.scheme = "https"
         components.host = "generativelanguage.googleapis.com"
         components.path = "/v1beta/models/\(cleanModel):generateContent"
-        components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
 
         guard let url = components.url else {
             throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to construct valid URL."])
@@ -77,6 +76,8 @@ class GeminiService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue(actualApiKey, forHTTPHeaderField: "x-goog-api-key")
+        request.timeoutInterval = 15.0
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
         let (data, _) = try await URLSession.shared.data(for: request)
@@ -146,13 +147,16 @@ class GeminiService {
         components.scheme = "https"
         components.host = "generativelanguage.googleapis.com"
         components.path = "/v1beta/models"
-        components.queryItems = [URLQueryItem(name: "key", value: actualApiKey)]
 
         guard let url = components.url else {
             throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to construct valid URL."])
         }
         
-        let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
+        var request = URLRequest(url: url)
+        request.addValue(actualApiKey, forHTTPHeaderField: "x-goog-api-key")
+        request.timeoutInterval = 15.0
+
+        let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw NSError(domain: "GeminiService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch models"])
