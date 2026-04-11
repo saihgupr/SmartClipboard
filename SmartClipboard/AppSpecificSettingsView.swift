@@ -46,6 +46,15 @@ struct AppSpecificSettingsView: View {
                         .font(.system(size: 10))
                         .foregroundColor(.secondary.opacity(0.8))
                         .multilineTextAlignment(.center)
+
+                    Button("Add Application") {
+                        addApplication()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .padding(.top, 4)
+                    .accessibilityLabel("Add Application")
+                    .help("Add an application to the special paste list")
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
