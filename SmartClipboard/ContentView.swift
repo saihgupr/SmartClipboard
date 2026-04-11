@@ -87,6 +87,9 @@ struct ContentView: View {
                     .onSubmit {
                         if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
                             clipboardManager.paste(item: item)
+                        } else if let first = displayItems.first {
+                            // Fallback to first item if selection is lost but items exist
+                            clipboardManager.paste(item: first)
                         }
                     }
                 
@@ -192,14 +195,21 @@ struct ContentView: View {
         .frame(width: 380, height: 500)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
-            isSearchFocused = true
             setupKeyboardMonitor()
+            // Initial focus
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isSearchFocused = true
+                if selectedItemId == nil {
+                    selectedItemId = displayItems.first?.id
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
             searchQuery = ""
-            isSearchFocused = true
-            DispatchQueue.main.async {
-                selectedItemId = history.first?.id
+            // Slight delay to ensure window is ready for focus
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                isSearchFocused = true
+                selectedItemId = displayItems.first?.id
             }
         }
     }
@@ -209,17 +219,23 @@ struct ContentView: View {
     private func setupKeyboardMonitor() {
         if keyboardMonitor != nil { return }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // If settings window is frontmost, don't intercept keys for the popover/main window
+            if NSApp.keyWindow?.className.contains("Settings") == true {
+                return event
+            }
+            
             let items = displayItems
             guard !items.isEmpty else { return event }
             
             switch event.keyCode {
             case 125: // Down
                 if let currentId = selectedItemId,
-                   let currentIndex = items.firstIndex(where: { $0.id == currentId }),
-                   currentIndex < items.count - 1 {
-                    selectedItemId = items[currentIndex + 1].id
+                   let currentIndex = items.firstIndex(where: { $0.id == currentId }) {
+                    if currentIndex < items.count - 1 {
+                        selectedItemId = items[currentIndex + 1].id
+                    }
                     return nil
-                } else if selectedItemId == nil {
+                } else {
                     selectedItemId = items.first?.id
                     return nil
                 }
