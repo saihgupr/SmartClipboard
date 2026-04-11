@@ -10,11 +10,9 @@ struct ContentView: View {
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
     
-    // We'll use the item ID for selection
     @State private var selectedItemId: UUID?
     @FocusState private var isSearchFocused: Bool
     
-    // User Settings
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-1.5-flash"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
@@ -24,14 +22,6 @@ struct ContentView: View {
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.timeStyle = .short
-        f.dateStyle = .none
-        return f
-    }()
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.timeStyle = .none
-        f.dateStyle = .short
         return f
     }()
 
@@ -43,11 +33,7 @@ struct ContentView: View {
     }()
     
     private static let queryDateFormatters: [DateFormatter] = {
-        let formats = [
-            "M/d", "M-d", "M.d",
-            "MMM d", "MMMM d",
-            "d MMM", "d MMMM"
-        ]
+        let formats = ["M/d", "M-d", "M.d", "MMM d", "MMMM d", "d MMM", "d MMMM"]
         return formats.map { format in
             let df = DateFormatter()
             df.locale = Locale.current
@@ -55,9 +41,6 @@ struct ContentView: View {
             return df
         }
     }()
-
-    private static let weekdays: [String] = Calendar.current.standaloneWeekdaySymbols
-    private static let shortWeekdays: [String] = Calendar.current.shortStandaloneWeekdaySymbols
 
     private func formatTimestamp(_ date: Date, todayStart: Date, tomorrowStart: Date, yesterdayStart: Date) -> String {
         if date >= todayStart && date < tomorrowStart {
@@ -75,54 +58,68 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // macOS Tahoe Native Search Header
-            HStack {
-                TextField("Search items...", text: $searchQuery)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($isSearchFocused)
-                    .onChange(of: searchQuery) { _, _ in
-                        performLocalSearch()
-                        selectedItemId = displayItems.first?.id
-                    }
-                    .onSubmit {
-                        if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
-                            clipboardManager.paste(item: item)
-                        } else if let first = displayItems.first {
-                            // Fallback to first item if selection is lost but items exist
-                            clipboardManager.paste(item: first)
+            // macOS Tahoe Polished Search Header
+            HStack(spacing: 10) {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 13, weight: .medium))
+                    
+                    TextField("Search history...", text: $searchQuery)
+                        .textFieldStyle(.plain)
+                        .focused($isSearchFocused)
+                        .onChange(of: searchQuery) { _, _ in
+                            performLocalSearch()
+                            selectedItemId = displayItems.first?.id
                         }
+                        .onSubmit {
+                            if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
+                                clipboardManager.paste(item: item)
+                            } else if let first = displayItems.first {
+                                clipboardManager.paste(item: first)
+                            }
+                        }
+                    
+                    if isSearching {
+                        ProgressView().scaleEffect(0.4).frame(width: 16, height: 16)
+                    } else if !searchQuery.isEmpty {
+                        Button(action: performAISearch) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
+                        .help("AI Search")
                     }
-                
-                if isSearching {
-                    ProgressView().scaleEffect(0.5).frame(width: 20, height: 20)
-                } else if !searchQuery.isEmpty {
-                    Button(action: performAISearch) {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(.plain)
-                    .help("AI Search")
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+                )
                 
                 if #available(macOS 13.0, *) {
                     SettingsLink {
                         Image(systemName: "gearshape")
+                            .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Settings")
                 } else {
                     Button(action: openSettings) {
                         Image(systemName: "gearshape")
+                            .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Settings")
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(Color(NSColor.windowBackgroundColor))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(.ultraThinMaterial)
             
             Divider()
             
@@ -143,40 +140,21 @@ struct ContentView: View {
                         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
                         ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                            HStack(spacing: 12) {
-                                if index < 10 {
-                                    Text("\(index == 9 ? 0 : index + 1)")
-                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                        .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
-                                        .frame(width: 15)
-                                        .padding(4)
-                                        .background(selectedItemId == item.id ? Color.white.opacity(0.2) : Color(NSColor.quaternaryLabelColor))
-                                        .cornerRadius(4)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart))
-                                        .font(.caption)
-                                        .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
-                                    
-                                    Text(item.content)
-                                        .font(.system(.body, design: .monospaced))
-                                        .lineLimit(3)
-                                        .foregroundColor(selectedItemId == item.id ? .white : .primary)
-                                }
-                            }
+                            ClipboardRow(
+                                item: item,
+                                index: index,
+                                isSelected: selectedItemId == item.id,
+                                timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart)
+                            )
                             .tag(item.id)
-                            .padding(.vertical, 4)
-                            .contentShape(Rectangle())
+                            .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
                             .onTapGesture {
                                 selectedItemId = item.id
                                 clipboardManager.paste(item: item)
                             }
                             .contextMenu {
                                 Button(role: .destructive) {
-                                    withAnimation {
-                                        clipboardManager.delete(item: item)
-                                    }
+                                    withAnimation { clipboardManager.delete(item: item) }
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -184,29 +162,26 @@ struct ContentView: View {
                         }
                     }
                     .listStyle(.sidebar)
+                    .scrollContentBackground(.hidden)
                     .onChange(of: selectedItemId) { _, newValue in
                         if let id = newValue {
-                            proxy.scrollTo(id)
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                proxy.scrollTo(id)
+                            }
                         }
                     }
                 }
             }
         }
         .frame(width: 380, height: 500)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(.ultraThinMaterial)
         .onAppear {
             setupKeyboardMonitor()
-            // Initial focus
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isSearchFocused = true
-                if selectedItemId == nil {
-                    selectedItemId = displayItems.first?.id
-                }
-            }
+            isSearchFocused = true
+            selectedItemId = displayItems.first?.id
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
             searchQuery = ""
-            // Slight delay to ensure window is ready for focus
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
                 selectedItemId = displayItems.first?.id
@@ -219,234 +194,156 @@ struct ContentView: View {
     private func setupKeyboardMonitor() {
         if keyboardMonitor != nil { return }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // If settings window is frontmost, don't intercept keys for the popover/main window
-            if NSApp.keyWindow?.className.contains("Settings") == true {
-                return event
-            }
+            if NSApp.keyWindow?.className.contains("Settings") == true { return event }
             
             let items = displayItems
-            guard !items.isEmpty else { return event }
-            
             switch event.keyCode {
             case 125: // Down
-                if let currentId = selectedItemId,
-                   let currentIndex = items.firstIndex(where: { $0.id == currentId }) {
-                    if currentIndex < items.count - 1 {
-                        selectedItemId = items[currentIndex + 1].id
-                    }
-                    return nil
-                } else {
-                    selectedItemId = items.first?.id
-                    return nil
-                }
+                guard !items.isEmpty else { return event }
+                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
+                    if idx < items.count - 1 { selectedItemId = items[idx + 1].id }
+                } else { selectedItemId = items.first?.id }
+                return nil
             case 126: // Up
-                if let currentId = selectedItemId,
-                   let currentIndex = items.firstIndex(where: { $0.id == currentId }),
-                   currentIndex > 0 {
-                    selectedItemId = items[currentIndex - 1].id
+                guard !items.isEmpty else { return event }
+                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }), idx > 0 {
+                    selectedItemId = items[idx - 1].id
+                }
+                return nil
+            case 36: // Enter
+                if isSearchFocused { return event }
+                if let id = selectedItemId, let item = items.first(where: { $0.id == id }) {
+                    clipboardManager.paste(item: item)
                     return nil
                 }
             default:
-                break
+                if !isSearchFocused, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
+                    let unicode = chars.unicodeScalars.first?.value ?? 0
+                    if (unicode >= 32 && unicode < 127) || unicode > 160 { isSearchFocused = true }
+                }
             }
             return event
         }
     }
     
-    private var accessibilityWarning: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-                Text("Accessibility Required")
-                    .font(.headline)
-                Spacer()
-                Button("Fix") {
-                    clipboardManager.requestAccessibilityPermission()
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                        NSWorkspace.shared.open(url)
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-            }
-            
-            Text("Enable SmartClipboard in System Settings > Privacy > Accessibility to use global shortcuts.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(12)
-        .background(Color.orange.opacity(0.1))
-    }
-    
-    private var emptyStateView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: searchQuery.isEmpty ? "doc.on.clipboard" : "magnifyingglass")
-                .font(.system(size: 32))
-                .foregroundColor(.secondary.opacity(0.5))
-            
-            Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found")
-                .foregroundColor(.secondary)
-
-            if searchQuery.isEmpty {
-                Text("Copy some text to get started")
-                    .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.8))
-            } else {
-                Button("Clear Search") {
-                    searchQuery = ""
-                    performLocalSearch()
-                    selectedItemId = displayItems.first?.id
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
     private func openSettings() {
         NSApp.activate(ignoringOtherApps: true)
-        if #available(macOS 13.0, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-        }
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
     
     func performLocalSearch() {
-        guard !searchQuery.isEmpty else {
-            searchResults = []
-            return
-        }
-        
+        guard !searchQuery.isEmpty else { searchResults = []; return }
         let query = searchQuery.trimmingCharacters(in: .whitespaces)
         let lowerQuery = query.lowercased()
-        
         let calendar = Calendar.current
         let now = Date()
         
-        var queryDay: Int?
-        var queryMonth: Int?
-        var queryWeekday: Int?
-        
+        var qDay: Int?, qMonth: Int?, qWeekday: Int?
         for df in Self.queryDateFormatters {
             if let date = df.date(from: query) {
                 let comps = calendar.dateComponents([.month, .day], from: date)
-                queryDay = comps.day
-                queryMonth = comps.month
-                break
+                qDay = comps.day; qMonth = comps.month; break
             }
         }
+        if let idx = Calendar.current.standaloneWeekdaySymbols.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) { qWeekday = idx + 1 }
         
-        if let index = Self.weekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
-            queryWeekday = index + 1
-        } else if let index = Self.shortWeekdays.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) {
-            queryWeekday = index + 1
-        }
-
         let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
-
-        let mightBeTimeOrDate = queryMonth != nil ||
-                                queryWeekday != nil ||
-                                lowerQuery.contains("am") ||
-                                lowerQuery.contains("pm") ||
-                                query.contains("/") ||
-                                query.contains("-") ||
-                                query.contains(":")
-
         let todayStart = calendar.startOfDay(for: now)
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
         self.searchResults = history.filter { item in
             if item.content.localizedCaseInsensitiveContains(query) { return true }
-            
-            let itemDate = item.timestamp
-            
-            if let qM = queryMonth, let qD = queryDay {
-                let itemComps = calendar.dateComponents([.month, .day], from: itemDate)
-                if itemComps.month == qM && itemComps.day == qD {
-                    return true
-                }
+            let d = item.timestamp
+            if let m = qMonth, let day = qDay {
+                let comps = calendar.dateComponents([.month, .day], from: d)
+                if comps.month == m && comps.day == day { return true }
             }
-            
-            if let qW = queryWeekday {
-                let itemWeekday = calendar.component(.weekday, from: itemDate)
-                if itemWeekday == qW {
-                    return true
-                }
-            }
-            
-            if matchesYesterday {
-                if itemDate >= yesterdayStart && itemDate < todayStart { return true }
-            }
-            if matchesToday {
-                if itemDate >= todayStart && itemDate < tomorrowStart { return true }
-            }
-            
-            if mightBeTimeOrDate {
-                let timeStr = Self.timeFormatter.string(from: itemDate)
-                if timeStr.localizedCaseInsensitiveContains(query) {
-                    if itemDate >= todayStart && itemDate < tomorrowStart { return true }
-                    if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
-                        return true
-                    }
-                }
-
-                let fullStr = Self.fullFormatter.string(from: itemDate)
-                if fullStr.localizedCaseInsensitiveContains(query) {
-                    return true
-                }
-            }
-            
+            if let w = qWeekday, calendar.component(.weekday, from: d) == w { return true }
+            if matchesYesterday, d >= yesterdayStart && d < todayStart { return true }
+            if matchesToday, d >= todayStart && d < tomorrowStart { return true }
             return false
         }
     }
     
     func performAISearch() {
-        guard !searchQuery.isEmpty else {
-            searchResults = []
-            return
-        }
-        
+        guard !searchQuery.isEmpty else { return }
         isSearching = true
         Task {
             do {
-                let intent = try await geminiService.parseSearchIntent(
-                    query: searchQuery,
-                    history: history,
-                    apiKey: apiKey,
-                    modelName: selectedModel,
-                    searchDepth: semanticSearchDepth
-                )
-                
+                let intent = try await geminiService.parseSearchIntent(query: searchQuery, history: history, apiKey: apiKey, modelName: selectedModel, searchDepth: semanticSearchDepth)
                 await MainActor.run {
                     var filtered = self.history
-                    
-                    if let semanticIds = intent.semanticMatchIds, !semanticIds.isEmpty {
-                        let semanticSet = Set(semanticIds)
-                        filtered = filtered.filter { semanticSet.contains($0.id) }
+                    if let ids = intent.semanticMatchIds, !ids.isEmpty {
+                        let set = Set(ids); filtered = filtered.filter { set.contains($0.id) }
                     } else {
-                        if let start = intent.startDate, let end = intent.endDate {
-                            filtered = filtered.filter { $0.timestamp >= start && $0.timestamp <= end }
-                        }
-                        
-                        if let textQ = intent.textQuery, !textQ.isEmpty {
-                            filtered = filtered.filter { $0.content.localizedCaseInsensitiveContains(textQ) }
-                        }
+                        if let s = intent.startDate, let e = intent.endDate { filtered = filtered.filter { $0.timestamp >= s && $0.timestamp <= e } }
+                        if let t = intent.textQuery, !t.isEmpty { filtered = filtered.filter { $0.content.localizedCaseInsensitiveContains(t) } }
                     }
-                    
                     self.searchResults = filtered
                     self.selectedItemId = filtered.first?.id
                     self.isSearching = false
                 }
-            } catch {
-                print("Search error: \(error)")
-                await MainActor.run { self.isSearching = false }
-            }
+            } catch { isSearching = false }
         }
+    }
+    
+    private var accessibilityWarning: some View {
+        HStack {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
+            Text("Accessibility Required").font(.caption.bold())
+            Spacer()
+            Button("Fix") {
+                clipboardManager.requestAccessibilityPermission()
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") { NSWorkspace.shared.open(url) }
+            }.buttonStyle(.bordered).controlSize(.small)
+        }
+        .padding(10)
+        .background(Color.orange.opacity(0.1))
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: searchQuery.isEmpty ? "doc.on.clipboard" : "magnifyingglass")
+                .font(.system(size: 32)).foregroundColor(.secondary.opacity(0.3))
+            Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found").foregroundColor(.secondary)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct ClipboardRow: View {
+    let item: ClipboardItem
+    let index: Int
+    let isSelected: Bool
+    let timestamp: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            if index < 10 {
+                Text("\(index == 9 ? 0 : index + 1)")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(isSelected ? .white.opacity(0.9) : .secondary)
+                    .frame(width: 18, height: 18)
+                    .background(isSelected ? Color.white.opacity(0.25) : Color(NSColor.quaternaryLabelColor))
+                    .cornerRadius(4)
+            }
+            
+            VStack(alignment: .leading, spacing: 3) {
+                Text(timestamp)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(isSelected ? .white.opacity(0.7) : .secondary)
+                
+                Text(item.content)
+                    .font(.system(size: 13, weight: .regular, design: .monospaced))
+                    .lineLimit(2)
+                    .foregroundColor(isSelected ? .white : .primary)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .contentShape(Rectangle())
     }
 }
