@@ -12,6 +12,7 @@ struct ContentView: View {
     
     // We'll use the item ID for selection
     @State private var selectedItemId: UUID?
+    @FocusState private var isSearchFocused: Bool
     
     // User Settings
     @AppStorage("geminiApiKey") private var apiKey: String = ""
@@ -78,6 +79,7 @@ struct ContentView: View {
             HStack {
                 TextField("Search items...", text: $searchQuery)
                     .textFieldStyle(.roundedBorder)
+                    .focused($isSearchFocused)
                     .onChange(of: searchQuery) { _, _ in
                         performLocalSearch()
                         selectedItemId = displayItems.first?.id
@@ -120,70 +122,109 @@ struct ContentView: View {
             if displayItems.isEmpty {
                 emptyStateView
             } else {
-                List(selection: $selectedItemId) {
-                    let now = Date()
-                    let calendar = Calendar.current
-                    let todayStart = calendar.startOfDay(for: now)
-                    let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
-                    let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
+                ScrollViewReader { proxy in
+                    List(selection: $selectedItemId) {
+                        let now = Date()
+                        let calendar = Calendar.current
+                        let todayStart = calendar.startOfDay(for: now)
+                        let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+                        let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
-                    ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                        HStack(spacing: 12) {
-                            if index < 10 {
-                                Text("\(index == 9 ? 0 : index + 1)")
-                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                    .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
-                                    .frame(width: 15)
-                                    .padding(4)
-                                    .background(selectedItemId == item.id ? Color.white.opacity(0.2) : Color(NSColor.quaternaryLabelColor))
-                                    .cornerRadius(4)
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart))
-                                    .font(.caption)
-                                    .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
-                                
-                                Text(item.content)
-                                    .font(.system(.body, design: .monospaced))
-                                    .lineLimit(3)
-                                    .foregroundColor(selectedItemId == item.id ? .white : .primary)
-                            }
-                        }
-                        .tag(item.id)
-                        .padding(.vertical, 4)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedItemId = item.id
-                            clipboardManager.paste(item: item)
-                        }
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                withAnimation {
-                                    clipboardManager.delete(item: item)
+                        ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
+                            HStack(spacing: 12) {
+                                if index < 10 {
+                                    Text("\(index == 9 ? 0 : index + 1)")
+                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                        .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
+                                        .frame(width: 15)
+                                        .padding(4)
+                                        .background(selectedItemId == item.id ? Color.white.opacity(0.2) : Color(NSColor.quaternaryLabelColor))
+                                        .cornerRadius(4)
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart))
+                                        .font(.caption)
+                                        .foregroundColor(selectedItemId == item.id ? .white.opacity(0.8) : .secondary)
+                                    
+                                    Text(item.content)
+                                        .font(.system(.body, design: .monospaced))
+                                        .lineLimit(3)
+                                        .foregroundColor(selectedItemId == item.id ? .white : .primary)
+                                }
+                            }
+                            .tag(item.id)
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedItemId = item.id
+                                clipboardManager.paste(item: item)
+                            }
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    withAnimation {
+                                        clipboardManager.delete(item: item)
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
-                }
-                .listStyle(.sidebar)
-                // Use built-in handler for Enter key when the list is in focus
-                .onCommand(#selector(NSResponder.insertNewline(_:))) {
-                    if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
-                        clipboardManager.paste(item: item)
+                    .listStyle(.sidebar)
+                    .onChange(of: selectedItemId) { _, newValue in
+                        if let id = newValue {
+                            proxy.scrollTo(id)
+                        }
                     }
                 }
             }
         }
         .frame(width: 380, height: 500)
         .background(Color(NSColor.windowBackgroundColor))
+        .onAppear {
+            isSearchFocused = true
+            setupKeyboardMonitor()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
             searchQuery = ""
+            isSearchFocused = true
             DispatchQueue.main.async {
                 selectedItemId = history.first?.id
             }
+        }
+    }
+
+    @State private var keyboardMonitor: Any?
+    
+    private func setupKeyboardMonitor() {
+        if keyboardMonitor != nil { return }
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let items = displayItems
+            guard !items.isEmpty else { return event }
+            
+            switch event.keyCode {
+            case 125: // Down
+                if let currentId = selectedItemId,
+                   let currentIndex = items.firstIndex(where: { $0.id == currentId }),
+                   currentIndex < items.count - 1 {
+                    selectedItemId = items[currentIndex + 1].id
+                    return nil
+                } else if selectedItemId == nil {
+                    selectedItemId = items.first?.id
+                    return nil
+                }
+            case 126: // Up
+                if let currentId = selectedItemId,
+                   let currentIndex = items.firstIndex(where: { $0.id == currentId }),
+                   currentIndex > 0 {
+                    selectedItemId = items[currentIndex - 1].id
+                    return nil
+                }
+            default:
+                break
+            }
+            return event
         }
     }
     
@@ -241,7 +282,7 @@ struct ContentView: View {
     }
     
     private func openSettings() {
-        // macOS standard way to show Settings Window
+        NSApp.activate(ignoringOtherApps: true)
         if #available(macOS 13.0, *) {
             NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
         } else {
@@ -260,7 +301,6 @@ struct ContentView: View {
         
         let calendar = Calendar.current
         let now = Date()
-        _ = calendar.component(.year, from: now)
         
         var queryDay: Int?
         var queryMonth: Int?
