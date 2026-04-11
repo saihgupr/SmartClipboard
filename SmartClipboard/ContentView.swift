@@ -416,9 +416,9 @@ struct ContentView: View {
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
 
         // Fast path: if the query doesn't look like a time or date at all, we can skip expensive date formatting
-        // (digits, slashes, dashes, colons, am, pm)
-        let containsDigits = query.rangeOfCharacter(from: .decimalDigits) != nil
-        let mightBeTimeOrDate = containsDigits ||
+        // (slashes, dashes, colons, am, pm, or specific explicit matches)
+        let mightBeTimeOrDate = queryMonth != nil ||
+                                queryWeekday != nil ||
                                 lowerQuery.contains("am") ||
                                 lowerQuery.contains("pm") ||
                                 query.contains("/") ||
