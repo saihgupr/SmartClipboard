@@ -58,7 +58,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // macOS Tahoe Polished Search Header - Perfectly Symmetric
+            // macOS Tahoe Polished Search Header - Clean & Symmetric
             HStack(spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
@@ -93,8 +93,8 @@ struct ContentView: View {
                     }
                 }
                 .padding(.horizontal, 10)
-                .frame(height: 32) // Fixed height for internal search bar
-                .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+                .frame(height: 32)
+                .background(Color(NSColor.controlBackgroundColor).opacity(0.6))
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -118,8 +118,9 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(height: 60) // Fixed total header height for perfect symmetry
-            .background(.ultraThinMaterial)
+            .padding(.top, 14)    // Balanced Top Padding
+            .padding(.bottom, 14) // Balanced Bottom Padding
+            // Removed double ultraThinMaterial background here
             
             Divider()
             
@@ -163,9 +164,9 @@ struct ContentView: View {
                     }
                     .listStyle(.sidebar)
                     .scrollContentBackground(.hidden)
+                    .accentColor(.blue) // Force native blue selection highlight
                     .onChange(of: selectedItemId) { _, newValue in
                         if let id = newValue {
-                            // Center the selection so it's always fully visible
                             DispatchQueue.main.async {
                                 withAnimation(.easeInOut(duration: 0.12)) {
                                     proxy.scrollTo(id, anchor: .center)
@@ -177,7 +178,7 @@ struct ContentView: View {
             }
         }
         .frame(width: 380, height: 500)
-        .background(.ultraThinMaterial)
+        .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow).ignoresSafeArea())
         .onAppear {
             setupKeyboardMonitor()
             isSearchFocused = true
@@ -187,7 +188,7 @@ struct ContentView: View {
             searchQuery = ""
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
-                selectedItemId = history.first?.id
+                selectedItemId = displayItems.first?.id
             }
         }
     }
@@ -312,6 +313,24 @@ struct ContentView: View {
                 .font(.system(size: 32)).foregroundColor(.secondary.opacity(0.3))
             Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found").foregroundColor(.secondary)
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+    
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = material
+        nsView.blendingMode = blendingMode
     }
 }
 
