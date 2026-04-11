@@ -101,12 +101,21 @@ struct ContentView: View {
                     .help("AI Search")
                 }
                 
-                Button(action: openSettings) {
-                    Image(systemName: "gearshape")
-                        .foregroundColor(.secondary)
+                if #available(macOS 13.0, *) {
+                    SettingsLink {
+                        Image(systemName: "gearshape")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Settings")
+                } else {
+                    Button(action: openSettings) {
+                        Image(systemName: "gearshape")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Settings")
                 }
-                .buttonStyle(.plain)
-                .help("Settings")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)

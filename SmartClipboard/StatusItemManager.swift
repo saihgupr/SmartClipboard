@@ -177,6 +177,13 @@ final class StatusItemManager: NSObject {
     
     private func showContextMenu(_ sender: NSStatusBarButton) {
         let menu = NSMenu()
+        
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         let quitItem = NSMenuItem(title: "Quit SmartClipboard", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -184,6 +191,15 @@ final class StatusItemManager: NSObject {
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
         statusItem?.menu = nil // Reset so next left-click works correctly
+    }
+    
+    @objc private func openSettings() {
+        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 13.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
     
     @objc private func quitApp() {
