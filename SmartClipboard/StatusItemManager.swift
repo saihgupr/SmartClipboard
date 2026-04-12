@@ -112,6 +112,7 @@ final class StatusItemManager: NSObject {
                 window.isOpaque = false
                 window.backgroundColor = .clear
                 window.makeKey()
+                window.makeMain()
             }
             NSApp.activate(ignoringOtherApps: true)
         }

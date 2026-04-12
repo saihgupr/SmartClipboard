@@ -254,6 +254,7 @@ struct ContentView: View {
                         isSearchFocused = true
                         // DO NOT manually append or return nil. 
                         // Returning the event allows the TextField to receive it normally.
+                        return event
                     }
                 }
             }
