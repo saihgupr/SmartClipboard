@@ -101,6 +101,7 @@ struct AISettingsView: View {
                         fetchModels()
                     }
                     .disabled(isLoadingModels || apiKey.isEmpty)
+                    .help(apiKey.isEmpty ? "API Key required" : "Test Connection")
                 }
                 
                 if showSuccessMessage {
@@ -130,6 +131,7 @@ struct AISettingsView: View {
                             fetchModels()
                         }
                         .disabled(apiKey.isEmpty)
+                        .help(apiKey.isEmpty ? "API Key required" : "Fetch Available Models")
                     }
                 } else {
                     HStack {
@@ -142,6 +144,7 @@ struct AISettingsView: View {
                             Image(systemName: "arrow.clockwise")
                         }
                         .buttonStyle(.borderless)
+                        .accessibilityLabel("Refresh Models")
                         .help("Refresh Models")
                     }
                 }

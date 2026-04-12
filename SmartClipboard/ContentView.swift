@@ -98,6 +98,7 @@ struct ContentView: View {
                             .foregroundColor(.blue)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("AI Search")
                     .help("AI Search")
                 }
                 
@@ -107,6 +108,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                     .help("Settings")
                 } else {
                     Button(action: openSettings) {
@@ -114,6 +116,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                     .help("Settings")
                 }
             }

@@ -3,3 +3,6 @@
 **Action:** When creating empty states, ensure context-specific actionable items are available (e.g., "Clear Search" button). When disabling an interactive element, always provide a tooltip explaining the requirement.## 2026-04-11 - [Empty State CTA]
 **Learning:** Empty states with instructional text but no inline Call to Action are frustrating.
 **Action:** Always ensure empty states include a prominent button or control for the user to immediately take the action described in the text.
+\n## 2026-04-12 - [Accessible Icon Buttons]
+**Learning:** Icon-only buttons without accessibility labels create navigation hurdles for screen reader users in SwiftUI.
+**Action:** Always append `.accessibilityLabel()` along with `.help()` for screen-reader and mouse-user contexts when utilizing system icons for buttons.
