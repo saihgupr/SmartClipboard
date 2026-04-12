@@ -112,6 +112,11 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            NotificationCenter.default.post(name: .closeUI, object: nil)
+                        }
+                    })
                 } else {
                     Button(action: openSettings) {
                         Image(systemName: "gearshape")
@@ -278,6 +283,9 @@ struct ContentView: View {
     private func openSettings() {
         NSApp.activate(ignoringOtherApps: true)
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            NotificationCenter.default.post(name: .closeUI, object: nil)
+        }
     }
     
     func performLocalSearch() {

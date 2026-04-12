@@ -5,6 +5,7 @@ import SwiftData
 /// Manages the menu bar icon (NSStatusItem) and provides custom left-click/right-click behavior.
 extension Notification.Name {
     static let uiWillShow = Notification.Name("uiWillShow")
+    static let closeUI = Notification.Name("closeUI")
 }
 
 /// A custom NSPanel that allows becoming the key window even without a title bar.
@@ -38,6 +39,10 @@ final class StatusItemManager: NSObject {
         
         GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
             DispatchQueue.main.async { self?.toggleMainWindow() }
+        }
+
+        NotificationCenter.default.addObserver(forName: .closeUI, object: nil, queue: .main) { [weak self] _ in
+            self?.closeUI()
         }
         
         registerSavedHotkey()
@@ -167,6 +172,9 @@ final class StatusItemManager: NSObject {
             NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
         } else {
             NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            NotificationCenter.default.post(name: .closeUI, object: nil)
         }
     }
     
