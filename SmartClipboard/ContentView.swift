@@ -6,8 +6,6 @@ struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
     
-    let isInPopover: Bool
-    
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
@@ -122,7 +120,7 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, isInPopover ? 16 : 20) 
+            .padding(.top, 16) 
             .padding(.bottom, 14)
             
             Divider()
@@ -191,11 +189,7 @@ struct ContentView: View {
         .onDisappear {
             removeKeyboardMonitor()
         }
-        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
-            // Only respond if the notification was intended for this specific instance
-            guard let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool,
-                  targetIsPopover == self.isInPopover else { return }
-            
+        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
             searchQuery = ""
             selectedItemId = history.first?.id
             
@@ -204,6 +198,7 @@ struct ContentView: View {
             }
         }
     }
+
 
     @State private var keyboardMonitor: Any?
     

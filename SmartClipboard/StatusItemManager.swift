@@ -11,7 +11,6 @@ extension Notification.Name {
 final class StatusItemManager: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
-    private var mainWindow: NSPanel?
     
     private let clipboardManager: ClipboardManager
     private let modelContainer: ModelContainer
@@ -23,14 +22,13 @@ final class StatusItemManager: NSObject {
         
         setupStatusItem()
         setupPopover()
-        setupMainWindow()
         
         clipboardManager.onPaste = { [weak self] in
             DispatchQueue.main.async { self?.closeUI() }
         }
         
         GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
-            DispatchQueue.main.async { self?.toggleUI(fromHotkey: true) }
+            DispatchQueue.main.async { self?.toggleUI() }
         }
         
         registerSavedHotkey()
@@ -51,7 +49,7 @@ final class StatusItemManager: NSObject {
         popover.contentSize = NSSize(width: 380, height: 500)
         popover.behavior = .transient
         
-        let contentView = ContentView(isInPopover: true)
+        let contentView = ContentView()
             .environmentObject(clipboardManager)
             .modelContainer(modelContainer)
         
@@ -59,62 +57,20 @@ final class StatusItemManager: NSObject {
         self.popover = popover
     }
     
-    private func setupMainWindow() {
-        let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 380, height: 500),
-            styleMask: [.nonactivatingPanel, .titled, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        
-        panel.titleVisibility = .hidden
-        panel.titlebarAppearsTransparent = true
-        panel.isMovableByWindowBackground = true
-        panel.isFloatingPanel = true
-        panel.level = .floating
-        panel.hidesOnDeactivate = true
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = true
-        
-        panel.standardWindowButton(.closeButton)?.isHidden = true
-        panel.standardWindowButton(.miniaturizeButton)?.isHidden = true
-        panel.standardWindowButton(.zoomButton)?.isHidden = true
-        
-        let contentView = ContentView(isInPopover: false)
-            .environmentObject(clipboardManager)
-            .modelContainer(modelContainer)
-        
-        panel.contentViewController = NSHostingController(rootView: contentView)
-        self.mainWindow = panel
-    }
-    
     @objc private func handleStatusItemClick(_ sender: NSStatusBarButton) {
         if NSApp.currentEvent?.type == .rightMouseUp {
             showContextMenu(sender)
         } else {
-            toggleUI(fromHotkey: false)
+            toggleUI()
         }
     }
     
-    func toggleUI(fromHotkey: Bool) {
-        if fromHotkey {
-            toggleMainWindow()
-        } else {
-            togglePopover()
-        }
-    }
-    
-    private func togglePopover() {
+    func toggleUI() {
         guard let button = statusItem?.button, let popover = popover else { return }
         if popover.isShown {
             popover.performClose(button)
         } else {
-            mainWindow?.orderOut(nil)
-            // Specify context so only the Popover instance resets
-            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": true])
+            NotificationCenter.default.post(name: .uiWillShow, object: nil)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             if let window = popover.contentViewController?.view.window {
                 window.isOpaque = false
@@ -125,23 +81,8 @@ final class StatusItemManager: NSObject {
         }
     }
     
-    private func toggleMainWindow() {
-        guard let window = mainWindow else { return }
-        if window.isVisible {
-            window.orderOut(nil)
-        } else {
-            if popover?.isShown == true { popover?.performClose(nil) }
-            // Specify context so only the Panel instance resets
-            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
-            window.center()
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-        }
-    }
-    
     func closeUI() {
         if popover?.isShown == true { popover?.performClose(nil) }
-        mainWindow?.orderOut(nil)
     }
     
     private func registerSavedHotkey() {
