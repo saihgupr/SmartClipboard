@@ -333,13 +333,14 @@ struct ContentView: View {
         let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
 
-        let mightBeTimeOrDate = queryMonth != nil ||
+        let mightBeTime = lowerQuery.contains("am") ||
+                          lowerQuery.contains("pm") ||
+                          query.contains(":")
+
+        let mightBeDateString = queryMonth != nil ||
                                 queryWeekday != nil ||
-                                lowerQuery.contains("am") ||
-                                lowerQuery.contains("pm") ||
                                 query.contains("/") ||
-                                query.contains("-") ||
-                                query.contains(":")
+                                query.contains("-")
 
         let todayStart = calendar.startOfDay(for: now)
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
@@ -351,9 +352,13 @@ struct ContentView: View {
             let itemDate = item.timestamp
             
             if let qM = queryMonth, let qD = queryDay {
-                let itemComps = calendar.dateComponents([.month, .day], from: itemDate)
-                if itemComps.month == qM && itemComps.day == qD {
-                    return true
+                // Use separate .component() calls to avoid allocating heavy DateComponents structs in loop
+                let itemMonth = calendar.component(.month, from: itemDate)
+                if itemMonth == qM {
+                    let itemDay = calendar.component(.day, from: itemDate)
+                    if itemDay == qD {
+                        return true
+                    }
                 }
             }
             
@@ -371,7 +376,7 @@ struct ContentView: View {
                 if itemDate >= todayStart && itemDate < tomorrowStart { return true }
             }
             
-            if mightBeTimeOrDate {
+            if mightBeTime {
                 let timeStr = Self.timeFormatter.string(from: itemDate)
                 if timeStr.localizedCaseInsensitiveContains(query) {
                     if itemDate >= todayStart && itemDate < tomorrowStart { return true }
@@ -379,7 +384,9 @@ struct ContentView: View {
                         return true
                     }
                 }
+            }
 
+            if mightBeDateString {
                 let fullStr = Self.fullFormatter.string(from: itemDate)
                 if fullStr.localizedCaseInsensitiveContains(query) {
                     return true
