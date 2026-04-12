@@ -31,32 +31,41 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
-            Section {
-                Toggle("Launch SmartClipboard at Login", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { _, newValue in
-                        updateLoginItem(enabled: newValue)
+            VStack(alignment: .leading, spacing: 20) {
+                // Login Item
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Launch SmartClipboard at Login", isOn: $launchAtLogin)
+                        .onChange(of: launchAtLogin) { _, newValue in
+                            updateLoginItem(enabled: newValue)
+                        }
+                    Text("Automatically start the app when you turn on your Mac.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 20)
+                }
+
+                Divider()
+
+                // History Retention
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("History Retention:", selection: $historyRetentionDays) {
+                        Text("7 Days").tag(7)
+                        Text("30 Days").tag(30)
+                        Text("90 Days").tag(90)
+                        Text("180 Days (6 mo)").tag(180)
+                        Text("1 Year").tag(365)
+                        Text("Forever").tag(0)
                     }
-                
-                Picker("History Retention:", selection: $historyRetentionDays) {
-                    Text("7 Days").tag(7)
-                    Text("30 Days").tag(30)
-                    Text("90 Days").tag(90)
-                    Text("180 Days (6 mo)").tag(180)
-                    Text("1 Year").tag(365)
-                    Text("Forever").tag(0)
-                }
-                Text("Controls how long clipboard items are kept before automatic deletion.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Section {
-                Button("Quit SmartClipboard") {
-                    NSApplication.shared.terminate(nil)
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: 250)
+                    
+                    Text("Controls how long clipboard items are kept before automatic deletion.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
+            .padding(20)
         }
-        .padding(20)
     }
     
     private func updateLoginItem(enabled: Bool) {
