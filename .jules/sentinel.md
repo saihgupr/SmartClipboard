@@ -16,3 +16,8 @@
 **Vulnerability:** The Gemini API key was transmitted as a URL query parameter (`?key=...`).
 **Learning:** Placing sensitive tokens like API keys in URLs exposes them to intermediate proxy logs, server access logs, and network monitoring tools in plain text, making them susceptible to theft.
 **Prevention:** Always transmit sensitive tokens using secure HTTP headers (e.g., `x-goog-api-key`, `Authorization`) instead of URL query parameters.
+
+## 2025-04-12 - Missing Clipboard Input Length Limit (DoS Risk)
+**Vulnerability:** The clipboard manager (`SmartClipboard/ClipboardManager.swift`) was blindly saving all copied string data directly into a persistent SwiftData history database and caching it in memory without imposing any length limits.
+**Learning:** Saving unbounded strings from the pasteboard (e.g., if a user copies a 500MB log file or an extremely large dataset) can lead to severe memory exhaustion, blocking the main thread, crashing the application (DoS), or corrupting the local persistent store. In Swift, calling `.count` on a `String` iterates through the whole string's grapheme clusters; instead, check `newString.utf8.count` for raw size limits efficiently.
+**Prevention:** Always enforce a sensible maximum length limit (e.g., 100,000 characters) on user-provided input or clipboard data before saving it to a database or transmitting it to external APIs.
