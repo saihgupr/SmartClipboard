@@ -6,6 +6,8 @@ struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
     
+    let isInPopover: Bool
+    
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
@@ -58,7 +60,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // macOS Tahoe Polished Search Header - Clean & Symmetric
+            // macOS Tahoe Polished Search Header
             HStack(spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
@@ -70,7 +72,9 @@ struct ContentView: View {
                         .focused($isSearchFocused)
                         .onChange(of: searchQuery) { _, _ in
                             performLocalSearch()
-                            selectedItemId = displayItems.first?.id
+                            if let firstId = displayItems.first?.id {
+                                selectedItemId = firstId
+                            }
                         }
                         .onSubmit {
                             if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
@@ -118,8 +122,8 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 16)    // Matching standard popover top padding
-            .padding(.bottom, 12) // Balanced bottom padding for the header
+            .padding(.top, isInPopover ? 16 : 20) 
+            .padding(.bottom, 14)
             
             Divider()
                 .opacity(0.5)
@@ -184,12 +188,19 @@ struct ContentView: View {
             isSearchFocused = true
             selectedItemId = displayItems.first?.id
         }
-        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
+        .onDisappear {
+            removeKeyboardMonitor()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
+            // Only respond if the notification was intended for this specific instance
+            guard let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool,
+                  targetIsPopover == self.isInPopover else { return }
+            
             searchQuery = ""
-            // Aggressive focus and selection on show
+            selectedItemId = history.first?.id
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
-                selectedItemId = displayItems.first?.id
             }
         }
     }
@@ -199,20 +210,34 @@ struct ContentView: View {
     private func setupKeyboardMonitor() {
         if keyboardMonitor != nil { return }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if NSApp.keyWindow?.className.contains("Settings") == true { return event }
+            // Check if THIS view is in the key window. This prevents double-monitoring.
+            guard let keyWindow = NSApp.keyWindow,
+                  let myWindow = event.window,
+                  keyWindow == myWindow else { return event }
+            
+            // Don't intercept if Settings window is frontmost
+            if keyWindow.title.contains("Settings") == true { return event }
             
             let items = displayItems
             switch event.keyCode {
             case 125: // Down
                 guard !items.isEmpty else { return event }
                 if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
-                    if idx < items.count - 1 { selectedItemId = items[idx + 1].id }
-                } else { selectedItemId = items.first?.id }
+                    if idx < items.count - 1 {
+                        selectedItemId = items[idx + 1].id
+                    }
+                } else {
+                    selectedItemId = items.first?.id
+                }
                 return nil
             case 126: // Up
                 guard !items.isEmpty else { return event }
-                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }), idx > 0 {
-                    selectedItemId = items[idx - 1].id
+                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
+                    if idx > 0 {
+                        selectedItemId = items[idx - 1].id
+                    }
+                } else {
+                    selectedItemId = items.first?.id
                 }
                 return nil
             case 36: // Enter
@@ -222,18 +247,23 @@ struct ContentView: View {
                     return nil
                 }
             default:
-                // Type-to-search redirection: if not focused, but printable key pressed
                 if !isSearchFocused, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                     let unicode = chars.unicodeScalars.first?.value ?? 0
                     if (unicode >= 32 && unicode < 127) || unicode > 160 {
                         isSearchFocused = true
-                        // Manually append the character if the focus delay might miss it
-                        searchQuery.append(chars)
-                        return nil // Intercepted and handled
+                        // DO NOT manually append or return nil. 
+                        // Returning the event allows the TextField to receive it normally.
                     }
                 }
             }
             return event
+        }
+    }
+    
+    private func removeKeyboardMonitor() {
+        if let monitor = keyboardMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyboardMonitor = nil
         }
     }
     

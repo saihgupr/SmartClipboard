@@ -51,7 +51,7 @@ final class StatusItemManager: NSObject {
         popover.contentSize = NSSize(width: 380, height: 500)
         popover.behavior = .transient
         
-        let contentView = ContentView()
+        let contentView = ContentView(isInPopover: true)
             .environmentObject(clipboardManager)
             .modelContainer(modelContainer)
         
@@ -60,7 +60,6 @@ final class StatusItemManager: NSObject {
     }
     
     private func setupMainWindow() {
-        // Use .titled but with hidden/transparent titlebar to maintain native rounded corners and shadows
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 380, height: 500),
             styleMask: [.nonactivatingPanel, .titled, .fullSizeContentView],
@@ -80,12 +79,11 @@ final class StatusItemManager: NSObject {
         panel.backgroundColor = .clear
         panel.hasShadow = true
         
-        // Remove standard titlebar buttons to make it look like a clean panel
         panel.standardWindowButton(.closeButton)?.isHidden = true
         panel.standardWindowButton(.miniaturizeButton)?.isHidden = true
         panel.standardWindowButton(.zoomButton)?.isHidden = true
         
-        let contentView = ContentView()
+        let contentView = ContentView(isInPopover: false)
             .environmentObject(clipboardManager)
             .modelContainer(modelContainer)
         
@@ -115,7 +113,8 @@ final class StatusItemManager: NSObject {
             popover.performClose(button)
         } else {
             mainWindow?.orderOut(nil)
-            NotificationCenter.default.post(name: .uiWillShow, object: nil)
+            // Specify context so only the Popover instance resets
+            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": true])
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             if let window = popover.contentViewController?.view.window {
                 window.isOpaque = false
@@ -132,7 +131,8 @@ final class StatusItemManager: NSObject {
             window.orderOut(nil)
         } else {
             if popover?.isShown == true { popover?.performClose(nil) }
-            NotificationCenter.default.post(name: .uiWillShow, object: nil)
+            // Specify context so only the Panel instance resets
+            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
             window.center()
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
