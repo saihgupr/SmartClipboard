@@ -6,6 +6,8 @@ struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
     
+    let isInPopover: Bool
+    
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var searchResults: [ClipboardItem] = []
@@ -180,7 +182,7 @@ struct ContentView: View {
             }
         }
         .frame(width: 380, height: 500)
-        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow).ignoresSafeArea())
+        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow, cornerRadius: 12).ignoresSafeArea())
         .onAppear {
             setupKeyboardMonitor()
             isSearchFocused = true
@@ -189,7 +191,11 @@ struct ContentView: View {
         .onDisappear {
             removeKeyboardMonitor()
         }
-        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
+            // Only respond if the notification was intended for this specific instance
+            guard let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool,
+                  targetIsPopover == self.isInPopover else { return }
+            
             searchQuery = ""
             selectedItemId = history.first?.id
             
@@ -351,18 +357,29 @@ struct ContentView: View {
 struct VisualEffectView: NSViewRepresentable {
     let material: NSVisualEffectView.Material
     let blendingMode: NSVisualEffectView.BlendingMode
+    var cornerRadius: CGFloat = 0
     
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = NSVisualEffectView()
         view.material = material
         view.blendingMode = blendingMode
         view.state = .active
+        
+        if cornerRadius > 0 {
+            view.wantsLayer = true
+            view.layer?.cornerRadius = cornerRadius
+            view.layer?.masksToBounds = true
+        }
+        
         return view
     }
     
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
         nsView.material = material
         nsView.blendingMode = blendingMode
+        if cornerRadius > 0 {
+            nsView.layer?.cornerRadius = cornerRadius
+        }
     }
 }
 
