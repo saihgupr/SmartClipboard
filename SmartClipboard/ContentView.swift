@@ -211,13 +211,16 @@ struct ContentView: View {
     private func setupKeyboardMonitor() {
         if keyboardMonitor != nil { return }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // Check if THIS view is in the key window. This prevents double-monitoring.
+            // Check if THIS view is in the key window.
             guard let keyWindow = NSApp.keyWindow,
                   let myWindow = event.window,
                   keyWindow == myWindow else { return event }
             
             // Don't intercept if Settings window is frontmost
             if keyWindow.title.contains("Settings") == true { return event }
+            
+            // Use first responder check to avoid stale capture of SwiftUI @FocusState
+            let isFocused = keyWindow.firstResponder is NSTextView
             
             let items = displayItems
             switch event.keyCode {
@@ -242,18 +245,21 @@ struct ContentView: View {
                 }
                 return nil
             case 36: // Enter
-                if isSearchFocused { return event }
+                // If focused on text field, only intercept if we want to trigger paste
+                // Otherwise let the TextField handle its own submit
+                if isFocused { return event }
                 if let id = selectedItemId, let item = items.first(where: { $0.id == id }) {
                     clipboardManager.paste(item: item)
                     return nil
                 }
             default:
-                if !isSearchFocused, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
+                // If not focused, check if we should auto-focus on character input
+                if !isFocused, !event.modifierFlags.contains(.command), 
+                   let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                     let unicode = chars.unicodeScalars.first?.value ?? 0
                     if (unicode >= 32 && unicode < 127) || unicode > 160 {
                         isSearchFocused = true
-                        // DO NOT manually append or return nil. 
-                        // Returning the event allows the TextField to receive it normally.
+                        // Return event so it lands in the newly focused TextField
                         return event
                     }
                 }
