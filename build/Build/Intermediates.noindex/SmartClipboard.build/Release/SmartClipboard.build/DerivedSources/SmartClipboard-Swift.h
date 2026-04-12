@@ -281,6 +281,8 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import AppKit;
+@import Foundation;
 @import ObjectiveC;
 #endif
 
@@ -303,6 +305,15 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #endif
 
 #if defined(__OBJC__)
+
+/// A custom NSPanel that allows becoming the key window even without a title bar.
+/// This ensures the search bar and keyboard navigation work correctly.
+SWIFT_CLASS("_TtC14SmartClipboard8KeyPanel")
+@interface KeyPanel : NSPanel
+@property (nonatomic, readonly) BOOL canBecomeKeyWindow;
+@property (nonatomic, readonly) BOOL canBecomeMainWindow;
+- (nonnull instancetype)initWithContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingStoreType defer:(BOOL)flag OBJC_DESIGNATED_INITIALIZER;
+@end
 
 SWIFT_CLASS("_TtC14SmartClipboard17StatusItemManager")
 @interface StatusItemManager : NSObject

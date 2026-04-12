@@ -7,6 +7,13 @@ extension Notification.Name {
     static let uiWillShow = Notification.Name("uiWillShow")
 }
 
+/// A custom NSPanel that allows becoming the key window even without a title bar.
+/// This ensures the search bar and keyboard navigation work correctly.
+final class KeyPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
+}
+
 @MainActor
 final class StatusItemManager: NSObject {
     private var statusItem: NSStatusItem?
@@ -60,9 +67,9 @@ final class StatusItemManager: NSObject {
     }
     
     private func setupMainWindow() {
-        let panel = NSPanel(
+        let panel = KeyPanel(
             contentRect: NSRect(x: 0, y: 0, width: 380, height: 500),
-            styleMask: [.nonactivatingPanel, .fullSizeContentView],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
