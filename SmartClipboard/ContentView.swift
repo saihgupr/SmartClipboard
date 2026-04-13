@@ -298,8 +298,9 @@ struct ContentView: View {
         var qDay: Int?, qMonth: Int?, qWeekday: Int?
         for df in Self.queryDateFormatters {
             if let date = df.date(from: query) {
-                let comps = calendar.dateComponents([.month, .day], from: date)
-                qDay = comps.day; qMonth = comps.month; break
+                qDay = calendar.component(.day, from: date)
+                qMonth = calendar.component(.month, from: date)
+                break
             }
         }
         if let idx = Calendar.current.standaloneWeekdaySymbols.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) { qWeekday = idx + 1 }
@@ -314,8 +315,7 @@ struct ContentView: View {
             if item.content.localizedCaseInsensitiveContains(query) { return true }
             let d = item.timestamp
             if let m = qMonth, let day = qDay {
-                let comps = calendar.dateComponents([.month, .day], from: d)
-                if comps.month == m && comps.day == day { return true }
+                if calendar.component(.month, from: d) == m && calendar.component(.day, from: d) == day { return true }
             }
             if let w = qWeekday, calendar.component(.weekday, from: d) == w { return true }
             if matchesYesterday, d >= yesterdayStart && d < todayStart { return true }
