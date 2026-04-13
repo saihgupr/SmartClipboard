@@ -67,7 +67,7 @@ struct ContentView: View {
                         .foregroundColor(.secondary)
                         .font(.system(size: 13, weight: .medium))
                     
-                    TextField("Search history...", text: $searchQuery)
+                    TextField("Search history, or hit Return for AI...", text: $searchQuery)
                         .textFieldStyle(.plain)
                         .focused($isSearchFocused)
                         .onChange(of: searchQuery) { _, _ in
