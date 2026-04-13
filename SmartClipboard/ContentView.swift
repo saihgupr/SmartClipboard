@@ -67,7 +67,7 @@ struct ContentView: View {
                         .foregroundColor(.secondary)
                         .font(.system(size: 13, weight: .medium))
                     
-                    TextField("Search history, or hit Return for AI...", text: $searchQuery)
+                    TextField("Search history...", text: $searchQuery)
                         .textFieldStyle(.plain)
                         .focused($isSearchFocused)
                         .onChange(of: searchQuery) { _, _ in
@@ -419,7 +419,7 @@ struct ContentView: View {
                 .font(.system(size: 32))
                 .foregroundColor(.secondary.opacity(0.3))
             
-            Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : "No matches found. Hit Return to search with AI.")
+            Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : "No matches found.")
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
