@@ -17,7 +17,6 @@
 
 **Learning:** Implementing "fast-paths" that are too broad (e.g., checking if a query string contains ANY digits to determine if it MIGHT be a date) can have disastrous performance implications. In a local search filter, a query like "bug 123" triggered expensive O(N) `DateFormatter` calculations on every single item in history, destroying search responsiveness.
 **Action:** Fast-path conditional flags must be strict. When attempting to bypass expensive formatting inside a loop, ensure the check is highly specific (e.g., requires specific date delimiters like `:`, `/`, `-`, or explicit month/weekday match) rather than a generic digit check.
-
 ## 2024-05-18 - Avoid DateComponents allocations in tight Swift loops
 **Learning:** Extracting multiple components using `Calendar.current.dateComponents` inside an unbounded `filter` loop allocates a heavy struct and destroys performance. Additionally, pre-computing large date arrays to avoid this can cause O(N*M) regressions.
 **Action:** Use scalar `calendar.component(_:from:)` calls for individual integers instead, as it avoids struct allocations entirely.
