@@ -312,19 +312,67 @@ struct ContentView: View {
         
         let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
+
+        let mightBeTime = lowerQuery.contains("am") ||
+                          lowerQuery.contains("pm") ||
+                          query.contains(":")
+
+        let mightBeDateString = qMonth != nil ||
+                                qWeekday != nil ||
+                                query.contains("/") ||
+                                query.contains("-")
+
         let todayStart = calendar.startOfDay(for: now)
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
         self.searchResults = history.filter { item in
             if item.content.localizedCaseInsensitiveContains(query) { return true }
-            let d = item.timestamp
-            if let m = qMonth, let day = qDay {
-                if calendar.component(.month, from: d) == m && calendar.component(.day, from: d) == day { return true }
+            
+            let itemDate = item.timestamp
+            
+            if let qM = qMonth, let qD = qDay {
+                // Use separate .component() calls to avoid allocating heavy DateComponents structs in loop
+                let itemMonth = calendar.component(.month, from: itemDate)
+                if itemMonth == qM {
+                    let itemDay = calendar.component(.day, from: itemDate)
+                    if itemDay == qD {
+                        return true
+                    }
+                }
             }
-            if let w = qWeekday, calendar.component(.weekday, from: d) == w { return true }
-            if matchesYesterday, d >= yesterdayStart && d < todayStart { return true }
-            if matchesToday, d >= todayStart && d < tomorrowStart { return true }
+            
+            if let qW = qWeekday {
+                let itemWeekday = calendar.component(.weekday, from: itemDate)
+                if itemWeekday == qW {
+                    return true
+                }
+            }
+            
+            if matchesYesterday {
+                if itemDate >= yesterdayStart && itemDate < todayStart { return true }
+            }
+            if matchesToday {
+                if itemDate >= todayStart && itemDate < tomorrowStart { return true }
+            }
+            
+            if mightBeTime {
+                let timeStr = Self.timeFormatter.string(from: itemDate)
+                if timeStr.localizedCaseInsensitiveContains(query) {
+                    if itemDate >= todayStart && itemDate < tomorrowStart { return true }
+                    if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") {
+                        return true
+                    }
+                }
+            }
+
+            if mightBeDateString {
+                let fullStr = Self.fullFormatter.string(from: itemDate)
+                if fullStr.localizedCaseInsensitiveContains(query) {
+                    return true
+                }
+            }
+            
             return false
         }
     }
