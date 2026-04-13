@@ -101,6 +101,7 @@ struct AISettingsView: View {
                         fetchModels()
                     }
                     .disabled(isLoadingModels || apiKey.isEmpty)
+                    .help(apiKey.isEmpty ? "API key required to test connection" : "Test API connection")
                 }
                 
                 if showSuccessMessage {
@@ -130,6 +131,7 @@ struct AISettingsView: View {
                             fetchModels()
                         }
                         .disabled(apiKey.isEmpty)
+                        .help(apiKey.isEmpty ? "API key required to fetch models" : "Fetch available models from Gemini")
                     }
                 } else {
                     HStack {
@@ -143,6 +145,7 @@ struct AISettingsView: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Refresh Models")
+                        .accessibilityLabel("Refresh Models")
                     }
                 }
                 

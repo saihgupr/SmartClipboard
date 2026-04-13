@@ -94,6 +94,7 @@ struct ContentView: View {
                         }
                         .buttonStyle(.plain)
                         .help("AI Search")
+                        .accessibilityLabel("AI Search")
                     }
                 }
                 .padding(.horizontal, 10)
@@ -112,6 +113,8 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Settings")
+                    .accessibilityLabel("Settings")
                     .simultaneousGesture(TapGesture().onEnded {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             NotificationCenter.default.post(name: .closeUI, object: nil)
@@ -124,6 +127,8 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Settings")
+                    .accessibilityLabel("Settings")
                 }
             }
             .padding(.horizontal, 16)
@@ -365,6 +370,16 @@ struct ContentView: View {
             Image(systemName: searchQuery.isEmpty ? "doc.on.clipboard" : "magnifyingglass")
                 .font(.system(size: 32)).foregroundColor(.secondary.opacity(0.3))
             Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found").foregroundColor(.secondary)
+
+            if !searchQuery.isEmpty {
+                Button("Clear Search") {
+                    searchQuery = ""
+                    isSearchFocused = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .padding(.top, 4)
+            }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
