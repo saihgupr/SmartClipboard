@@ -416,8 +416,13 @@ struct ContentView: View {
     private var emptyStateView: some View {
         VStack(spacing: 12) {
             Image(systemName: searchQuery.isEmpty ? "doc.on.clipboard" : "magnifyingglass")
-                .font(.system(size: 32)).foregroundColor(.secondary.opacity(0.3))
-            Text(searchQuery.isEmpty ? "Clipboard is empty" : "No matches found").foregroundColor(.secondary)
+                .font(.system(size: 32))
+                .foregroundColor(.secondary.opacity(0.3))
+            
+            Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : "No matches found. Hit Return to search with AI.")
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
 
             if !searchQuery.isEmpty {
                 Button("Clear Search") {
