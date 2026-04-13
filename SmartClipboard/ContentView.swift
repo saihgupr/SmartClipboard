@@ -113,6 +113,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                     .help("Settings")
                     .accessibilityLabel("Settings")
                     .simultaneousGesture(TapGesture().onEnded {
@@ -127,6 +128,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                     .help("Settings")
                     .accessibilityLabel("Settings")
                 }
