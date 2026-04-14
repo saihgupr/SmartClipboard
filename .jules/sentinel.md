@@ -27,3 +27,8 @@
 **Vulnerability:** The clipboard manager (`SmartClipboard/ClipboardManager.swift`) was blindly saving all copied string data directly into a persistent SwiftData history database and caching it in memory without imposing any length limits.
 **Learning:** Saving unbounded strings from the pasteboard (e.g., if a user copies a 500MB log file or an extremely large dataset) can lead to severe memory exhaustion, blocking the main thread, crashing the application (DoS), or corrupting the local persistent store. In Swift, calling `.count` on a `String` iterates through the whole string's grapheme clusters; instead, check `newString.utf8.count` for raw size limits efficiently.
 **Prevention:** Always enforce a sensible maximum length limit (e.g., 100,000 characters) on user-provided input or clipboard data before saving it to a database or transmitting it to external APIs.
+
+## 2025-04-14 - Heuristic Check for Undocumented Clipboard Sensitive Types
+**Vulnerability:** While known password managers' clipboard types were ignored, obscure or newer credential managers might leak passwords to persistent storage if they use custom identifiers like `com.company.password.type` which were not explicitly in the sensitive types blocklist.
+**Learning:** Exact string matching on `NSPasteboard.PasteboardType` identifiers is insufficient against the diverse and evolving ecosystem of third-party credential managers.
+**Prevention:** Implement a defense-in-depth heuristic check that examines the raw lowercase value of all pasteboard types and blocks the clipboard ingestion if the type string contains keywords such as `password`, `concealed`, `transient`, or `secret`.
