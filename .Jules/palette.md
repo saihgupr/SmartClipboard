@@ -17,3 +17,6 @@
 ## 2026-04-12 - [Accessible Icon Buttons]
 **Learning:** Icon-only buttons without accessibility labels create navigation hurdles for screen reader users in SwiftUI.
 **Action:** Always append `.accessibilityLabel()` along with `.help()` for screen-reader and mouse-user contexts when utilizing system icons for buttons.
+## 2024-05-25 - Contextual Empty States and Actionable Disabled Buttons
+**Learning:** Empty states without context-specific guidance (like confusing an ongoing search with zero results) mislead users, and disabled buttons without explanations leave them feeling stuck.
+**Action:** Always ensure empty states reflect asynchronous actions appropriately (e.g., "Searching with AI..." rather than "No matches found.") and always use `.help()` tooltips on disabled buttons to describe the missing prerequisite (like an API key).

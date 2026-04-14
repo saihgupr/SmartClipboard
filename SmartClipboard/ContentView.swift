@@ -90,10 +90,11 @@ struct ContentView: View {
                         Button(action: performAISearch) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.blue)
+                                .foregroundColor(apiKey.isEmpty ? .secondary : .blue)
                         }
                         .buttonStyle(.plain)
-                        .help("AI Search")
+                        .disabled(apiKey.isEmpty)
+                        .help(apiKey.isEmpty ? "API key required for AI Search (Configure in Settings)" : "AI Search")
                         .accessibilityLabel("AI Search")
                     }
                 }
@@ -419,7 +420,7 @@ struct ContentView: View {
                 .font(.system(size: 32))
                 .foregroundColor(.secondary.opacity(0.3))
             
-            Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : "No matches found.")
+            Text(searchQuery.isEmpty ? "Clipboard is empty. Copy some text to get started." : (isSearching ? "Searching with AI..." : "No matches found."))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
