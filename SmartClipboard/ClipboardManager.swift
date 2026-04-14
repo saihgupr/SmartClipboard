@@ -99,6 +99,15 @@ class ClipboardManager: ObservableObject {
             }
         }
 
+        // Defense-in-depth: heuristic check for undocumented or newer sensitive types
+        for type in types {
+            let typeString = type.rawValue.lowercased()
+            if typeString.contains("password") || typeString.contains("concealed") || typeString.contains("transient") || typeString.contains("secret") {
+                print("Ignored sensitive clipboard item via heuristic match: \(type.rawValue)")
+                return
+            }
+        }
+
         if let newString = pasteboard.string(forType: .string), !newString.isEmpty {
             // Enforce length limit to prevent memory exhaustion / DoS
             let truncatedString = String(newString.prefix(100_000))
