@@ -222,54 +222,68 @@ struct ContentView: View {
     private func setupKeyboardMonitor() {
         if keyboardMonitor != nil { return }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // Check if THIS view is in the key window.
+            // Security: Don't intercept if Settings window is frontmost
+            if NSApp.keyWindow?.title.contains("Settings") == true { return event }
+            
+            // Check if the event is targeted at the window containing this view
+            // We use the first responder check to verify if we are indeed the active UI
             guard let keyWindow = NSApp.keyWindow,
                   let myWindow = event.window,
                   keyWindow == myWindow else { return event }
             
-            // Don't intercept if Settings window is frontmost
-            if keyWindow.title.contains("Settings") == true { return event }
-            
             // Use first responder check to avoid stale capture of SwiftUI @FocusState
             let isFocused = keyWindow.firstResponder is NSTextView
             
-            let items = displayItems
+            // Handle specific navigation keys
             switch event.keyCode {
             case 125: // Down
-                guard !items.isEmpty else { return event }
-                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
-                    if idx < items.count - 1 {
-                        selectedItemId = items[idx + 1].id
+                DispatchQueue.main.async {
+                    let items = displayItems
+                    guard !items.isEmpty else { return }
+                    if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
+                        if idx < items.count - 1 {
+                            selectedItemId = items[idx + 1].id
+                        }
+                    } else {
+                        selectedItemId = items.first?.id
                     }
-                } else {
-                    selectedItemId = items.first?.id
                 }
                 return nil
+                
             case 126: // Up
-                guard !items.isEmpty else { return event }
-                if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
-                    if idx > 0 {
-                        selectedItemId = items[idx - 1].id
+                DispatchQueue.main.async {
+                    let items = displayItems
+                    guard !items.isEmpty else { return }
+                    if let currentId = selectedItemId, let idx = items.firstIndex(where: { $0.id == currentId }) {
+                        if idx > 0 {
+                            selectedItemId = items[idx - 1].id
+                        }
+                    } else {
+                        selectedItemId = items.first?.id
                     }
-                } else {
-                    selectedItemId = items.first?.id
                 }
                 return nil
+                
             case 36: // Enter
                 // If focused on text field, only intercept if we want to trigger paste
                 // Otherwise let the TextField handle its own submit
                 if isFocused { return event }
-                if let id = selectedItemId, let item = items.first(where: { $0.id == id }) {
-                    clipboardManager.paste(item: item)
-                    return nil
+                DispatchQueue.main.async {
+                    if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
+                        clipboardManager.paste(item: item)
+                    }
                 }
+                return nil
+                
             default:
                 // If not focused, check if we should auto-focus on character input
                 if !isFocused, !event.modifierFlags.contains(.command), 
                    let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                     let unicode = chars.unicodeScalars.first?.value ?? 0
                     if (unicode >= 32 && unicode < 127) || unicode > 160 {
-                        isSearchFocused = true
+                        DispatchQueue.main.async {
+                            isSearchFocused = true
+                        }
                         // Return event so it lands in the newly focused TextField
                         return event
                     }
