@@ -44,6 +44,10 @@ struct ContentView: View {
         }
     }()
 
+    // ⚡ Bolt: Cache standaloneWeekdaySymbols to avoid O(N) allocations in local search filtering loops.
+    // Expected impact: Eliminates continuous memory allocation overhead during keystrokes, reducing local search latency.
+    private static let weekdaySymbols = Calendar.current.standaloneWeekdaySymbols
+
     private func formatTimestamp(_ date: Date, todayStart: Date, tomorrowStart: Date, yesterdayStart: Date) -> String {
         if date >= todayStart && date < tomorrowStart {
             return Self.timeFormatter.string(from: date)
@@ -323,7 +327,7 @@ struct ContentView: View {
                 break
             }
         }
-        if let idx = Calendar.current.standaloneWeekdaySymbols.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) { qWeekday = idx + 1 }
+        if let idx = Self.weekdaySymbols.firstIndex(where: { $0.localizedCaseInsensitiveContains(query) }) { qWeekday = idx + 1 }
         
         let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
