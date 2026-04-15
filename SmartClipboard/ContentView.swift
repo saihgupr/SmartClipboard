@@ -451,6 +451,17 @@ struct ContentView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .padding(.top, 4)
+            } else {
+                Button("Copy Sample Text") {
+                    let pb = NSPasteboard.general
+                    pb.clearContents()
+                    pb.setString("Hello, SmartClipboard! 👋", forType: .string)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .padding(.top, 4)
+                .accessibilityLabel("Copy Sample Text")
+                .help("Copy text to populate clipboard")
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
