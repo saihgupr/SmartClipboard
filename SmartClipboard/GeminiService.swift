@@ -30,12 +30,14 @@ class GeminiService {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "generativelanguage.googleapis.com"
-        components.path = "/v1beta/models/\(cleanModel):generateContent"
+        components.path = "/v1beta/models"
 
-        guard let url = components.url else {
+        guard var url = components.url else {
             throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to construct valid URL."])
         }
         
+        url = url.appendingPathComponent("\(cleanModel):generateContent")
+
         let formatter = ISO8601DateFormatter()
         let currentDateString = formatter.string(from: Date())
         
