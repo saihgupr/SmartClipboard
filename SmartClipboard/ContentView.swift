@@ -451,18 +451,22 @@ struct ContentView: View {
                 .padding(.horizontal, 32)
 
             if !searchQuery.isEmpty {
-                Button("Clear Search") {
+                Button {
                     searchQuery = ""
                     isSearchFocused = true
+                } label: {
+                    Label("Clear Search", systemImage: "xmark.circle")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .padding(.top, 4)
             } else {
-                Button("Copy Sample Text") {
+                Button {
                     let pb = NSPasteboard.general
                     pb.clearContents()
                     pb.setString("Hello, SmartClipboard! 👋", forType: .string)
+                } label: {
+                    Label("Copy Sample Text", systemImage: "doc.on.clipboard")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
