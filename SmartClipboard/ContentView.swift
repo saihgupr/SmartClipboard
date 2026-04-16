@@ -332,14 +332,17 @@ struct ContentView: View {
         let matchesYesterday = "yesterday".hasPrefix(lowerQuery) && lowerQuery.count >= 4
         let matchesToday = "today".hasPrefix(lowerQuery) && lowerQuery.count >= 3
 
-        let mightBeTime = lowerQuery.contains("am") ||
-                          lowerQuery.contains("pm") ||
-                          query.contains(":")
+        // ⚡ Bolt: Fast-paths must be strict. Don't trigger O(N) DateFormatter logic for strings that just happen to contain 'am' or '-'.
+        // Expected impact: Eliminates O(N) lag on keystrokes when typing normal queries (e.g. "program", "bug-fix")
+        let hasDigits = query.rangeOfCharacter(from: .decimalDigits) != nil
+
+        let mightBeTime = hasDigits && (lowerQuery.contains("am") ||
+                                        lowerQuery.contains("pm") ||
+                                        query.contains(":"))
 
         let mightBeDateString = qMonth != nil ||
                                 qWeekday != nil ||
-                                query.contains("/") ||
-                                query.contains("-")
+                                (hasDigits && (query.contains("/") || query.contains("-")))
 
         let todayStart = calendar.startOfDay(for: now)
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
