@@ -23,6 +23,8 @@ class GeminiService {
         guard let actualApiKey = apiKey, !actualApiKey.isEmpty else {
             throw GeminiError.missingApiKey
         }
+        // Security: Defense-in-depth truncation to prevent token exhaustion / DoS
+        let safeQuery = String(query.prefix(2000))
         let actualModel = (modelName == nil || modelName!.isEmpty) ? "gemini-1.5-flash" : modelName!
         
         let cleanModel = actualModel.replacingOccurrences(of: "models/", with: "")
@@ -48,7 +50,7 @@ class GeminiService {
         You are an AI assistant parsing search queries for a clipboard manager.
         The current date and time is \(currentDateString).
         
-        The user has provided a search query: "\(query)"
+        The user has provided a search query: "\(safeQuery)"
 
         Extract the user's intent into a JSON object with this exact structure:
         {

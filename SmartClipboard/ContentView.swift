@@ -74,7 +74,11 @@ struct ContentView: View {
                     TextField("Search history...", text: $searchQuery)
                         .textFieldStyle(.plain)
                         .focused($isSearchFocused)
-                        .onChange(of: searchQuery) { _, _ in
+                        .onChange(of: searchQuery) { _, newValue in
+                            // Security: Enforce input length limit (DoS risk)
+                            if newValue.count > 2000 {
+                                searchQuery = String(newValue.prefix(2000))
+                            }
                             performLocalSearch()
                             if let firstId = displayItems.first?.id {
                                 selectedItemId = firstId
