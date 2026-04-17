@@ -102,15 +102,27 @@ class ClipboardManager: ObservableObject {
         // Defense-in-depth: heuristic check for undocumented or newer sensitive types
         for type in types {
             let typeString = type.rawValue.lowercased()
-            if typeString.contains("password") || typeString.contains("concealed") || typeString.contains("transient") || typeString.contains("secret") {
+            if typeString.contains("password") || typeString.contains("concealed") || typeString.contains("transient") || typeString.contains("secret") || typeString.contains("credential") || typeString.contains("token") {
                 print("Ignored sensitive clipboard item via heuristic match: \(type.rawValue)")
                 return
             }
         }
 
         if let newString = pasteboard.string(forType: .string), !newString.isEmpty {
-            // Enforce length limit to prevent memory exhaustion / DoS
-            let truncatedString = String(newString.prefix(100_000))
+            // Security: Defense-in-depth against copying explicit private keys to AI search history
+            if newString.contains("-----BEGIN") && newString.contains("PRIVATE KEY") {
+                print("Ignored sensitive clipboard item: Explicit Private Key")
+                return
+            }
+
+            // Security: Enforce length limit to prevent memory exhaustion / DoS
+            // Fast-path size check using utf8.count to avoid O(N) grapheme iteration on every copy
+            let truncatedString: String
+            if newString.utf8.count > 100_000 {
+                truncatedString = String(newString.prefix(100_000))
+            } else {
+                truncatedString = newString
+            }
 
             // Check for any existing item with the same content to implement "move-to-top"
             let predicate = #Predicate<ClipboardItem> { $0.content == truncatedString }

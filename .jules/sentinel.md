@@ -37,3 +37,13 @@
 **Vulnerability:** URL injection and path traversal were possible in `GeminiService.swift` because user-controlled strings (`modelName`) were interpolated directly into the `components.path` property (`"/v1beta/models/\(cleanModel):generateContent"`).
 **Learning:** `URLComponents.path` automatically escapes most characters, but if a developer tries to use `addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)`, it still permits the `/` character, allowing an attacker to traverse directories (e.g., `../../../malicious-endpoint`). Furthermore, applying manual percent encoding before setting `.path` leads to double-encoding bugs, breaking valid URLs.
 **Prevention:** Never use string interpolation or manual `addingPercentEncoding` for path construction. Instead, define the static base path using `URLComponents`, unwrap the resulting `URL`, and safely append dynamic segments using `url.appendingPathComponent(component)`, which properly escapes path separators and prevents traversal.
+
+## 2026-04-17 - Prevent O(N) DoS on Mass Clipboard Copy
+**Vulnerability:** Calling `String.prefix()` unconditionally on massive clipboard entries forces Swift to iterate through every grapheme cluster, leading to an O(N) performance lag or temporary DoS.
+**Learning:** Checking the raw size first using `.utf8.count` provides a fast-path bypass for string length limits, avoiding the cost of grapheme iteration for small/normal copies.
+**Prevention:** Always perform a `.utf8.count` threshold check before invoking `.prefix()` or `.count` on potentially unbounded user inputs like clipboard text.
+
+## 2026-04-17 - Prevent Explicit Private Key Logging
+**Vulnerability:** The clipboard manager's credential detection missed explicit private key structures (like SSH or TLS private keys) when the pasteboard type didn't explicitly flag them.
+**Learning:** Exact pasteboard type checks are insufficient. The actual string payload must be analyzed for explicit key formats (e.g. `-----BEGIN` and `PRIVATE KEY`).
+**Prevention:** Implement defense-in-depth heuristic checks on the raw string content for known sensitive patterns (like explicit private keys) to prevent writing them to persistent storage or sending them to AI search.
