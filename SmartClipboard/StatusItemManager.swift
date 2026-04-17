@@ -167,13 +167,21 @@ final class StatusItemManager: NSObject {
     }
     
     @objc private func openSettings() {
+        if #available(macOS 13.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
+        
+        // Ensure the app becomes active and the settings window is ordered front
         NSApp.activate(ignoringOtherApps: true)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if #available(macOS 13.0, *) {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-            } else {
-                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        // Minor delay to allow the window to be created if it wasn't already, then order front
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            NSApp.windows.forEach { window in
+                if window.title != "" && window != self.mainWindow {
+                    window.orderFrontRegardless()
+                }
             }
         }
     }

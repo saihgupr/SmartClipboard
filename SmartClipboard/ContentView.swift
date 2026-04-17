@@ -309,9 +309,20 @@ struct ContentView: View {
     }
     
     private func openSettings() {
+        if #available(macOS 13.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
+        
         NSApp.activate(ignoringOtherApps: true)
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            NSApp.windows.forEach { window in
+                if window.title != "" {
+                    window.orderFrontRegardless()
+                }
+            }
             NotificationCenter.default.post(name: .closeUI, object: nil)
         }
     }
