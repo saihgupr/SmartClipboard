@@ -106,8 +106,10 @@ struct AISettingsView: View {
                     
                     Spacer()
                     
-                    Button("Test Connection") {
+                    Button {
                         fetchModels()
+                    } label: {
+                        Label("Test Connection", systemImage: "network")
                     }
                     .disabled(isLoadingModels || apiKey.isEmpty)
                     .help(apiKey.isEmpty ? "API key required to test connection" : "Test API connection")
@@ -136,8 +138,10 @@ struct AISettingsView: View {
                             .scaleEffect(0.5)
                             .frame(height: 20)
                     } else {
-                        Button("Fetch Available Models") {
+                        Button {
                             fetchModels()
+                        } label: {
+                            Label("Fetch Available Models", systemImage: "arrow.down.circle")
                         }
                         .disabled(apiKey.isEmpty)
                         .help(apiKey.isEmpty ? "API key required to fetch models" : "Fetch available models from Gemini")

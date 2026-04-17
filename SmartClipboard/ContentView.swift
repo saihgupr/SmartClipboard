@@ -430,9 +430,11 @@ struct ContentView: View {
             Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
             Text("Accessibility Required").font(.caption.bold())
             Spacer()
-            Button("Fix") {
+            Button {
                 clipboardManager.requestAccessibilityPermission()
                 if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") { NSWorkspace.shared.open(url) }
+            } label: {
+                Label("Fix", systemImage: "wrench.and.screwdriver")
             }.buttonStyle(.bordered).controlSize(.small)
         }
         .padding(10)

@@ -47,8 +47,10 @@ struct AppSpecificSettingsView: View {
                         .foregroundColor(.secondary.opacity(0.8))
                         .multilineTextAlignment(.center)
 
-                    Button("Add Application") {
+                    Button {
                         addApplication()
+                    } label: {
+                        Label("Add Application", systemImage: "plus.app")
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)

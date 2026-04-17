@@ -20,3 +20,6 @@
 ## 2024-05-25 - Contextual Empty States and Actionable Disabled Buttons
 **Learning:** Empty states without context-specific guidance (like confusing an ongoing search with zero results) mislead users, and disabled buttons without explanations leave them feeling stuck.
 **Action:** Always ensure empty states reflect asynchronous actions appropriately (e.g., "Searching with AI..." rather than "No matches found.") and always use `.help()` tooltips on disabled buttons to describe the missing prerequisite (like an API key).
+## 2024-05-25 - Use Labels for Buttons
+**Learning:** Using text-only buttons for primary actions can reduce visual scannability and make the UI feel less polished.
+**Action:** When updating buttons in SwiftUI, prefer using `Label(_:systemImage:)` (especially for prominent actions or empty states) to improve visual recognition and provide a better micro-UX.
