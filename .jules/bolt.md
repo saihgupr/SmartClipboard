@@ -20,3 +20,8 @@
 ## 2024-05-18 - Avoid DateComponents allocations in tight Swift loops
 **Learning:** Extracting multiple components using `Calendar.current.dateComponents` inside an unbounded `filter` loop allocates a heavy struct and destroys performance. Additionally, pre-computing large date arrays to avoid this can cause O(N*M) regressions.
 **Action:** Use scalar `calendar.component(_:from:)` calls for individual integers instead, as it avoids struct allocations entirely.
+
+## 2024-05-25 - O(N) allocation with `.enumerated()` in SwiftUI ForEach
+
+**Learning:** Using `Array(collection.enumerated())` inside a SwiftUI `ForEach` or `List` loop forces an O(N) tuple array allocation on the heap during *every single render cycle*. For large datasets, this causes severe memory churn and UI stutter, completely negating SwiftUI's lazy rendering optimizations.
+**Action:** Avoid `.enumerated()` in `ForEach`. Iterate over the identifiable collection directly (`ForEach(collection)`). If an index is needed for display purposes (like hotkey numbers), either calculate it lazily inside the view using `firstIndex(of:)` on a pre-filtered smaller array, or pass the specific index only when strictly necessary.
