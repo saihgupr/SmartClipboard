@@ -73,6 +73,3 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 * **Pull Requests**: Contributions are welcome! Feel free to fork the repository and open a [Pull Request](https://github.com/saihgupr/SmartClipboard/pulls).
 * **Support the Project**: If you enjoy using SmartClipboard, you can support its development by [donating on Ko-fi](https://ko-fi.com/saihgupr).
 
----
-
-*Built by Saihgupr*
