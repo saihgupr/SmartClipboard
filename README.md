@@ -22,7 +22,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 ## Screenshots
 
 <p align="center">
-  <img src="assets/screenshot5.jpeg" width="75%" alt="Spotlight Search Window" /><br />
+  <img src="assets/screenshot6.png" width="75%" alt="Spotlight Search Window" /><br />
   <em>Spotlight-style floating search window</em>
 </p>
 
@@ -39,7 +39,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 </p>
 
 <p align="center">
-  <img src="assets/screenshot6.png" width="48%" alt="Model Settings" /><br />
+  <img src="assets/screenshot5.jpeg" width="48%" alt="Model Settings" /><br />
   <em>Gemini Model Selection and Depth Configuration</em>
 </p>
 
