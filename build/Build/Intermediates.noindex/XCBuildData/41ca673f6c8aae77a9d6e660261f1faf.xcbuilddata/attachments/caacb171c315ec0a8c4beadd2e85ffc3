@@ -1,0 +1,66 @@
+{
+  "" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.dia",
+    "emit-module-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-emit-module.dia",
+    "pch" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.swiftdeps"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/AppSpecificSettingsView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ClipboardManager.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ContentView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/GeminiService.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeminiService.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeminiService.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeminiService.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/GlobalHotkeyManager.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ImportManager.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ImportManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ImportManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ImportManager.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/SettingsView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SettingsView.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ShortcutRecorderView.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/SmartClipboardApp.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/StatusItemManager.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.o"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}

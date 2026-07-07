@@ -1,0 +1,99 @@
+{
+  "" : {
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.dia",
+    "emit-module-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-emit-module.dia",
+    "pch" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.swiftdeps"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/AppSpecificSettingsView.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/AppSpecificSettingsView~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ClipboardManager.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ClipboardManager~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ContentView.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/GeminiService.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GeminiService~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/GlobalHotkeyManager.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/GlobalHotkeyManager~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/SettingsView.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/ShortcutRecorderView.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/ShortcutRecorderView~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/SmartClipboardApp.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/SmartClipboardApp~partial.swiftmodule"
+  },
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/StatusItemManager.swift" : {
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.dia",
+    "index-unit-output-path" : "/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.o",
+    "llvm-bc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.bc",
+    "object" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.o",
+    "swift-dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager.swiftdeps",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/.derived/Build/Intermediates.noindex/SmartClipboard.build/Debug/SmartClipboard.build/Objects-normal/arm64/StatusItemManager~partial.swiftmodule"
+  }
+}

@@ -1,0 +1,203 @@
+0000000000000000000000000000000000000000 18d60aafe17fed9a43defeff3d5602409beaacad saihgupr <121105543+saihgupr@users.noreply.github.com> 1775229594 -0400	commit (initial): Initial commit
+18d60aafe17fed9a43defeff3d5602409beaacad d2b40d51a48216453744bc430a1864a274395eb9 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775229636 -0400	commit: Readme Update
+d2b40d51a48216453744bc430a1864a274395eb9 f1f31f98a54a8273f9f243b3ec27b9502c91c97c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775233258 -0400	commit: Settings menu
+f1f31f98a54a8273f9f243b3ec27b9502c91c97c 0386b8cd14914a2a276c47efcc60e45940a645b3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775233825 -0400	commit: Get api link
+0386b8cd14914a2a276c47efcc60e45940a645b3 bb9ffcbb9665290bf4d6f7d22823a019ea2e2102 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775234329 -0400	commit: Test connection button
+bb9ffcbb9665290bf4d6f7d22823a019ea2e2102 80cbdf1f873ae3a305882ab2d7dde76cbb7e8edb saihgupr <121105543+saihgupr@users.noreply.github.com> 1775238070 -0400	commit: Save data in app support
+80cbdf1f873ae3a305882ab2d7dde76cbb7e8edb bf8c400858f547448fed90378fb276abf33166c5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775239812 -0400	commit: Clipboard bug fix
+bf8c400858f547448fed90378fb276abf33166c5 9c485c8c112e7bb83083a4ff1f0538cc89a7c67f saihgupr <121105543+saihgupr@users.noreply.github.com> 1775305060 -0400	commit: Better search with earlier dates
+9c485c8c112e7bb83083a4ff1f0538cc89a7c67f f4b16d0a3e9d959d6855cbeb53c8f84baaa78118 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775309277 -0400	commit: Search for tomorrow
+f4b16d0a3e9d959d6855cbeb53c8f84baaa78118 9bda00654b913273451a4c48bae693422c6ec13b saihgupr <121105543+saihgupr@users.noreply.github.com> 1775309739 -0400	commit: Ai search works
+9bda00654b913273451a4c48bae693422c6ec13b 84cc128d78be3ae58c7764c290f47d9aeb65e575 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775310270 -0400	commit: Search depth
+84cc128d78be3ae58c7764c290f47d9aeb65e575 f52ef2dc72a5e16db16c0f58a13d87335b41d839 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775310438 -0400	commit: Instant search
+f52ef2dc72a5e16db16c0f58a13d87335b41d839 507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775310599 -0400	commit: Cmd options paste
+507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 72eb792fe3a6ad7bc801b5d2858929a928b4269c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775314505 -0400	commit: Option shortcut works
+72eb792fe3a6ad7bc801b5d2858929a928b4269c 507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775324783 -0400	reset: moving to 507cf7b45faf7d84a903a24fbacf3260a9bc1bf5
+507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 72eb792fe3a6ad7bc801b5d2858929a928b4269c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775324785 -0400	reset: moving to 72eb792fe3a6ad7bc801b5d2858929a928b4269c
+72eb792fe3a6ad7bc801b5d2858929a928b4269c 507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775390902 -0400	reset: moving to 507cf7b45faf7d84a903a24fbacf3260a9bc1bf5
+507cf7b45faf7d84a903a24fbacf3260a9bc1bf5 72eb792fe3a6ad7bc801b5d2858929a928b4269c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775390973 -0400	reset: moving to 72eb792fe3a6ad7bc801b5d2858929a928b4269c
+72eb792fe3a6ad7bc801b5d2858929a928b4269c 1867793f389fd82a8ec748a08fe6d13c9a9cfe0f saihgupr <121105543+saihgupr@users.noreply.github.com> 1775391360 -0400	commit: Check for accessibility
+1867793f389fd82a8ec748a08fe6d13c9a9cfe0f 13ecd303294b8f67bf14d68de91ba82f62fe99cc saihgupr <121105543+saihgupr@users.noreply.github.com> 1775391963 -0400	commit: Prevent reverifying persistence accessbility
+13ecd303294b8f67bf14d68de91ba82f62fe99cc 5947f64d61638849d540f10c4929d1e920d8c004 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775396032 -0400	commit: Accessbaility preferences with terminal fix
+5947f64d61638849d540f10c4929d1e920d8c004 f757d1642dc96917a191d91ac301b174a6d3b827 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775396824 -0400	commit: Moves version to top of the list after pasting
+f757d1642dc96917a191d91ac301b174a6d3b827 92897e326d4934af7171915f65ca3131304452f9 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775410323 -0400	commit: Make preferences fix
+92897e326d4934af7171915f65ca3131304452f9 845fb0432d532e3bc24db9e4684dd2545aa1ac84 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775411053 -0400	commit: Fix for accessability
+845fb0432d532e3bc24db9e4684dd2545aa1ac84 757ff0e725cca8572247106251e4fb212d6d8c48 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775413848 -0400	commit: Accessability persists
+757ff0e725cca8572247106251e4fb212d6d8c48 a0bd1b72814c9012c82dc8693cc55e5f9f2828e5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775414229 -0400	commit: Add shift enter apps
+a0bd1b72814c9012c82dc8693cc55e5f9f2828e5 4d1e4c622fe3195f08597817ea1f82e5943dc58b saihgupr <121105543+saihgupr@users.noreply.github.com> 1775414927 -0400	commit: Shift+enter apps
+4d1e4c622fe3195f08597817ea1f82e5943dc58b bb363222f2457ba4bca39a39a769841b53a5bd6d saihgupr <121105543+saihgupr@users.noreply.github.com> 1775415025 -0400	commit: Fix cmd number no enter
+bb363222f2457ba4bca39a39a769841b53a5bd6d 9dd8bda7675af5ca220bc6b01c573f92a89966ab saihgupr <121105543+saihgupr@users.noreply.github.com> 1775415413 -0400	commit: Fix for option+
+9dd8bda7675af5ca220bc6b01c573f92a89966ab aa92a2454c28f5b40b563e6a6d8d1294c2b589d8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775415585 -0400	commit: Right click
+aa92a2454c28f5b40b563e6a6d8d1294c2b589d8 c331d5726f92734c9cd1f68c456a6765c82c2ab5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775415688 -0400	commit: Data manage ment setting
+c331d5726f92734c9cd1f68c456a6765c82c2ab5 acdda671a0f3636d60f6f209f123b2bdeb106a28 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775415879 -0400	commit: Fix for duplicates
+acdda671a0f3636d60f6f209f123b2bdeb106a28 482002232bb7cd256106e0c72ee604b13bc339e3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775484285 -0400	pull --ff-only origin main: Fast-forward
+482002232bb7cd256106e0c72ee604b13bc339e3 51d908a909c961560cf2f54fe92eaf5254c16e4a saihgupr <121105543+saihgupr@users.noreply.github.com> 1775485668 -0400	commit: Fix SwiftUI .onChange deprecations and Swift 6 macro warnings
+51d908a909c961560cf2f54fe92eaf5254c16e4a 33c76bd8a6946cd8b7abdc244caa8756f817e140 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775485675 -0400	merge bolt-optimize-local-search-13407974782477288172: Merge made by the 'ort' strategy.
+33c76bd8a6946cd8b7abdc244caa8756f817e140 ec51ce198b96143dd2b5f71170081a51acd8a785 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775485693 -0400	merge ux/clear-search-accessibility-846000741373010094: Merge made by the 'ort' strategy.
+ec51ce198b96143dd2b5f71170081a51acd8a785 11cdecea66ed5f4faace6fdabfd82e20fbfae8a0 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775573376 -0400	pull origin main: Fast-forward
+11cdecea66ed5f4faace6fdabfd82e20fbfae8a0 46cd3316eb63cd002d9304cde84e545c49fd13df saihgupr <121105543+saihgupr@users.noreply.github.com> 1775573456 -0400	commit: Merged prs
+46cd3316eb63cd002d9304cde84e545c49fd13df 680171cbb0049fe6b8465ba119b43eb4f576643b saihgupr <121105543+saihgupr@users.noreply.github.com> 1775573584 -0400	commit: Readme Update
+680171cbb0049fe6b8465ba119b43eb4f576643b 80a936a0ef0760de33a0bfa83c242a9d577f5a7c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775576419 -0400	commit: Clicking ui to paste does not make a space before
+80a936a0ef0760de33a0bfa83c242a9d577f5a7c 6c70e5eaa85a84cae14761d6c3c51eb772957333 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775578704 -0400	commit: Keyboard shortcut
+6c70e5eaa85a84cae14761d6c3c51eb772957333 a40be3340cc143ee800b561542807c3ec6b7847d saihgupr <121105543+saihgupr@users.noreply.github.com> 1775579083 -0400	commit: Keyboar dshortcut
+a40be3340cc143ee800b561542807c3ec6b7847d 328c697aad90a8413539f109bbf671abf8dc9dea saihgupr <121105543+saihgupr@users.noreply.github.com> 1775579727 -0400	commit: Revert quit button
+328c697aad90a8413539f109bbf671abf8dc9dea 315e040a4f1e158ef88ed9c78e3413ecb2c89100 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775580817 -0400	commit: Rounded corners of shortcut popup version
+315e040a4f1e158ef88ed9c78e3413ecb2c89100 80c053926a4a1c5944ac422b0c68278d7e1afd8e saihgupr <121105543+saihgupr@users.noreply.github.com> 1775581659 -0400	commit: Version bump 1.4.0
+80c053926a4a1c5944ac422b0c68278d7e1afd8e 9ac575511348c001a07c750f77d0cbfc5cc39762 Saihgupr <saihgupr@me.com> 1775658933 -0400	pull origin main: Fast-forward
+9ac575511348c001a07c750f77d0cbfc5cc39762 4f652134fda811a663276e91f30ff1a0cdbf7008 Saihgupr <saihgupr@me.com> 1775659836 -0400	commit: Merged
+4f652134fda811a663276e91f30ff1a0cdbf7008 9f6abfc982135bdc9d5b70e24a4c1cbe82f2a2b0 Saihgupr <saihgupr@me.com> 1775664063 -0400	commit: Highlight first item of clipboard
+9f6abfc982135bdc9d5b70e24a4c1cbe82f2a2b0 a45b96ec55249f7915852b4b750e254cacc6538c Saihgupr <saihgupr@me.com> 1775762814 -0400	commit: Merged
+a45b96ec55249f7915852b4b750e254cacc6538c 056e6f7488a57297488f5664ff505f885af0e4bc Saihgupr <saihgupr@me.com> 1775769199 -0400	commit: Resets to top of list
+056e6f7488a57297488f5664ff505f885af0e4bc 52e02fab43684f41eb7b56301560368c67f11a05 Saihgupr <saihgupr@me.com> 1775782829 -0400	commit: First item on reload
+52e02fab43684f41eb7b56301560368c67f11a05 4a3b4676b2e4d31329b8ebe23861ed898b38539d Saihgupr <saihgupr@me.com> 1775825846 -0400	pull origin main: Fast-forward
+4a3b4676b2e4d31329b8ebe23861ed898b38539d 9e7e8b0826179485f9d8b0eae6a4fb2b676a182b Saihgupr <saihgupr@me.com> 1775825924 -0400	commit: Merge
+9e7e8b0826179485f9d8b0eae6a4fb2b676a182b 9a7c0fd9358c74424819f34c1be917c5ca5613bc Saihgupr <saihgupr@me.com> 1775826651 -0400	commit: Arrows work from menubar press
+9a7c0fd9358c74424819f34c1be917c5ca5613bc ba18baa11449fcb60f53d0727c32e2cacdeb6d3e Saihgupr <saihgupr@me.com> 1775904947 -0400	pull: Fast-forward
+ba18baa11449fcb60f53d0727c32e2cacdeb6d3e d0c40788dc78147b3acaf0ed2ea8da63a6222188 Saihgupr <saihgupr@me.com> 1775905196 -0400	commit: Ai search
+d0c40788dc78147b3acaf0ed2ea8da63a6222188 b2093f48cdc1b243fa77f479f93ab805bb9a63ec saihgupr <121105543+saihgupr@users.noreply.github.com> 1775912520 -0400	commit: Ui refactor phase 1
+b2093f48cdc1b243fa77f479f93ab805bb9a63ec 822c3bf5b3eebc4c521de81b6674adb5c6622593 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775914202 -0400	commit: Arrow keys now work but settings icon does not work
+822c3bf5b3eebc4c521de81b6674adb5c6622593 99e59e9f047246bed6b28d489e87688d7aa90ea5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775914275 -0400	commit: Settings icon works
+99e59e9f047246bed6b28d489e87688d7aa90ea5 88422f322dca4f78fcd53ae19bee64cdc35ad03c saihgupr <121105543+saihgupr@users.noreply.github.com> 1775914642 -0400	commit: Selection right away and text when opening from shortcut
+88422f322dca4f78fcd53ae19bee64cdc35ad03c 29a9f05b30782ddcf4a6e1a6468b29f7b0e02e7a saihgupr <121105543+saihgupr@users.noreply.github.com> 1775915066 -0400	commit: Fix popup ui
+29a9f05b30782ddcf4a6e1a6468b29f7b0e02e7a 8d66da7cd5a09012ee266f0da65dcaa257d4afb1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775916100 -0400	commit: Scrolls down when selection changes
+8d66da7cd5a09012ee266f0da65dcaa257d4afb1 3a1bfdc0d56b3318f569ff051634c1131cc410f5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1775917112 -0400	commit: Match top and bottom of popup ui
+3a1bfdc0d56b3318f569ff051634c1131cc410f5 09382de2c44bca2ddd91b0a1959480dcad0138ff saihgupr <121105543+saihgupr@users.noreply.github.com> 1775917603 -0400	commit: Search for popup ui version on type
+09382de2c44bca2ddd91b0a1959480dcad0138ff e389daf3d4b4c5626ee499539c4269505aeda54c saihgupr <121105543+saihgupr@users.noreply.github.com> 1776003450 -0400	commit: Merge
+e389daf3d4b4c5626ee499539c4269505aeda54c 9ca1b19813843a40bec2787fa241b1f9dd1e67e3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776016307 -0400	commit: Shortcut popup same as menubar in shape/size
+9ca1b19813843a40bec2787fa241b1f9dd1e67e3 f9f335a681ba31a811a62cbcc92342ab74d7b8ad saihgupr <121105543+saihgupr@users.noreply.github.com> 1776016473 -0400	commit: Popsup in center now but does not search when i start typing nor does the arrow down selection another item
+f9f335a681ba31a811a62cbcc92342ab74d7b8ad 5d6310d74118cdec6d729300a60b2c20666e7a48 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776016584 -0400	commit: Center popup is responsive now
+5d6310d74118cdec6d729300a60b2c20666e7a48 84ad6a5da46c63de8ce6d163c80db7d3c2fc41a7 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776016838 -0400	commit: Selection with menubar version but no search
+84ad6a5da46c63de8ce6d163c80db7d3c2fc41a7 c9181241f1375e4fdf528496342f491475796d84 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776016984 -0400	commit: Search works for menu popup
+c9181241f1375e4fdf528496342f491475796d84 b95a3fe154004013947d1db2669ff2cf6ca79e5e saihgupr <121105543+saihgupr@users.noreply.github.com> 1776017940 -0400	commit: Main menu closes when settings opened
+b95a3fe154004013947d1db2669ff2cf6ca79e5e 9e643a9a4d327388d50b564c33a1de3e922fce12 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776018229 -0400	commit: Remove quit button from settings
+9e643a9a4d327388d50b564c33a1de3e922fce12 e51c0a991b15ae625c234bb28f267e65b4e7a2b5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776083111 -0400	pull --rebase origin main (finish): refs/heads/main onto 00e48a6e930965d11ad6a5c696615a6cec5edeba
+e51c0a991b15ae625c234bb28f267e65b4e7a2b5 dbead4fdc7f3eabccac2c021f400c62dcc7752b4 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776092205 -0400	merge origin/bolt-calendar-optimization-17114268652207889765: Merge made by the 'ort' strategy.
+dbead4fdc7f3eabccac2c021f400c62dcc7752b4 e0d95b7e41b34ece26b6fa4e044f83ed916f1b23 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776092310 -0400	commit (merge): Merge bolt-optimize-date-parsing and resolve conflicts
+e0d95b7e41b34ece26b6fa4e044f83ed916f1b23 4ad3191408ef29aff7ac7f6d4a26c466849e4946 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776092422 -0400	commit (merge): Merge bolt/fast-path-optimization and resolve conflicts
+4ad3191408ef29aff7ac7f6d4a26c466849e4946 95ab9046f4bd385e574d039d9d0a072190eed196 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776092831 -0400	commit (merge): Merge palette-actionable-empty-states and resolve conflicts
+95ab9046f4bd385e574d039d9d0a072190eed196 3a10a4a9ce2c3ea7a3845e4e0035e8928e1aec21 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093109 -0400	commit (merge): Merge palette-empty-state-cta and resolve conflicts
+3a10a4a9ce2c3ea7a3845e4e0035e8928e1aec21 c81c7c5765ff7533430b3a34405aff5debb97ad2 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093232 -0400	commit (merge): Merge palette/ux-accessibility-improvements and resolve conflicts
+c81c7c5765ff7533430b3a34405aff5debb97ad2 01676f7c3b69dbb15614c03163e559f2a3824819 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093538 -0400	commit (merge): Merge palette/ux-empty-state-and-a11y and resolve conflicts
+01676f7c3b69dbb15614c03163e559f2a3824819 400a19ef0220e2f7494cb0ab91da95b98934eb72 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093792 -0400	commit (merge): Merge palette/ux-improvements and resolve conflicts
+400a19ef0220e2f7494cb0ab91da95b98934eb72 d6dafc67cf0de787b1094790845c540221012b34 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093799 -0400	merge origin/sentinel-clipboard-security-fixes-17565390641718418331: Merge made by the 'ort' strategy.
+d6dafc67cf0de787b1094790845c540221012b34 1f1a91da90b726e6e882f16d9f5656a1dfb884a3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776093943 -0400	commit (merge): Merge sentinel-fix-url-components-dos and resolve conflicts
+1f1a91da90b726e6e882f16d9f5656a1dfb884a3 a0060686e4df0f4b1784e1c11883921bdd4b4bff saihgupr <121105543+saihgupr@users.noreply.github.com> 1776094037 -0400	commit (merge): Merge sentinel-security-clipboard and resolve conflicts
+a0060686e4df0f4b1784e1c11883921bdd4b4bff 68ffab4a96f7a94e2c33f062393c236d75079227 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776094052 -0400	commit (merge): Merge sentinel/api-key-header and resolve conflicts
+68ffab4a96f7a94e2c33f062393c236d75079227 74d38eb2cf4f0a6b016c16f11fb1236d10cb5d1b saihgupr <121105543+saihgupr@users.noreply.github.com> 1776094207 -0400	commit (merge): Merge sentinel/safe-url-construction and resolve conflicts
+74d38eb2cf4f0a6b016c16f11fb1236d10cb5d1b 27c33c7a8142cb7c3d9719f388e8175d13e94d77 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776094362 -0400	commit: Add .gitignore and restore stashed changes in StatusItemManager
+27c33c7a8142cb7c3d9719f388e8175d13e94d77 b5d1468dd4042a3dd0e5f74f5403145ee1559da7 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776096590 -0400	commit: Update search placeholder and empty state text
+b5d1468dd4042a3dd0e5f74f5403145ee1559da7 cf1f8c00e79b2a05c10af432bf08a7e76a98781a saihgupr <121105543+saihgupr@users.noreply.github.com> 1776167102 -0400	pull origin main: Fast-forward
+cf1f8c00e79b2a05c10af432bf08a7e76a98781a 21c502ea64af116acd9d21f0658472013c0ff732 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776181026 -0400	commit: Fix for shortcut popup arrow down
+21c502ea64af116acd9d21f0658472013c0ff732 a75e308eeff92e381cd8e2ac8b9efa9eaa2c5e60 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776271659 -0400	pull origin main: Fast-forward
+a75e308eeff92e381cd8e2ac8b9efa9eaa2c5e60 d1af6a5892ec17800b42c09309109a4738a371ec saihgupr <121105543+saihgupr@users.noreply.github.com> 1776430961 -0400	pull origin main: Fast-forward
+d1af6a5892ec17800b42c09309109a4738a371ec 07abb012a1f1ddaf07e73dd43fec187318948881 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776449487 -0400	commit: Ui selection blends in better now
+07abb012a1f1ddaf07e73dd43fec187318948881 3ac218a0a2d846db41ec506f6b8544e0093a391c saihgupr <121105543+saihgupr@users.noreply.github.com> 1776523354 -0400	commit: Settings pops up on top
+3ac218a0a2d846db41ec506f6b8544e0093a391c 93a2595df4ccdb696c151b76e79da944544b2917 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776523480 -0400	commit: First hotkey popups
+93a2595df4ccdb696c151b76e79da944544b2917 a73c4ee86f66ba91db27e38f03b4e072f7bab08e saihgupr <121105543+saihgupr@users.noreply.github.com> 1776862096 -0400	commit: Paste in correct windows
+a73c4ee86f66ba91db27e38f03b4e072f7bab08e 1376e53e22d25cbd316b31308886ed6ef7b8979f saihgupr <121105543+saihgupr@users.noreply.github.com> 1776862434 -0400	commit: Selection ui edit
+1376e53e22d25cbd316b31308886ed6ef7b8979f 35e0d3a8f932852aecd36277beb38735990973fd saihgupr <121105543+saihgupr@users.noreply.github.com> 1776862639 -0400	commit: Fix selection arrows
+35e0d3a8f932852aecd36277beb38735990973fd 8cef4c96bf8d21c06961e4484d949bb916904e33 saihgupr <121105543+saihgupr@users.noreply.github.com> 1776863091 -0400	commit: Ai works again
+8cef4c96bf8d21c06961e4484d949bb916904e33 6ea073997736aa4c455f0b5f513d29b57a04d22c saihgupr <121105543+saihgupr@users.noreply.github.com> 1777564282 -0400	commit: Update
+6ea073997736aa4c455f0b5f513d29b57a04d22c 5cd4a8890c9f1c685dfc4bbdbeedbd413831058b saihgupr <121105543+saihgupr@users.noreply.github.com> 1777564515 -0400	commit: Added right arrow option to expand clipboard item
+5cd4a8890c9f1c685dfc4bbdbeedbd413831058b 02ec878215f9b82c55def0de85754319d5ac0f84 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777565094 -0400	commit: Reset after expanded text window is closed
+02ec878215f9b82c55def0de85754319d5ac0f84 e92b710f74e1310463387a410720479b17a85aa3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777565590 -0400	commit: Copy button works but airplane icon does not work yet
+e92b710f74e1310463387a410720479b17a85aa3 780db9f8da7001f020b31305315c8011edd8ee1b saihgupr <121105543+saihgupr@users.noreply.github.com> 1777566150 -0400	commit: Share menu
+780db9f8da7001f020b31305315c8011edd8ee1b b5dcfefdbd1728109f4ff2d79c56b904806ca4f8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777566219 -0400	commit: Fix highlight
+b5dcfefdbd1728109f4ff2d79c56b904806ca4f8 0b74807938003e5131ee05ec79cc9e5d55e220c1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777566583 -0400	commit: Remove menu when share button pressed
+0b74807938003e5131ee05ec79cc9e5d55e220c1 b3388f02487cb8d64ddc05a74205a76285b8e909 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777567963 -0400	commit: Right arrow now goes to share menu after detail menu
+b3388f02487cb8d64ddc05a74205a76285b8e909 8aaf1b795821e02ad1ae6ac5c91012f62659b9af saihgupr <121105543+saihgupr@users.noreply.github.com> 1777568033 -0400	commit: Right arrow opens urls for urls
+8aaf1b795821e02ad1ae6ac5c91012f62659b9af 79be7baacb0b1f903874eb556e3b06b640494976 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777569270 -0400	commit: Roudned highlight
+79be7baacb0b1f903874eb556e3b06b640494976 d32c6fb2460f2eb8ef14a3747815499f6391e199 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777569340 -0400	commit: Removed lines seporating
+d32c6fb2460f2eb8ef14a3747815499f6391e199 d63ad17516b78e07dcdab14995f5ddef8d76a626 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777569666 -0400	commit: Left arrow button
+d63ad17516b78e07dcdab14995f5ddef8d76a626 9e7032679fc4ff69be05f06d9f502d9ab5a52bbb saihgupr <121105543+saihgupr@users.noreply.github.com> 1777569923 -0400	commit: Copy and delete work well for special button
+9e7032679fc4ff69be05f06d9f502d9ab5a52bbb b6d8da3eebfadf3a9fbdbf91c25e95cb1b0ec383 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777570018 -0400	commit: Better selection for copy special button
+b6d8da3eebfadf3a9fbdbf91c25e95cb1b0ec383 0510512528d855d7841dc302f4969b86adfe8edf saihgupr <121105543+saihgupr@users.noreply.github.com> 1777570299 -0400	commit: Settings refactor
+0510512528d855d7841dc302f4969b86adfe8edf db9a72d916c2975edddc7214b73d317e95354ec5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777573989 -0400	commit: Sidebar fix
+db9a72d916c2975edddc7214b73d317e95354ec5 ec88793c6d596e33191c37ee01e3458fa8ebd202 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777574543 -0400	commit: New icon
+ec88793c6d596e33191c37ee01e3458fa8ebd202 7a847c8198c696c23dceb5951f1ffbacf50f4fe6 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777574828 -0400	commit: Icon fix
+7a847c8198c696c23dceb5951f1ffbacf50f4fe6 3719166655bb520e5bd48916e0c4e853621be5fa saihgupr <121105543+saihgupr@users.noreply.github.com> 1777575401 -0400	commit: New icon
+3719166655bb520e5bd48916e0c4e853621be5fa 3b8873cca3534d2e7f80b92e8ebf5185e3517599 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777575857 -0400	commit: Icon fix
+3b8873cca3534d2e7f80b92e8ebf5185e3517599 d6c59e5207fbcbf851a4a1d256599f8e7f3ff768 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777576173 -0400	commit: Fix for arrows not working
+d6c59e5207fbcbf851a4a1d256599f8e7f3ff768 73c7687df55ac03ebc7de619333fbb7e7c09e699 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777576255 -0400	commit: Fix for menu bar popup down arrows
+73c7687df55ac03ebc7de619333fbb7e7c09e699 74b2cc3bb88014da843d97b4c5ad4abcb630e0ac saihgupr <121105543+saihgupr@users.noreply.github.com> 1777576563 -0400	commit: Model update
+74b2cc3bb88014da843d97b4c5ad4abcb630e0ac 9a94c87e2976bb9e8e72a2e6f2cd67dbd7bdc94c saihgupr <121105543+saihgupr@users.noreply.github.com> 1777576599 -0400	commit: Flash is default model
+9a94c87e2976bb9e8e72a2e6f2cd67dbd7bdc94c 856e4adf2f00226ef32520bd6ddd3566a1611a05 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777577378 -0400	commit: Icognito mode and paste fix
+856e4adf2f00226ef32520bd6ddd3566a1611a05 772c8977103e96335ab636c7c8dd6550d45725e3 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777634373 -0400	commit: Incognito mode works
+772c8977103e96335ab636c7c8dd6550d45725e3 a0d42aafbd489751a5c96a427e60331b47bf2cf1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777634605 -0400	commit: Readme Update
+a0d42aafbd489751a5c96a427e60331b47bf2cf1 bd61795cec50cb960d2320caf4c459e89df73b47 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777635000 -0400	commit: Down arrow bug fix
+bd61795cec50cb960d2320caf4c459e89df73b47 9783185ae8e082f920e70e2dade682b88f8745e8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777635181 -0400	commit: Settings menu fixes
+9783185ae8e082f920e70e2dade682b88f8745e8 7665491dcfbb881ce4d7bbfda19d39728e0aafe1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777635482 -0400	commit: Hold left arrow action
+7665491dcfbb881ce4d7bbfda19d39728e0aafe1 7078a02e30a20504dae2a918c698d699610ca043 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777636474 -0400	commit: Favorites and pins
+7078a02e30a20504dae2a918c698d699610ca043 7221c9e55fdb371afcfd2c254f246caca9074648 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777636564 -0400	commit: Bigger icons and left side
+7221c9e55fdb371afcfd2c254f246caca9074648 039ab32d29510da759a1ffe3c02b72d629b6377f saihgupr <121105543+saihgupr@users.noreply.github.com> 1777636696 -0400	commit: Left side icon
+039ab32d29510da759a1ffe3c02b72d629b6377f 7078a02e30a20504dae2a918c698d699610ca043 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777636989 -0400	reset: moving to 7078a02e30a20504dae2a918c698d699610ca043
+7078a02e30a20504dae2a918c698d699610ca043 2c060d2db3d9a62ba2d85880707542b330615203 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777637142 -0400	commit: Icons on the left side
+2c060d2db3d9a62ba2d85880707542b330615203 be7042ac80b0d751a60dd40a01ce5572cebd137e saihgupr <121105543+saihgupr@users.noreply.github.com> 1777637217 -0400	commit: Bigger and to the left
+be7042ac80b0d751a60dd40a01ce5572cebd137e 4355c5246bc6e8a414cb63d333fcaea320193cf4 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777637306 -0400	commit: Image size
+4355c5246bc6e8a414cb63d333fcaea320193cf4 0e016fc229cee5a658f9d29ff95ebae6bdb2ee12 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777637591 -0400	commit: Right click icon items
+0e016fc229cee5a658f9d29ff95ebae6bdb2ee12 129dce978fdb6104fe7151d10f0a5b6aab7d60ad saihgupr <121105543+saihgupr@users.noreply.github.com> 1777637665 -0400	commit: Monochrome pin
+129dce978fdb6104fe7151d10f0a5b6aab7d60ad 12692150cfcfc40a26ade127bdd4b3f8b2016cec saihgupr <121105543+saihgupr@users.noreply.github.com> 1777638370 -0400	commit: Settings text change
+12692150cfcfc40a26ade127bdd4b3f8b2016cec 9b6bdcbaf908da9770d6d90539cb3d6ef8a616b8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777639237 -0400	commit: Incognito mode
+9b6bdcbaf908da9770d6d90539cb3d6ef8a616b8 9e257db79749243bb8464de15c9e524f754094f7 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777639887 -0400	commit: Incognito icon
+9e257db79749243bb8464de15c9e524f754094f7 ef2a24f60155d8c458ed8577fe63d971de758198 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777641039 -0400	commit: Wider text field
+ef2a24f60155d8c458ed8577fe63d971de758198 1a53ea274800be77b338797c78b1fde55d65d75c saihgupr <121105543+saihgupr@users.noreply.github.com> 1777641139 -0400	commit: Padding
+1a53ea274800be77b338797c78b1fde55d65d75c acf7634a3594fe619d387f664ab695c4abc2be09 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777641461 -0400	commit: Spacing better
+acf7634a3594fe619d387f664ab695c4abc2be09 3c90dde26fe1e409a1120a43bd73c3b7e1c26359 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777641574 -0400	commit: Better spacing
+3c90dde26fe1e409a1120a43bd73c3b7e1c26359 78d6010beaab245fd1d7b531c148cd74864567a2 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777644242 -0400	commit: Remove cmd icon
+78d6010beaab245fd1d7b531c148cd74864567a2 ee2b7ede5e1a1fa3c1dd06e8683b78e52b833824 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777645012 -0400	commit: Icon update
+ee2b7ede5e1a1fa3c1dd06e8683b78e52b833824 c102b778a5f5ba8f830e817fbdfbfb4f0def913a saihgupr <121105543+saihgupr@users.noreply.github.com> 1777805265 -0400	commit: Migration button
+c102b778a5f5ba8f830e817fbdfbfb4f0def913a 21621fac1f9ff95c3eb5334c9ede081362053706 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777805533 -0400	commit: Import from alfred worked
+21621fac1f9ff95c3eb5334c9ede081362053706 4a14c1ff22dc8f6bcaa3e1d43acbada879ec33b1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777806375 -0400	commit: Delete button
+4a14c1ff22dc8f6bcaa3e1d43acbada879ec33b1 58ee7181f80ef481381c881e1640d8fab78151cf saihgupr <121105543+saihgupr@users.noreply.github.com> 1777806428 -0400	commit: Settings swap
+58ee7181f80ef481381c881e1640d8fab78151cf fa28f04cc03a77af8c8217aca041aa6401151cc2 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777806467 -0400	commit: Removed other number
+fa28f04cc03a77af8c8217aca041aa6401151cc2 8b6c45f5cbc243043fae34904bb1c70079199444 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777806649 -0400	commit: Clipboard detail right click option
+8b6c45f5cbc243043fae34904bb1c70079199444 7808115b3debc42011bdd182cc5da2d003cfbca8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777807403 -0400	commit: Items delete in search
+7808115b3debc42011bdd182cc5da2d003cfbca8 9b5f0b58c2a741a5f1389824fe980df25f442998 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777815582 -0400	commit: Bettertouchtool import option
+9b5f0b58c2a741a5f1389824fe980df25f442998 e82e565aa06acb0c9867e692b13f9ca3e658de33 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777838487 -0400	commit: Limited search to pages
+e82e565aa06acb0c9867e692b13f9ca3e658de33 db10e60b08bba8f53cfc719ccc4b2b74d6308ca8 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777838680 -0400	commit: Plain paste fix
+db10e60b08bba8f53cfc719ccc4b2b74d6308ca8 a354350e04c5f896dab75db765345d6752341a84 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777838868 -0400	commit: Readme Update
+a354350e04c5f896dab75db765345d6752341a84 c79056b7ced2cf474d0d838ff657556384dac430 saihgupr <121105543+saihgupr@users.noreply.github.com> 1777839276 -0400	commit: Old menubar icon
+c79056b7ced2cf474d0d838ff657556384dac430 a2658ba9805dc0eca2598412f3d2083437d89c1d saihgupr <121105543+saihgupr@users.noreply.github.com> 1777895552 -0400	commit: BTT import works
+a2658ba9805dc0eca2598412f3d2083437d89c1d 7146a2418f21c3aad54951cc6410588483e78bfc saihgupr <121105543+saihgupr@users.noreply.github.com> 1777895672 -0400	commit: Update settings text
+7146a2418f21c3aad54951cc6410588483e78bfc 320228e071d654e552d9547321975ddc17f35ef0 saihgupr <121105543+saihgupr@users.noreply.github.com> 1779714067 -0400	commit: Detailed view arrow down/up
+320228e071d654e552d9547321975ddc17f35ef0 1bb3f652ecf27735b2fda3cbd8304aca46c9e1c5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1779714181 -0400	commit: Fix for left arrow when in detail view
+1bb3f652ecf27735b2fda3cbd8304aca46c9e1c5 059b070dbcfbbf17253c0f745cbb34147d09ec6c saihgupr <121105543+saihgupr@users.noreply.github.com> 1779722459 -0400	commit: Fix for left arrow from details page
+059b070dbcfbbf17253c0f745cbb34147d09ec6c 279c38951cc7510f8f4f6c14743038bb0e7a353a saihgupr <121105543+saihgupr@users.noreply.github.com> 1779723183 -0400	commit: Readme Update
+279c38951cc7510f8f4f6c14743038bb0e7a353a 0cb123c05d4edbfed560e13d4eb09d4bc5b977ba saihgupr <121105543+saihgupr@users.noreply.github.com> 1779726495 -0400	commit: Load more option down arrow
+0cb123c05d4edbfed560e13d4eb09d4bc5b977ba 4d39af7ddcfc47aa369105d2e90212b41269356b saihgupr <121105543+saihgupr@users.noreply.github.com> 1779885291 -0400	commit: Share menu arrows fix
+4d39af7ddcfc47aa369105d2e90212b41269356b ab33ba5c528fc9e404f6a31155289a19c77ce9d5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781019893 -0400	commit: Ui update
+ab33ba5c528fc9e404f6a31155289a19c77ce9d5 d8c1940dd41abec69a701ef2be7ee81f0f970d34 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781021617 -0400	commit: Ui update
+d8c1940dd41abec69a701ef2be7ee81f0f970d34 8b9ec75cb37885e5e03bfc7e68f588c0f3fb7523 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781029549 -0400	commit: Github link
+8b9ec75cb37885e5e03bfc7e68f588c0f3fb7523 d8c1940dd41abec69a701ef2be7ee81f0f970d34 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781029553 -0400	reset: moving to d8c1940dd41abec69a701ef2be7ee81f0f970d34
+d8c1940dd41abec69a701ef2be7ee81f0f970d34 8b9ec75cb37885e5e03bfc7e68f588c0f3fb7523 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781029595 -0400	reset: moving to 8b9ec75cb37885e5e03bfc7e68f588c0f3fb7523
+8b9ec75cb37885e5e03bfc7e68f588c0f3fb7523 17af22800aa2d856eca6d4d27dc290750fe1ce2f saihgupr <121105543+saihgupr@users.noreply.github.com> 1781030707 -0400	commit: Removed the blue
+17af22800aa2d856eca6d4d27dc290750fe1ce2f e785a6bcba67ce029511ee2ab698c1fad3781493 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781030822 -0400	commit: Esc key close
+e785a6bcba67ce029511ee2ab698c1fad3781493 40fffe3acb97634c74cd5024d7a344ebc58eb20a saihgupr <121105543+saihgupr@users.noreply.github.com> 1781041751 -0400	commit: Settings update
+40fffe3acb97634c74cd5024d7a344ebc58eb20a 07c811f8fe87e613467220b4dff9ccd43eb6de2f saihgupr <121105543+saihgupr@users.noreply.github.com> 1781042347 -0400	commit: Incognito icon
+07c811f8fe87e613467220b4dff9ccd43eb6de2f c6d1e4876e132e53ede07f408bc77757d8f8ab62 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781042600 -0400	commit: Incognito items
+c6d1e4876e132e53ede07f408bc77757d8f8ab62 c4be19433f755027d99e265c943f59b11ca351fb saihgupr <121105543+saihgupr@users.noreply.github.com> 1781042686 -0400	commit: Fix left side space
+c4be19433f755027d99e265c943f59b11ca351fb 192628f6f340485cc41f9f987ee6f0c22e89a832 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781043383 -0400	commit: Clickable chevron
+192628f6f340485cc41f9f987ee6f0c22e89a832 f163300ca7500a07f38100aaa93f11b0263343bc saihgupr <121105543+saihgupr@users.noreply.github.com> 1781089088 -0400	commit: Close window on copy button press
+f163300ca7500a07f38100aaa93f11b0263343bc d7be85799805c86b06f91db1e87bbe0833279b66 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781092676 -0400	commit: Only share button
+d7be85799805c86b06f91db1e87bbe0833279b66 c7b565d8a00e0c4a2936e73b038b7420366fe9f0 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781092782 -0400	commit: Scroll through items in detail view
+c7b565d8a00e0c4a2936e73b038b7420366fe9f0 01dbcc2cb0da451b2faea37a0fadc68c29b233cd saihgupr <121105543+saihgupr@users.noreply.github.com> 1781093003 -0400	commit: Gemini hover color
+01dbcc2cb0da451b2faea37a0fadc68c29b233cd 3d7c13dcaf3289f25f2e5e3dc82c670d805ea319 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781093486 -0400	commit: Auto reload on scroll
+3d7c13dcaf3289f25f2e5e3dc82c670d805ea319 2debb82fd94fafdf2f72ff0e7f1f061607a267c5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781094155 -0400	commit: Share button in right click menu
+2debb82fd94fafdf2f72ff0e7f1f061607a267c5 372659aa0aeae7e2efb0dc2f85ca2adf137a097c saihgupr <121105543+saihgupr@users.noreply.github.com> 1781094555 -0400	commit: Share menu location
+372659aa0aeae7e2efb0dc2f85ca2adf137a097c df1e89b2d7030a68f06bc03cf631e204b75c7710 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781094597 -0400	commit: Position share menu
+df1e89b2d7030a68f06bc03cf631e204b75c7710 61a0c106c0b2492d1d5712f8a55e1648f8edb96a saihgupr <121105543+saihgupr@users.noreply.github.com> 1781095140 -0400	commit: Dark mode toggle
+61a0c106c0b2492d1d5712f8a55e1648f8edb96a 9f344282ba3fc05e563f284bd03b00cf9a9cec07 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781096126 -0400	commit: Dark mode term
+9f344282ba3fc05e563f284bd03b00cf9a9cec07 acb5fee6ec1f7c9791c1ebf899a32ba981846dc2 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781096280 -0400	commit: Rectangle
+acb5fee6ec1f7c9791c1ebf899a32ba981846dc2 ba29c8db186a19432468d17ec28d69fe7b427be4 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781096442 -0400	commit: Dark mode
+ba29c8db186a19432468d17ec28d69fe7b427be4 03535450f61a6a14c5378d028b7e7a92063ffeb5 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781096584 -0400	commit: Font update
+03535450f61a6a14c5378d028b7e7a92063ffeb5 36912e86c7201a128d05f6d73dfe6e2e802b0c4a saihgupr <121105543+saihgupr@users.noreply.github.com> 1781096922 -0400	commit: Cmd+c for detail view
+36912e86c7201a128d05f6d73dfe6e2e802b0c4a 2d58cc7524454160827a51e1e2beee9821a082a4 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781624850 -0400	commit: Favorites icon lowered
+2d58cc7524454160827a51e1e2beee9821a082a4 0b338749e62fd6c364081d8fe5b90e23554640ff saihgupr <121105543+saihgupr@users.noreply.github.com> 1781700824 -0400	commit: Fit right clicking items
+0b338749e62fd6c364081d8fe5b90e23554640ff 289d659484176a252a37c732da766dd3bc8c4310 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781701258 -0400	commit: Item moved to top if paste plain text
+289d659484176a252a37c732da766dd3bc8c4310 0b338749e62fd6c364081d8fe5b90e23554640ff saihgupr <121105543+saihgupr@users.noreply.github.com> 1781701268 -0400	reset: moving to 0b338749e62fd6c364081d8fe5b90e23554640ff
+0b338749e62fd6c364081d8fe5b90e23554640ff 289d659484176a252a37c732da766dd3bc8c4310 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781701311 -0400	reset: moving to 289d659484176a252a37c732da766dd3bc8c4310
+289d659484176a252a37c732da766dd3bc8c4310 9630ea31950a669523928ccf9643d4a80371338e saihgupr <121105543+saihgupr@users.noreply.github.com> 1781702150 -0400	commit: Fix right click items list bug
+9630ea31950a669523928ccf9643d4a80371338e cfa1a2d7821107e68bca1c096ea5e781c2577368 saihgupr <121105543+saihgupr@users.noreply.github.com> 1781703783 -0400	commit: Light mode
+cfa1a2d7821107e68bca1c096ea5e781c2577368 a46547a95c1d0e3705b035d726c0381d2751afec saihgupr <121105543+saihgupr@users.noreply.github.com> 1781704056 -0400	commit: Share menu fix
+a46547a95c1d0e3705b035d726c0381d2751afec af786fd03f4138b8ce229c12944a768d22dc83c1 saihgupr <121105543+saihgupr@users.noreply.github.com> 1782658547 -0400	commit: refactor: remove scroll wheel event monitoring and associated state from ContentView
+af786fd03f4138b8ce229c12944a768d22dc83c1 f7eb12229b31a72ea572152745ef54db27aaf38a saihgupr <121105543+saihgupr@users.noreply.github.com> 1783427191 -0400	commit: Cleanup

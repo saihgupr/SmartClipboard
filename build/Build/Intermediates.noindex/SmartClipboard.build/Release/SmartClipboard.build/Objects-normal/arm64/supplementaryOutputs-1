@@ -1,0 +1,12 @@
+{
+  "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/SmartClipboard/AppSpecificSettingsView.swift" : {
+    "abi-baseline-json" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard.abi.json",
+    "const-values" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.swiftconstvalues",
+    "dependencies" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.d",
+    "diagnostics" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-primary.dia",
+    "objc-header" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard-Swift.h",
+    "swiftdoc" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard.swiftdoc",
+    "swiftmodule" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard.swiftmodule",
+    "swiftsourceinfo" : "/Users/saihgupr/Projects/CurrentProjects/SmartClipboard/build/Build/Intermediates.noindex/SmartClipboard.build/Release/SmartClipboard.build/Objects-normal/arm64/SmartClipboard.swiftsourceinfo"
+  }
+}
