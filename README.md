@@ -19,6 +19,30 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 - **Privacy First**: Automatically filters sensitive data from password managers and respects `org.nspasteboard.ConcealedType` flags.
 - **High Performance**: Ultra-fast local search and SwiftData persistence layer optimized for zero-latency interactions.
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/screenshot6.jpeg" width="75%" alt="Spotlight Search Window" /><br />
+  <em>Spotlight-style floating search window</em>
+</p>
+
+<p align="center">
+  <img src="assets/screenshot1.png" width="48%" alt="Menu Bar Popover" />
+  <img src="assets/screenshot2.png" width="48%" alt="Detail View" /><br />
+  <em>Menu Bar Popover List (left) and Detailed Content Inspector (right)</em>
+</p>
+
+<p align="center">
+  <img src="assets/screenshot3.png" width="48%" alt="Semantic Search" />
+  <img src="assets/screenshot4.png" width="48%" alt="General Settings" /><br />
+  <em>Gemini-powered Semantic Search (left) and General Application Settings (right)</em>
+</p>
+
+<p align="center">
+  <img src="assets/screenshot5.png" width="48%" alt="Model Settings" /><br />
+  <em>Gemini Model Selection and Depth Configuration</em>
+</p>
+
 ## Keyboard Shortcuts
 
 | Shortcut | Context | Action |
