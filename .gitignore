@@ -19,9 +19,6 @@ DerivedData/
 .build/
 
 # User-specific
-.jules/bolt.md.tmp
-.jules/palette.md.tmp
-.jules/sentinel.md.tmp
 .env
 *.log
 build_log.txt
