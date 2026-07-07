@@ -1,0 +1,5 @@
+build/
+.env
+*.xcodeproj
+.DS_Store
+.git-backup-*
