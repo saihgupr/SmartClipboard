@@ -1,29 +1,25 @@
-# 📋 SmartClipboard
+# SmartClipboard
 
 SmartClipboard is a modern macOS menu bar application built with SwiftUI that enhances your clipboard experience with AI-powered semantic search.
 
-![macOS 13.0+](https://img.shields.io/badge/macOS-13.0+-blue.svg)
-![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange.svg)
-![Gemini AI](https://img.shields.io/badge/AI-Gemini_Flash-purple.svg)
+## Features
 
-## ✨ Features
+- **Always Accessible**: Lives in your macOS menu bar for quick access anytime.
+- **Dual UI Modes**: Triggering the app from the menu bar opens a focused popover, while using the global hotkey reveals a **center-screen floating window** (Spotlight-style).
+- **Sequential Pasting**: Rapidly paste multiple previous items in order using `Option + [1-9]`. Perfect for batch-filling forms or re-sequencing snippets.
+- **Incognito Mode**: Start a private session where copied items are temporarily recorded, then permanently purged as soon as the mode is disabled.
+- **Pins & Favorites**: Pin frequently used items to the top or mark them as favorites to protect them from automatic history pruning.
+- **History Import**: Seamlessly migrate your existing clipboard history from **Alfred**, **BetterTouchTool**, or **Keyboard Maestro**.
+- **Paginated History**: Optimized UI that handles thousands of items with zero lag using an intelligent pagination system.
+- **Quick Actions**: Use the **Left Arrow** key to perform customizable actions (*Flash Copy*, *Google Search*, *Pin*, or *Instant Delete*) from both list and detail views. If a Left Arrow action is triggered on a valid URL, it automatically opens the URL directly instead of searching.
+- **Seamless Detail View Navigation**: Hitting **Right Arrow** opens the detail view, and **Up/Down** arrows let you browse items without leaving the detail view.
+- **Global Shortcuts**: Center-screen floating window access via customizable hotkey and instant indexed pasting using `Cmd + [1-9]`.
+- **Semantic Search**: Ask natural language questions like "Where was that API key?" or "Find that snippet about database migrations" using Gemini AI.
+- **Smart Insertion**: Automatically detects chat apps like Slack or Discord to use `Shift+Enter` during multi-pastes.
+- **Privacy First**: Automatically filters sensitive data from password managers and respects `org.nspasteboard.ConcealedType` flags.
+- **High Performance**: Ultra-fast local search and SwiftData persistence layer optimized for zero-latency interactions.
 
-- **🚀 Always Accessible**: Lives in your macOS menu bar for quick access anytime.
-- **🔳 Dual UI Modes**: Triggering the app from the menu bar opens a focused popover, while using the global hotkey reveals a **center-screen floating window** (Spotlight-style).
-- **⚡ Sequential Pasting**: Rapidly paste multiple previous items in order using `Option + [1-9]`. Perfect for batch-filling forms or re-sequencing snippets.
-- **🕵️ Incognito Mode**: Start a private session where copied items are temporarily recorded, then permanently purged as soon as the mode is disabled.
-- **📌 Pins & Favorites**: Pin frequently used items to the top or mark them as favorites to protect them from automatic history pruning.
-- **📥 History Import**: Seamlessly migrate your existing clipboard history from **Alfred**, **BetterTouchTool**, or **Keyboard Maestro**.
-- **📜 Paginated History**: Optimized UI that handles thousands of items with zero lag using an intelligent pagination system.
-- **⬅️ Quick Actions**: Use the **Left Arrow** key to perform customizable actions (*Flash Copy*, *Google Search*, *Pin*, or *Instant Delete*) from both list and detail views. If a Left Arrow action is triggered on a valid URL, it automatically opens the URL directly instead of searching.
-- **📖 Seamless Detail View Navigation**: Hitting **Right Arrow** opens the detail view, and **Up/Down** arrows let you browse items without leaving the detail view.
-- **⌨️ Global Shortcuts**: Center-screen floating window access via customizable hotkey and instant indexed pasting using `Cmd + [1-9]`.
-- **🧠 Semantic Search**: Ask natural language questions like "Where was that API key?" or "Find that snippet about database migrations" using Gemini AI.
-- **💬 Smart Insertion**: Automatically detects chat apps like Slack or Discord to use `Shift+Enter` during multi-pastes.
-- **🛡️ Privacy First**: Automatically filters sensitive data from password managers and respects `org.nspasteboard.ConcealedType` flags.
-- **🚀 High Performance**: Ultra-fast local search and SwiftData persistence layer optimized for zero-latency interactions.
-
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Shortcut | Context | Action |
 | --- | --- | --- |
@@ -38,7 +34,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 | `Cmd + C` | Detail View | Copy item to clipboard without closing window (or copies text selection if active) |
 | `Escape` | Any | Close detail view / dismiss SmartClipboard window |
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **SwiftUI**: For a native, modern macOS user interface.
 - **AppKit**: Efficient clipboard monitoring via `NSPasteboard`.
@@ -46,7 +42,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 - **Gemini API**: Deep integration with Google's Gemini models for intelligent semantic analysis.
 - **XcodeGen**: Clean project management and version control.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -71,6 +67,12 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 
 4. Provide your Gemini API key in the app settings to enable semantic search features.
 
+### Contributing & Support
+
+* **Issues & Bug Reports**: If you find any bugs or have feature requests, please report them in the [Issue Tracker](https://github.com/saihgupr/SmartClipboard/issues).
+* **Pull Requests**: Contributions are welcome! Feel free to fork the repository and open a [Pull Request](https://github.com/saihgupr/SmartClipboard/pulls).
+* **Support the Project**: If you enjoy using SmartClipboard, you can support its development by [donating on Ko-fi](https://ko-fi.com/saihgupr).
+
 ---
 
-*Built with ❤️ by Saihgupr*
+*Built by Saihgupr*
