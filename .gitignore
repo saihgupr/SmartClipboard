@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.moved-aside
+*.xcuserstate
+*.xccheckout
+*.xcscheme
+!default.xcscheme
+
+# Swift Package Manager
+.swiftpm/xcode/
+.build/
+
+# User-specific
+.jules/bolt.md.tmp
+.jules/palette.md.tmp
+.jules/sentinel.md.tmp
+.env
+*.log
+build_log.txt
+build_output.txt
+test
+test.swift
+check_ax.swift
+check_post.swift
+.derived/
+.git-backup-*
