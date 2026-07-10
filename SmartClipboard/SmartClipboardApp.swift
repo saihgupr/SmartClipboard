@@ -35,9 +35,12 @@ struct SmartClipboardApp: App {
         _importManager = StateObject(wrappedValue: impManager)
         self.statusItemManager = StatusItemManager(clipboardManager: manager, importManager: impManager, modelContainer: container)
         
-        // Check for updates in the background on launch
-        Task {
-            await UpdateManager.shared.checkForUpdates(manually: false)
+        // Check for updates in the background on launch if enabled
+        UserDefaults.standard.register(defaults: ["checkForUpdatesOnLaunch": true])
+        if UserDefaults.standard.bool(forKey: "checkForUpdatesOnLaunch") {
+            Task {
+                UpdateManager.shared.checkForUpdates(manually: false)
+            }
         }
     }
 

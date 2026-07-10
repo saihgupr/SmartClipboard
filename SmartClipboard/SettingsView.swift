@@ -493,104 +493,107 @@ struct MigrationSettingsView: View {
 // MARK: - About Settings
 struct AboutSettingsView: View {
     @StateObject private var updateManager = UpdateManager.shared
+    @AppStorage("checkForUpdatesOnLaunch") private var checkForUpdatesOnLaunch = true
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 80, height: 80)
-                .shadow(radius: 10)
-            
-            VStack(spacing: 4) {
-                Text("SmartClipboard")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Text("A modern clipboard manager powered by Google Gemini.")
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            // Updates Status View
-            VStack(spacing: 8) {
-                switch updateManager.checkStatus {
-                case .idle:
-                    Button(action: { updateManager.checkForUpdates(manually: true) }) {
-                        Label("Check for Updates", systemImage: "arrow.clockwise")
-                    }
-                    .buttonStyle(.bordered)
-                    
-                case .checking:
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("Checking for updates...")
-                            .foregroundColor(.secondary)
-                            .font(.subheadline)
-                    }
-                    
-                case .upToDate:
-                    VStack(spacing: 6) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("SmartClipboard is up to date")
-                                .foregroundColor(.secondary)
-                                .font(.subheadline)
-                        }
-                        
-                        Button("Check Again") {
-                            updateManager.checkForUpdates(manually: true)
-                        }
-                        .buttonStyle(.link)
+        VStack(spacing: 24) {
+            HStack(spacing: 20) {
+                Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 64, height: 64)
+                    .shadow(radius: 6)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("SmartClipboard")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                    Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
                         .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("A modern clipboard manager powered by Google Gemini.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+            
+            SettingsSection(title: "Software Updates") {
+                VStack(alignment: .leading, spacing: 14) {
+                    Toggle(isOn: $checkForUpdatesOnLaunch) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Automatically Check for Updates")
+                                .font(.system(size: 13, weight: .medium))
+                            Text("Keep SmartClipboard secure and up-to-date automatically.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
+                    .toggleStyle(.switch)
+                    .focusEffectDisabled()
                     
-                case .updateAvailable(let version, let url):
-                    VStack(spacing: 10) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundColor(.blue)
-                            Text("New update available: \(version)")
-                                .font(.system(size: 13, weight: .semibold))
+                    Divider()
+                    
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Update Status")
+                                .font(.system(size: 13, weight: .medium))
+                            
+                            switch updateManager.checkStatus {
+                            case .idle:
+                                Text("Check has not been performed yet.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            case .checking:
+                                Text("Checking for updates...")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            case .upToDate:
+                                Text("SmartClipboard is up to date.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            case .updateAvailable(let version, _):
+                                Text("Version \(version) is available.")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            case .failed(let error):
+                                Text("Check failed: \(error)")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
                         }
                         
-                        Link(destination: url) {
-                            Label("Download Update", systemImage: "safari")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.regular)
-                    }
-                    .padding(12)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(8)
-                    
-                case .failed(let error):
-                    VStack(spacing: 6) {
-                        Text("Update check failed")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                        Spacer()
                         
-                        Button("Try Again") {
-                            updateManager.checkForUpdates(manually: true)
+                        // Action button
+                        switch updateManager.checkStatus {
+                        case .idle, .upToDate, .failed:
+                            Button(action: { updateManager.checkForUpdates(manually: true) }) {
+                                if updateManager.isChecking {
+                                    ProgressView().controlSize(.small)
+                                } else {
+                                    Text("Check Now")
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .disabled(updateManager.isChecking)
+                        case .checking:
+                            ProgressView()
+                                .controlSize(.small)
+                        case .updateAvailable(_, let url):
+                            Link(destination: url) {
+                                Text("Download")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
                     }
-                    .padding(10)
                 }
             }
-            .padding(.vertical, 8)
             
             Divider()
-                .padding(.vertical, 10)
+                .padding(.vertical, 4)
             
             VStack(spacing: 12) {
                 Link(destination: URL(string: "https://github.com/saihgupr/SmartClipboard")!) {
