@@ -63,6 +63,15 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
 
 ### Installation
 
+Choose one of the following methods to install SmartClipboard:
+
+#### Option 1: Standard Installation (Recommended)
+
+1. Download the latest `.dmg` installer from [GitHub Releases](https://github.com/saihgupr/SmartClipboard/releases).
+2. Open the downloaded `.dmg` and drag `SmartClipboard` to your `/Applications` folder.
+
+#### Option 2: Build from Source (Developers)
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/saihgupr/SmartClipboard.git
@@ -74,9 +83,9 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
    xcodegen generate
    ```
 
-3. Build and run the project (Cmd + R) or use the included `deploy.sh` script for rapid installation to `/Applications`.
+3. Build and run the project in Xcode (`Cmd + R`) or run the included `deploy.sh` script to install it directly to `/Applications`.
 
-4. Provide your Gemini API key in the app settings to enable semantic search features.
+*Once installed, provide your Gemini API key in the app settings to enable semantic search features.*
 
 ### macOS Security (Gatekeeper) Warning
 
