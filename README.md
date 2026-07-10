@@ -109,14 +109,19 @@ To open the app, you can use any of the following standard methods:
    xattr -d com.apple.quarantine /Applications/SmartClipboard.app
    ```
 
-## Contributing & Support
+## Contributing
 
-Contributions are welcome! If you find bugs, have suggestions, or want to contribute code, please open an issue in the [Issue Tracker](https://github.com/saihgupr/SmartClipboard/issues) or submit a pull request. If you'd like to support the development of this project, you can [donate on Ko-fi](https://ko-fi.com/saihgupr).
+Contributions are welcome! 
 
-## My Other Projects
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/awesome-feature`)
+3. Commit your changes and push to your fork
+4. Open a Pull Request
 
-If you find SmartClipboard useful, check out some of my other macOS and developer tools:
+## Support & Feedback
 
-- **[frigate-events-card](https://github.com/saihgupr/frigate-events-card)**: A custom, highly interactive camera event viewer card for Home Assistant and Frigate.
-- **[DMGMaker](https://github.com/saihgupr/DMGMaker)**: A modern macOS utility to design and package custom styled `.dmg` installers.
-- **[NotifiCLI](https://github.com/saihgupr/NotifiCLI)**: A CLI tool to send native macOS notifications directly from the terminal or shell scripts.
+If you encounter any issues, bugs, or have feature requests, please [open an issue on GitHub](https://github.com/saihgupr/SmartClipboard/issues).
+
+SmartClipboard is open-source and free. If you find it useful, consider giving it a star ⭐ or making a donation to support development!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/saihgupr)
