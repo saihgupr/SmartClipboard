@@ -15,4 +15,4 @@ targets:
       CODE_SIGN_IDENTITY: "Apple Development"
       CODE_SIGN_ENTITLEMENTS: SmartClipboard/SmartClipboard.entitlements
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-      MARKETING_VERSION: 1.0.1
+      MARKETING_VERSION: 1.0.2

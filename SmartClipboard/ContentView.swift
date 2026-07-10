@@ -481,14 +481,20 @@ struct ContentView: View {
         .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
-                if themeStyle == "dark" {
+                if isInPopover && themeStyle == "glass" {
+                    Color.clear
+                } else if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                    if !isInPopover {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                    }
                 } else if themeStyle == "light" {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
+                    if !isInPopover {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
+                    }
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
@@ -509,8 +515,10 @@ struct ContentView: View {
                     )
                     .cornerRadius(16)
                     
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.18), lineWidth: 0.5)
+                    if !isInPopover {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.18), lineWidth: 0.5)
+                    }
                 }
                 
                 WindowAccessor { window in
