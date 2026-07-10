@@ -23,10 +23,7 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
 | :---: | :---: | :---: |
 | ![Glass Theme](assets/theme_glass.png) | ![Dark Theme](assets/theme_dark.png) | ![Light Theme](assets/theme_light.png) |
 
-- **Liquid Glass**: Our signature theme using native macOS vibrancy (`NSGlassEffectView` on macOS 26.0+) for a true glassmorphic backdrop.
-- **Vibrant Dark**: A sleek, solid dark theme built to blend elegantly with your system dark mode.
-- **Vibrant Light**: A clean, solid light theme with matching subtle borders.
-- **Subtle Borders**: Meticulously balanced container outlines, decreased by 75% for a premium, frameless aesthetic.
+
 
 
 ## Menu 
