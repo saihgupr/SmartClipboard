@@ -2,6 +2,11 @@
 
 SmartClipboard is a modern macOS menu bar application built with SwiftUI that enhances your clipboard experience with AI-powered semantic search.
 
+<p align="center">
+  <img src="assets/screenshot5.jpeg" width="45%" alt="Spotlight Search Window" />
+  <img src="assets/screenshot6.jpeg" width="45%" alt="Model Settings" />
+</p>
+
 ## Features
 
 - **Always Accessible**: Lives in your macOS menu bar for quick access anytime.
@@ -19,12 +24,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 - **Privacy First**: Automatically filters sensitive data from password managers and respects `org.nspasteboard.ConcealedType` flags.
 - **High Performance**: Ultra-fast local search and SwiftData persistence layer optimized for zero-latency interactions.
 
-## Screenshots 
-
-<p align="center">
-  <img src="assets/screenshot5.jpeg" width="48%" alt="Spotlight Search Window" />
-  <img src="assets/screenshot6.png" width="48%" alt="Model Settings" />
-</p>
+## Menu 
 
 <p align="center">
   <img src="assets/screenshot1.png" width="48%" alt="Menu Bar Popover" />
