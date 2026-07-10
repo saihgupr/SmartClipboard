@@ -19,11 +19,9 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 
 SmartClipboard is designed to look modern and native on macOS. Choose between three premium styles:
 
-<p align="center">
-  <img src="assets/theme_glass.png" width="31%" alt="Glass Theme" />
-  <img src="assets/theme_dark.png" width="31%" alt="Dark Theme" />
-  <img src="assets/theme_light.png" width="31%" alt="Light Theme" />
-</p>
+| Glass | Dark | Light |
+| :---: | :---: | :---: |
+| ![Glass Theme](assets/theme_glass.png) | ![Dark Theme](assets/theme_dark.png) | ![Light Theme](assets/theme_light.png) |
 
 - **Liquid Glass**: Our signature theme using native macOS vibrancy (`NSGlassEffectView` on macOS 26.0+) for a true glassmorphic backdrop.
 - **Vibrant Dark**: A sleek, solid dark theme built to blend elegantly with your system dark mode.
