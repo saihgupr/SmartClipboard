@@ -26,7 +26,7 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
 
 
 
-## Menu 
+## Settings
 
 <p align="center">
   <img src="assets/screenshot1.png" width="48%" alt="Menu Bar Popover" />
@@ -52,14 +52,6 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
 | `Up / Down Arrow` | Detail View | Navigate and view previous / next item content |
 | `Cmd + C` | Detail View | Copy item to clipboard without closing window (or copies text selection if active) |
 | `Escape` | Any | Close detail view / dismiss SmartClipboard window |
-
-## Technology Stack
-
-- **SwiftUI**: For a native, modern macOS user interface.
-- **AppKit**: Efficient clipboard monitoring via `NSPasteboard`.
-- **SwiftData**: Modern, high-performance persistence layer for your history.
-- **Gemini API**: Deep integration with Google's Gemini models for intelligent semantic analysis.
-- **XcodeGen**: Clean project management and version control.
 
 ## Getting Started
 
