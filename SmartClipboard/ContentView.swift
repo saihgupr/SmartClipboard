@@ -468,7 +468,7 @@ struct ContentView: View {
             }
             
             if showingDetail, let item = selectedItem {
-                ClipboardDetailView(item: item, isSharingPickerOpen: $isSharingPickerOpen) {
+                ClipboardDetailView(item: item, isSharingPickerOpen: $isSharingPickerOpen, isInPopover: isInPopover) {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         showingDetail = false
                     }
@@ -481,7 +481,7 @@ struct ContentView: View {
         .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
-                if isInPopover && themeStyle == "glass" {
+                if isInPopover {
                     Color.clear
                 } else if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
@@ -1549,6 +1549,7 @@ struct ClipboardDetailView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     let item: ClipboardItem
     @Binding var isSharingPickerOpen: Bool
+    let isInPopover: Bool
     let onBack: () -> Void
     @AppStorage("themeStyle") private var themeStyle = "glass"
     
@@ -1608,7 +1609,9 @@ struct ClipboardDetailView: View {
         .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
-                if themeStyle == "dark" {
+                if isInPopover {
+                    Color.clear
+                } else if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(Color.white.opacity(0.03), lineWidth: 0.5)

@@ -81,6 +81,7 @@ func presentSettingsWindow(manager: ClipboardManager, importManager: ImportManag
 @MainActor
 final class StatusItemManager: NSObject {
     private var statusItem: NSStatusItem?
+    private var popover: NSPopover?
     private var mainWindow: NSPanel?
     
     private let clipboardManager: ClipboardManager
@@ -94,6 +95,7 @@ final class StatusItemManager: NSObject {
         super.init()
         
         setupStatusItem()
+        setupPopover()
         setupMainWindow()
         
         clipboardManager.onPaste = { [weak self] in
@@ -101,7 +103,7 @@ final class StatusItemManager: NSObject {
         }
         
         GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
-            DispatchQueue.main.async { self?.toggleMainWindow(fromStatusItem: false) }
+            DispatchQueue.main.async { self?.toggleMainWindow() }
         }
 
         NotificationCenter.default.addObserver(forName: .closeUI, object: nil, queue: .main) { [weak self] _ in
@@ -119,6 +121,20 @@ final class StatusItemManager: NSObject {
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
+    }
+    
+    private func setupPopover() {
+        let popover = NSPopover()
+        popover.contentSize = NSSize(width: 380, height: 500)
+        popover.behavior = .transient
+        
+        let contentView = ContentView(isInPopover: true)
+            .environmentObject(clipboardManager)
+            .environmentObject(importManager)
+            .modelContainer(modelContainer)
+        
+        popover.contentViewController = NSHostingController(rootView: contentView)
+        self.popover = popover
     }
     
     private func setupMainWindow() {
@@ -152,11 +168,34 @@ final class StatusItemManager: NSObject {
         if NSApp.currentEvent?.type == .rightMouseUp {
             showContextMenu(sender)
         } else {
-            toggleMainWindow(fromStatusItem: true)
+            togglePopover()
         }
     }
     
-    private func toggleMainWindow(fromStatusItem: Bool) {
+    private func updatePopoverAppearance() {
+        guard let popover = popover else { return }
+        let theme = UserDefaults.standard.string(forKey: "themeStyle") ?? "glass"
+        if theme == "light" {
+            popover.appearance = NSAppearance(named: .vibrantLight)
+        } else {
+            popover.appearance = NSAppearance(named: .vibrantDark)
+        }
+    }
+    
+    private func togglePopover() {
+        guard let button = statusItem?.button, let popover = popover else { return }
+        if popover.isShown {
+            popover.performClose(button)
+        } else {
+            mainWindow?.orderOut(nil)
+            updatePopoverAppearance()
+            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": true])
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+    
+    private func toggleMainWindow() {
         guard let window = mainWindow else { return }
 
         let isActuallyFrontmost = window.isVisible
@@ -167,37 +206,18 @@ final class StatusItemManager: NSObject {
         if isActuallyFrontmost {
             window.orderOut(nil)
         } else {
+            if popover?.isShown == true { popover?.performClose(nil) }
             NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
             NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
             NSApp.activate(ignoringOtherApps: true)
-            
-            if fromStatusItem, let button = statusItem?.button, let statusBarWindow = button.window, let screen = statusBarWindow.screen {
-                let rectInWindow = button.convert(button.bounds, to: nil)
-                let screenRect = statusBarWindow.convertToScreen(rectInWindow)
-                let screenFrame = screen.visibleFrame
-                
-                let windowSize = window.frame.size
-                var xPos = screenRect.midX - windowSize.width / 2
-                let yPos = screenRect.minY - windowSize.height - 4
-                
-                if xPos < screenFrame.minX {
-                    xPos = screenFrame.minX
-                }
-                if xPos + windowSize.width > screenFrame.maxX {
-                    xPos = screenFrame.maxX - windowSize.width
-                }
-                
-                window.setFrameOrigin(NSPoint(x: xPos, y: yPos))
-            } else {
-                window.center()
-            }
-            
+            window.center()
             window.orderFrontRegardless()
             window.makeKeyAndOrderFront(nil)
         }
     }
     
     func closeUI() {
+        if popover?.isShown == true { popover?.performClose(nil) }
         mainWindow?.orderOut(nil)
     }
     
