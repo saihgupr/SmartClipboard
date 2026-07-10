@@ -487,13 +487,13 @@ struct ContentView: View {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.03), lineWidth: 0.5)
                     }
                 } else if themeStyle == "light" {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
+                            .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
                     }
                 } else {
                     if #available(macOS 26.0, *) {
@@ -517,7 +517,7 @@ struct ContentView: View {
                     
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.18), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
                     }
                 }
                 
@@ -1611,11 +1611,11 @@ struct ClipboardDetailView: View {
                 if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.03), lineWidth: 0.5)
                 } else if themeStyle == "light" {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
+                        .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
@@ -1637,7 +1637,7 @@ struct ClipboardDetailView: View {
                     .cornerRadius(16)
                     
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.18), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
                 }
             }
             .ignoresSafeArea()
