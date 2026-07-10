@@ -43,8 +43,8 @@ echo "🔐 Checking Accessibility permission..."
 if osascript -e 'tell application "System Events" to return name of first process' &>/dev/null; then
     echo "   ✅ Accessibility already granted (persisted via stable signing identity)"
 else
-    echo "   ⚠️  Accessibility not yet granted. Please enable once in System Settings > Privacy > Accessibility."
-    echo "        (This only needs to be done once — it will persist across future rebuilds.)"
+    echo "   ⚠️  Accessibility not yet granted. Resetting stale entries and opening System Settings..."
+    tccutil reset Accessibility com.saihgupr.SmartClipboard &>/dev/null || true
     open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
 fi
 
