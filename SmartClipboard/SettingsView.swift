@@ -191,7 +191,7 @@ struct GeneralSettingsView: View {
                         }
                         Spacer()
                         Text(dbSizeString)
-                            .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 12, weight: .regular, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
                 }
