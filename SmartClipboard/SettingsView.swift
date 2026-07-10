@@ -398,6 +398,7 @@ struct MigrationSettingsView: View {
     @EnvironmentObject private var importManager: ImportManager
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @State private var showDeleteConfirmation = false
+    @State private var dbSizeString = "Calculating..."
     
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -439,7 +440,23 @@ struct MigrationSettingsView: View {
             }
 
             SettingsSection(title: "Clean Slate") {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Database Disk Usage")
+                                .font(.system(size: 13, weight: .medium))
+                            Text("The current size of your clipboard history on disk.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Text(dbSizeString)
+                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Divider()
+                    
                     Text("Remove all items from your current history. This is recommended before importing from another app to ensure a clean transition.")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -460,6 +477,7 @@ struct MigrationSettingsView: View {
                         Button("Cancel", role: .cancel) { }
                         Button("Delete Everything", role: .destructive) {
                             clipboardManager.clearAllHistory()
+                            updateDBSize()
                         }
                     } message: {
                         Text("This action cannot be undone. All clipboard items, including pinned and favorited items, will be permanently removed.")
@@ -486,6 +504,41 @@ struct MigrationSettingsView: View {
                     .cornerRadius(8)
                 }
             }
+        }
+        .onAppear {
+            updateDBSize()
+        }
+        .onChange(of: importManager.isImporting) { _, newValue in
+            if !newValue {
+                // Refresh size when import finishes
+                updateDBSize()
+            }
+        }
+    }
+    
+    private func updateDBSize() {
+        let fileManager = FileManager.default
+        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dbFolder = appSupportURL.appendingPathComponent("SmartClipboard")
+        
+        do {
+            let files = try fileManager.contentsOfDirectory(at: dbFolder, includingPropertiesForKeys: [.fileSizeKey])
+            var totalBytes: Int64 = 0
+            for file in files {
+                if file.lastPathComponent.hasPrefix("clipboardHistory") {
+                    let resources = try file.resourceValues(forKeys: [.fileSizeKey])
+                    if let size = resources.fileSize {
+                        totalBytes += Int64(size)
+                    }
+                }
+            }
+            
+            let formatter = ByteCountFormatter()
+            formatter.allowedUnits = [.useBytes, .useKB, .useMB, .useGB]
+            formatter.countStyle = .file
+            dbSizeString = formatter.string(fromByteCount: totalBytes)
+        } catch {
+            dbSizeString = "Unknown"
         }
     }
 }
