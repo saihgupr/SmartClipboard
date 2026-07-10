@@ -38,13 +38,13 @@ SmartClipboard is designed to look modern and native on macOS. Choose between th
 ## Settings
 
 <p align="center">
-  <img src="assets/screenshot1.png" width="48%" alt="Menu Bar Popover" />
+  <img src="assets/screenshot1_v2.png" width="48%" alt="Menu Bar Popover" />
   <img src="assets/screenshot2.png" width="48%" alt="Detail View" />
 </p>
 
 <p align="center">
   <img src="assets/screenshot3.png" width="48%" alt="Semantic Search" />
-  <img src="assets/screenshot4_v2.png" width="48%" alt="General Settings" />
+  <img src="assets/screenshot4.png" width="48%" alt="General Settings" />
 </p>
 
 ## Keyboard Shortcuts
