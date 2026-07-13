@@ -10,6 +10,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 ## Features
 
 - **AI-Powered Semantic Search**: Ask natural language questions like *"Where was that API key?"* or *"Find the code snippet"* using Gemini AI.
+- **Smart Date & Time Filtering**: Find clips from specific timeframes by searching natural language descriptors (e.g., *"today"*, *"yesterday"*), weekdays (e.g., *"Monday"*), specific times (e.g., *"2:30 pm"*, *"11:00"*), or calendar formats (e.g., *"July 13"*, *"07/13"*).
 - **Dual Interface Layouts**: Access quickly via a lightweight menu bar popover or invoke a Spotlight-style center-screen floating window.
 - **Power-User Shortcuts**: Quick indexed pasting (`Cmd + [1-9]`), sequential pasting (`Option + [1-9]` for batch forms), and rapid navigation using Arrow keys.
 - **Privacy & Security**: Incognito sessions, automatic password manager filtering, and local secure storage.
