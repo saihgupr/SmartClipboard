@@ -174,7 +174,7 @@ final class StatusItemManager: NSObject {
     
     private func updatePopoverAppearance() {
         guard let popover = popover else { return }
-        let theme = UserDefaults.standard.string(forKey: "themeStyle") ?? "glass"
+        let theme = UserDefaults.standard.string(forKey: "themeStyle") ?? "darkGlass"
         if theme == "light" {
             popover.appearance = NSAppearance(named: .vibrantLight)
         } else {

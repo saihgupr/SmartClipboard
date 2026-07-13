@@ -238,7 +238,7 @@ struct ContentView: View {
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     @AppStorage("leftArrowAction") private var leftArrowAction: String = "googleSearch"
     @AppStorage("longLeftArrowAction") private var longLeftArrowAction: String = "delete"
-    @AppStorage("themeStyle") private var themeStyle = "glass"
+    @AppStorage("themeStyle") private var themeStyle = "darkGlass"
     
     @State private var leftArrowDownTime: Date?
     @State private var leftArrowLongPressTriggered = false
@@ -822,14 +822,17 @@ struct ContentView: View {
             }
         }()
         
-        if action == "quickCopy" {
+        // Copy and move to top of the list for all non-delete actions
+        if action != "delete" {
             let joinedContent = targets.map { $0.content }.joined(separator: "\n")
             for target in targets {
                 target.timestamp = Date()
             }
             try? modelContext.save()
             clipboardManager.copyToClipboard(content: joinedContent)
-            
+        }
+        
+        if action == "quickCopy" {
             let currentItems = displayItems
             let targetIndices = targets.compactMap { target in
                 currentItems.firstIndex(where: { $0.id == target.id })
@@ -857,10 +860,7 @@ struct ContentView: View {
             }
         } else if action == "pastePlainText" {
             let joinedContent = targets.map { $0.content }.joined(separator: "\n")
-            for target in targets {
-                target.timestamp = Date()
-            }
-            try? modelContext.save()
+            // Already copied and moved to top above. We just need to simulate paste
             clipboardManager.paste(content: joinedContent)
         } else if action == "googleSearch" {
             let joinedContent = targets.map { $0.content }.joined(separator: " ")
@@ -1583,7 +1583,7 @@ struct ClipboardDetailView: View {
     @Binding var isSharingPickerOpen: Bool
     let isInPopover: Bool
     let onBack: () -> Void
-    @AppStorage("themeStyle") private var themeStyle = "glass"
+    @AppStorage("themeStyle") private var themeStyle = "darkGlass"
     
     var body: some View {
         VStack(spacing: 0) {

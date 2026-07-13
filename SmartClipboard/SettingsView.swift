@@ -3,7 +3,7 @@ import SwiftData
 import ServiceManagement
 
 struct SettingsView: View {
-    @AppStorage("themeStyle") private var themeStyle = "glass"
+    @AppStorage("themeStyle") private var themeStyle = "darkGlass"
     @State private var selectedTab: SettingsTab? = .general
     
     enum SettingsTab: String, CaseIterable, Identifiable {
@@ -133,7 +133,7 @@ struct GeneralSettingsView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("historyRetentionDays") private var historyRetentionDays: Int = 180
-    @AppStorage("themeStyle") private var themeStyle = "glass"
+    @AppStorage("themeStyle") private var themeStyle = "darkGlass"
     @State private var dbSizeString = "Calculating..."
 
     var body: some View {

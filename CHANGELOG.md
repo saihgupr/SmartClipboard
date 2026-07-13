@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-07-13
+
+### Added
+- Introduced the **Dark Glass** theme style option using macOS 26.0+'s clear Liquid Glass (`NSGlassEffectView.Style.clear`) with native dark tinting (`tintColor`). This gives a clear, refractive physical glass look (distorted warp) without frosted blur.
+- Set **Dark Glass** as the default app theme style.
+- Enhanced specular gradients and outer border stroke opacities on both Glass and Dark Glass themes to make reflection highlights look crisper and more physical.
+- Updated the **Left Arrow Key** action logic to automatically copy the item to the clipboard and update its timestamp to move it to the top of the history list for all actions (except delete).
+
+### Fixed
+- Fixed a bug in `deploy.sh` that was incorrectly checking runner permissions and wiping out the application's macOS Accessibility permissions on every deployment.
+
 ## [1.0.2] - 2026-07-10
 
 ### Added
