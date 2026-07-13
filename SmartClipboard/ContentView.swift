@@ -497,12 +497,15 @@ struct ContentView: View {
                     }
                 } else if themeStyle == "darkGlass" {
                     if #available(macOS 26.0, *) {
-                        GlassEffectView(style: .clear, cornerRadius: 16)
+                        GlassEffectView(
+                            style: .clear,
+                            tintColor: NSColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.72),
+                            cornerRadius: 16
+                        )
                     } else {
                         VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
+                        Color.black.opacity(0.3)
                     }
-                    
-                    Color.black.opacity(0.35)
                     
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
@@ -1445,6 +1448,7 @@ struct VisualEffectView: NSViewRepresentable {
 @available(macOS 26.0, *)
 struct GlassEffectView: NSViewRepresentable {
     var style: NSGlassEffectView.Style = .regular
+    var tintColor: NSColor? = nil
     var cornerRadius: CGFloat = 0
     
     func makeNSView(context: Context) -> NSGlassEffectView {
@@ -1453,6 +1457,7 @@ struct GlassEffectView: NSViewRepresentable {
         if cornerRadius > 0 {
             view.cornerRadius = cornerRadius
         }
+        view.tintColor = tintColor
         return view
     }
     
@@ -1461,6 +1466,7 @@ struct GlassEffectView: NSViewRepresentable {
         if cornerRadius > 0 {
             nsView.cornerRadius = cornerRadius
         }
+        nsView.tintColor = tintColor
     }
 }
 
@@ -1647,12 +1653,15 @@ struct ClipboardDetailView: View {
                         .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
                 } else if themeStyle == "darkGlass" {
                     if #available(macOS 26.0, *) {
-                        GlassEffectView(style: .clear, cornerRadius: 16)
+                        GlassEffectView(
+                            style: .clear,
+                            tintColor: NSColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.72),
+                            cornerRadius: 16
+                        )
                     } else {
                         VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
+                        Color.black.opacity(0.3)
                     }
-                    
-                    Color.black.opacity(0.35)
                     
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
