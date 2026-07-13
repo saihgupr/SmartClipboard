@@ -510,10 +510,10 @@ struct ContentView: View {
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0.12),
-                            Color.white.opacity(0.04),
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
                             Color.clear,
-                            Color.white.opacity(0.02)
+                            Color.white.opacity(0.04)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -522,7 +522,7 @@ struct ContentView: View {
                     
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                     }
                 } else {
                     if #available(macOS 26.0, *) {
@@ -534,10 +534,10 @@ struct ContentView: View {
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0.12),
-                            Color.white.opacity(0.04),
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
                             Color.clear,
-                            Color.white.opacity(0.02)
+                            Color.white.opacity(0.04)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -546,7 +546,7 @@ struct ContentView: View {
                     
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                     }
                 }
                 
@@ -1666,10 +1666,10 @@ struct ClipboardDetailView: View {
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0.12),
-                            Color.white.opacity(0.04),
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
                             Color.clear,
-                            Color.white.opacity(0.02)
+                            Color.white.opacity(0.04)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -1677,7 +1677,7 @@ struct ClipboardDetailView: View {
                     .cornerRadius(16)
                     
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
@@ -1688,10 +1688,10 @@ struct ClipboardDetailView: View {
                     // macOS Golden Gate liquid glass light-reflection overlay
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0.12),
-                            Color.white.opacity(0.04),
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
                             Color.clear,
-                            Color.white.opacity(0.02)
+                            Color.white.opacity(0.04)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -1699,7 +1699,7 @@ struct ClipboardDetailView: View {
                     .cornerRadius(16)
                     
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                 }
             }
             .ignoresSafeArea()
