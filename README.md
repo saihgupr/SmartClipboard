@@ -9,12 +9,15 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 
 ## Features
 
-- **AI-Powered Semantic Search**: Ask natural language questions like *"Where was that API key?"* or *"Find the code snippet"* using Gemini AI.
-- **Smart Date & Time Filtering**: Find clips from specific timeframes by searching natural language descriptors (e.g., *"today"*, *"yesterday"*), weekdays (e.g., *"Monday"*), specific times (e.g., *"2:30 pm"*, *"11:00"*), or calendar formats (e.g., *"July 13"*, *"07/13"*).
-- **Dual Interface Layouts**: Access quickly via a lightweight menu bar popover or invoke a Spotlight-style center-screen floating window.
-- **Power-User Shortcuts**: Quick indexed pasting (`Cmd + [1-9]`), sequential pasting (`Option + [1-9]` for batch forms), and rapid navigation using Arrow keys.
-- **Privacy & Security**: Incognito sessions, automatic password manager filtering, and local secure storage.
-- **Seamless Migration**: Built-in history importer for Alfred, BetterTouchTool, and Keyboard Maestro.
+* AI Search: Find anything in your clipboard by asking a question in plain English. For example, “Where was that API key?” or “Find the code snippet.” Powered by Gemini AI.
+* Find by Date or Time: Search for items you copied using terms like “today”, “yesterday”, “Monday”, “2:30 PM”, “July 13”, or “07/13”.
+* Two Ways to Access Your Clipboard: Open it from the menu bar for quick access, or use a Spotlight-style floating window that appears in the center of your screen.
+* Keyboard-First Shortcuts:
+    * Paste recent items instantly with ⌘ + 1–9.
+    * Paste multiple items in order with ⌥ + 1–9, useful for filling out forms.
+    * Browse your clipboard using the arrow keys.
+* Privacy & Security: Use incognito mode when you don’t want items saved. Clipboard entries from password managers are automatically ignored, and all history is stored securely on your device.
+* Easy Migration: Import your existing clipboard history from Alfred, BetterTouchTool, or Keyboard Maestro in a few clicks.
 
 ## Appearance & Themes
 
