@@ -236,7 +236,7 @@ struct ContentView: View {
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-2.5-flash"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
-    @AppStorage("leftArrowAction") private var leftArrowAction: String = "quickCopy"
+    @AppStorage("leftArrowAction") private var leftArrowAction: String = "googleSearch"
     @AppStorage("longLeftArrowAction") private var longLeftArrowAction: String = "delete"
     @AppStorage("themeStyle") private var themeStyle = "glass"
     

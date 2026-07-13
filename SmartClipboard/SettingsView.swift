@@ -696,7 +696,7 @@ struct SettingsSection<Content: View>: View {
 }
 
 struct LeftArrowActionSettingView: View {
-    @AppStorage("leftArrowAction") private var leftArrowAction: String = "quickCopy"
+    @AppStorage("leftArrowAction") private var leftArrowAction: String = "googleSearch"
     @AppStorage("longLeftArrowAction") private var longLeftArrowAction: String = "delete"
     
     var body: some View {
