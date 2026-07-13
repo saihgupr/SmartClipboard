@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-07-13
+
+### Changed
+- Replaced the native `NSPopover` with a custom floating panel positioned relative to the menu bar status item. This enables consistent themes, seamless visual transitions, and custom styling for the popover interface.
+- Updated the features presentation in `README.md` to highlight key capabilities (AI Search, Date & Time finding, Dual Access Layouts, Keyboard Shortcuts, and Migration).
+
 ## [1.0.3] - 2026-07-13
 
 ### Added
