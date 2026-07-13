@@ -211,11 +211,10 @@ struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @EnvironmentObject private var importManager: ImportManager
     @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
-    
-    let isInPopover: Bool
+    @State private var isShownAsPopover: Bool
     
     init(isInPopover: Bool) {
-        self.isInPopover = isInPopover
+        self._isShownAsPopover = State(initialValue: isInPopover)
     }
     
     @State private var searchQuery = ""
@@ -466,9 +465,10 @@ struct ContentView: View {
                     }
                 }
             }
+            .padding(.top, isShownAsPopover ? 10 : 0)
             
             if showingDetail, let item = selectedItem {
-                ClipboardDetailView(item: item, isSharingPickerOpen: $isSharingPickerOpen, isInPopover: isInPopover) {
+                ClipboardDetailView(item: item, isSharingPickerOpen: $isSharingPickerOpen, isInPopover: isShownAsPopover) {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         showingDetail = false
                     }
@@ -483,16 +483,8 @@ struct ContentView: View {
             ZStack {
                 if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                    }
                 } else if themeStyle == "light" {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
-                    }
                 } else if themeStyle == "darkGlass" {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
@@ -517,11 +509,6 @@ struct ContentView: View {
                         endPoint: .bottomTrailing
                     )
                     .cornerRadius(16)
-                    
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                    }
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
@@ -541,19 +528,21 @@ struct ContentView: View {
                         endPoint: .bottomTrailing
                     )
                     .cornerRadius(16)
-                    
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                    }
                 }
                 
                 WindowAccessor { window in
                     self.hostWindow = window
                 }
             }
+            .clipShape(PopoverBubbleShape(showArrow: isShownAsPopover))
+            .overlay(
+                PopoverBubbleShape(showArrow: isShownAsPopover)
+                    .stroke(
+                        themeStyle == "light" ? Color.black.opacity(0.03) : Color.white.opacity(0.08),
+                        lineWidth: 0.5
+                    )
+            )
             .ignoresSafeArea()
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         )
         .onAppear {
             setupKeyboardMonitor()
@@ -568,8 +557,8 @@ struct ContentView: View {
             removeKeyboardMonitor()
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
-            guard let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool,
-                  targetIsPopover == self.isInPopover else { return }
+            let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool ?? false
+            isShownAsPopover = targetIsPopover
             
             searchQuery = ""
             pageLimit = 1
@@ -1635,22 +1624,15 @@ struct ClipboardDetailView: View {
                     .textSelection(.enabled)
             }
         }
+        .padding(.top, isInPopover ? 10 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
                 if themeStyle == "dark" {
                     Color(red: 0.118, green: 0.118, blue: 0.118)
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.03), lineWidth: 0.5)
-                    }
                 } else if themeStyle == "light" {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
-                    }
                 } else if themeStyle == "darkGlass" {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
@@ -1675,11 +1657,6 @@ struct ClipboardDetailView: View {
                         endPoint: .bottomTrailing
                     )
                     .cornerRadius(16)
-                    
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                    }
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
@@ -1699,18 +1676,21 @@ struct ClipboardDetailView: View {
                         endPoint: .bottomTrailing
                     )
                     .cornerRadius(16)
-                    
-                    if !isInPopover {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                    }
                 }
             }
+            .clipShape(PopoverBubbleShape(showArrow: isInPopover))
+            .overlay(
+                PopoverBubbleShape(showArrow: isInPopover)
+                    .stroke(
+                        themeStyle == "light" ? Color.black.opacity(0.03) : Color.white.opacity(0.08),
+                        lineWidth: 0.5
+                    )
+            )
             .ignoresSafeArea()
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         )
     }
 }
+
 
 // MARK: - ShareButton
 struct ShareButton: View {
@@ -1931,5 +1911,108 @@ class MouseDetectingNSView: NSView {
     override func rightMouseDown(with event: NSEvent) {
         onRightClick?(event.modifierFlags)
         super.rightMouseDown(with: event)
+    }
+}
+
+// MARK: - PopoverBubbleShape
+struct PopoverBubbleShape: Shape {
+    var arrowHeight: CGFloat = 10
+    var arrowWidth: CGFloat = 24
+    var cornerRadius: CGFloat = 16
+    var showArrow: Bool
+    
+    func path(in rect: CGRect) -> Path {
+        if !showArrow {
+            return RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).path(in: rect)
+        }
+        
+        var path = Path()
+        
+        let minX = rect.minX
+        let maxX = rect.maxX
+        let minY = rect.minY + arrowHeight
+        let maxY = rect.maxY
+        
+        let midX = rect.midX
+        let arrowLeft = midX - arrowWidth / 2
+        let arrowRight = midX + arrowWidth / 2
+        
+        // Start from top-left corner (after the radius)
+        path.move(to: CGPoint(x: minX + cornerRadius, y: minY))
+        
+        // Go to left side of the arrow
+        path.addLine(to: CGPoint(x: arrowLeft, y: minY))
+        
+        // Draw the gentle popover arrow using S-curves and a rounded cap
+        let tipOffset: CGFloat = 2.2
+        let tipHeightOffset: CGFloat = 1.3
+        
+        path.addCurve(
+            to: CGPoint(x: midX - tipOffset, y: rect.minY + tipHeightOffset),
+            control1: CGPoint(x: arrowLeft + 3.5, y: minY),
+            control2: CGPoint(x: midX - 4.5, y: rect.minY + 2.5)
+        )
+        
+        path.addQuadCurve(
+            to: CGPoint(x: midX + tipOffset, y: rect.minY + tipHeightOffset),
+            control: CGPoint(x: midX, y: rect.minY)
+        )
+        
+        path.addCurve(
+            to: CGPoint(x: arrowRight, y: minY),
+            control1: CGPoint(x: midX + 4.5, y: rect.minY + 2.5),
+            control2: CGPoint(x: arrowRight - 3.5, y: minY)
+        )
+        
+        // Go to top-right corner before radius
+        path.addLine(to: CGPoint(x: maxX - cornerRadius, y: minY))
+        
+        // Top-right corner arc
+        path.addArc(
+            center: CGPoint(x: maxX - cornerRadius, y: minY + cornerRadius),
+            radius: cornerRadius,
+            startAngle: Angle(radians: -Double.pi / 2),
+            endAngle: Angle(radians: 0),
+            clockwise: false
+        )
+        
+        // Right side
+        path.addLine(to: CGPoint(x: maxX, y: maxY - cornerRadius))
+        
+        // Bottom-right corner arc
+        path.addArc(
+            center: CGPoint(x: maxX - cornerRadius, y: maxY - cornerRadius),
+            radius: cornerRadius,
+            startAngle: Angle(radians: 0),
+            endAngle: Angle(radians: Double.pi / 2),
+            clockwise: false
+        )
+        
+        // Bottom side
+        path.addLine(to: CGPoint(x: minX + cornerRadius, y: maxY))
+        
+        // Bottom-left corner arc
+        path.addArc(
+            center: CGPoint(x: minX + cornerRadius, y: maxY - cornerRadius),
+            radius: cornerRadius,
+            startAngle: Angle(radians: Double.pi / 2),
+            endAngle: Angle(radians: Double.pi),
+            clockwise: false
+        )
+        
+        // Left side
+        path.addLine(to: CGPoint(x: minX, y: minY + cornerRadius))
+        
+        // Top-left corner arc
+        path.addArc(
+            center: CGPoint(x: minX + cornerRadius, y: minY + cornerRadius),
+            radius: cornerRadius,
+            startAngle: Angle(radians: Double.pi),
+            endAngle: Angle(radians: -Double.pi / 2),
+            clockwise: false
+        )
+        
+        path.closeSubpath()
+        return path
     }
 }

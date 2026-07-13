@@ -170,7 +170,7 @@ final class StatusItemManager: NSObject {
     private func showMainWindow(relativeTo button: NSButton?) {
         guard let window = mainWindow else { return }
         
-        NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
+        NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": button != nil])
         NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
         NSApp.activate(ignoringOtherApps: true)
         
@@ -185,7 +185,7 @@ final class StatusItemManager: NSObject {
             let screenFrame = screen.visibleFrame
             
             var x = buttonOrigin.x + (button.bounds.width / 2) - (windowWidth / 2)
-            var y = buttonOrigin.y - windowHeight - 5
+            var y = buttonOrigin.y - windowHeight
             
             // Constrain within screen bounds
             if x < screenFrame.minX {
