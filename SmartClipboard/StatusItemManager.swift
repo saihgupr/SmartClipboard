@@ -185,7 +185,7 @@ final class StatusItemManager: NSObject {
             let screenFrame = screen.visibleFrame
             
             var x = buttonOrigin.x + (button.bounds.width / 2) - (windowWidth / 2)
-            var y = buttonOrigin.y - windowHeight
+            var y = buttonOrigin.y - windowHeight + 8
             
             // Constrain within screen bounds
             if x < screenFrame.minX {
