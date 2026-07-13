@@ -91,7 +91,7 @@ struct SettingsView: View {
             .toolbarBackground(.hidden, for: .windowToolbar)
         }
         .frame(minWidth: 750, minHeight: 550)
-        .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
+        .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
         .onReceive(NotificationCenter.default.publisher(for: .settingsWillShow)) { _ in
             selectedTab = .general
         }
@@ -224,12 +224,13 @@ struct GeneralSettingsView: View {
                     Spacer()
                     Picker("", selection: $themeStyle) {
                         Text("Glass").tag("glass")
+                        Text("Dark Glass").tag("darkGlass")
                         Text("Dark").tag("dark")
                         Text("Light").tag("light")
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 180)
+                    .frame(width: 300)
                 }
             }
         }

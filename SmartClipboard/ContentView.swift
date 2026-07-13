@@ -478,7 +478,7 @@ struct ContentView: View {
             }
         }
         .frame(width: 380, height: 500)
-        .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
+        .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
                 if isInPopover {
@@ -494,6 +494,32 @@ struct ContentView: View {
                     if !isInPopover {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
+                    }
+                } else if themeStyle == "darkGlass" {
+                    if #available(macOS 26.0, *) {
+                        GlassEffectView(style: .clear, cornerRadius: 16)
+                    } else {
+                        VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
+                    }
+                    
+                    Color.black.opacity(0.35)
+                    
+                    // macOS Golden Gate liquid glass light-reflection overlay
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.12),
+                            Color.white.opacity(0.04),
+                            Color.clear,
+                            Color.white.opacity(0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .cornerRadius(16)
+                    
+                    if !isInPopover {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
                     }
                 } else {
                     if #available(macOS 26.0, *) {
@@ -1606,7 +1632,7 @@ struct ClipboardDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .preferredColorScheme(themeStyle == "dark" ? .dark : (themeStyle == "light" ? .light : nil))
+        .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
         .background(
             ZStack {
                 if isInPopover {
@@ -1619,6 +1645,30 @@ struct ClipboardDetailView: View {
                     Color(red: 0.96, green: 0.96, blue: 0.96)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(Color.black.opacity(0.03), lineWidth: 0.5)
+                } else if themeStyle == "darkGlass" {
+                    if #available(macOS 26.0, *) {
+                        GlassEffectView(style: .clear, cornerRadius: 16)
+                    } else {
+                        VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
+                    }
+                    
+                    Color.black.opacity(0.35)
+                    
+                    // macOS Golden Gate liquid glass light-reflection overlay
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.12),
+                            Color.white.opacity(0.04),
+                            Color.clear,
+                            Color.white.opacity(0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .cornerRadius(16)
+                    
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
                 } else {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(style: .regular, cornerRadius: 16)
