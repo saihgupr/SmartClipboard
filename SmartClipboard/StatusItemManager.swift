@@ -81,8 +81,8 @@ func presentSettingsWindow(manager: ClipboardManager, importManager: ImportManag
 @MainActor
 final class StatusItemManager: NSObject {
     private var statusItem: NSStatusItem?
-    private var popover: NSPopover?
     private var mainWindow: NSPanel?
+    private var lastCloseTime: Date?
     
     private let clipboardManager: ClipboardManager
     private let importManager: ImportManager
@@ -95,8 +95,17 @@ final class StatusItemManager: NSObject {
         super.init()
         
         setupStatusItem()
-        setupPopover()
         setupMainWindow()
+        
+        if let window = mainWindow {
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didResignKeyNotification,
+                object: window,
+                queue: .main
+            ) { [weak self] _ in
+                self?.lastCloseTime = Date()
+            }
+        }
         
         clipboardManager.onPaste = { [weak self] in
             DispatchQueue.main.async { self?.closeUI() }
@@ -121,20 +130,6 @@ final class StatusItemManager: NSObject {
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
-    }
-    
-    private func setupPopover() {
-        let popover = NSPopover()
-        popover.contentSize = NSSize(width: 380, height: 500)
-        popover.behavior = .transient
-        
-        let contentView = ContentView(isInPopover: true)
-            .environmentObject(clipboardManager)
-            .environmentObject(importManager)
-            .modelContainer(modelContainer)
-        
-        popover.contentViewController = NSHostingController(rootView: contentView)
-        self.popover = popover
     }
     
     private func setupMainWindow() {
@@ -172,52 +167,82 @@ final class StatusItemManager: NSObject {
         }
     }
     
-    private func updatePopoverAppearance() {
-        guard let popover = popover else { return }
-        let theme = UserDefaults.standard.string(forKey: "themeStyle") ?? "darkGlass"
-        if theme == "light" {
-            popover.appearance = NSAppearance(named: .vibrantLight)
+    private func showMainWindow(relativeTo button: NSButton?) {
+        guard let window = mainWindow else { return }
+        
+        NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
+        NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
+        NSApp.activate(ignoringOtherApps: true)
+        
+        if let button = button, let buttonWindow = button.window {
+            let buttonScreenRect = button.convert(button.bounds, to: nil)
+            let buttonOrigin = buttonWindow.convertToScreen(buttonScreenRect).origin
+            
+            let windowWidth = window.frame.width
+            let windowHeight = window.frame.height
+            
+            let screen = NSScreen.screens.first { $0.frame.contains(buttonOrigin) } ?? NSScreen.main ?? NSScreen.screens[0]
+            let screenFrame = screen.visibleFrame
+            
+            var x = buttonOrigin.x + (button.bounds.width / 2) - (windowWidth / 2)
+            var y = buttonOrigin.y - windowHeight - 5
+            
+            // Constrain within screen bounds
+            if x < screenFrame.minX {
+                x = screenFrame.minX + 10
+            } else if x + windowWidth > screenFrame.maxX {
+                x = screenFrame.maxX - windowWidth - 10
+            }
+            
+            if y < screenFrame.minY {
+                y = screenFrame.minY + 10
+            }
+            
+            window.setFrame(NSRect(x: x, y: y, width: windowWidth, height: windowHeight), display: true)
         } else {
-            popover.appearance = NSAppearance(named: .vibrantDark)
+            window.center()
         }
+        
+        window.orderFrontRegardless()
+        window.makeKeyAndOrderFront(nil)
     }
     
     private func togglePopover() {
-        guard let button = statusItem?.button, let popover = popover else { return }
-        if popover.isShown {
-            popover.performClose(button)
+        if let lastClose = lastCloseTime, Date().timeIntervalSince(lastClose) < 0.25 {
+            lastCloseTime = nil
+            return
+        }
+        
+        guard let window = mainWindow else { return }
+        
+        let isActuallyFrontmost = window.isVisible
+            && window.occlusionState.contains(.visible)
+            && NSApp.isActive
+            && NSApp.keyWindow === window
+            
+        if isActuallyFrontmost {
+            window.orderOut(nil)
         } else {
-            mainWindow?.orderOut(nil)
-            updatePopoverAppearance()
-            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": true])
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            NSApp.activate(ignoringOtherApps: true)
+            showMainWindow(relativeTo: statusItem?.button)
         }
     }
     
     private func toggleMainWindow() {
         guard let window = mainWindow else { return }
-
+        
         let isActuallyFrontmost = window.isVisible
             && window.occlusionState.contains(.visible)
             && NSApp.isActive
             && NSApp.keyWindow === window
-
+            
         if isActuallyFrontmost {
             window.orderOut(nil)
         } else {
-            if popover?.isShown == true { popover?.performClose(nil) }
-            NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": false])
-            NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
-            NSApp.activate(ignoringOtherApps: true)
-            window.center()
-            window.orderFrontRegardless()
-            window.makeKeyAndOrderFront(nil)
+            showMainWindow(relativeTo: nil)
         }
     }
     
     func closeUI() {
-        if popover?.isShown == true { popover?.performClose(nil) }
         mainWindow?.orderOut(nil)
     }
     
