@@ -499,7 +499,7 @@ struct ContentView: View {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
                             style: .clear,
-                            tintColor: NSColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.72),
+                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.82),
                             cornerRadius: 16
                         )
                     } else {
@@ -1655,7 +1655,7 @@ struct ClipboardDetailView: View {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
                             style: .clear,
-                            tintColor: NSColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.72),
+                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.82),
                             cornerRadius: 16
                         )
                     } else {
