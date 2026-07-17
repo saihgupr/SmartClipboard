@@ -376,9 +376,6 @@ struct ContentView: View {
                 .padding(.top, 14) 
                 .padding(.bottom, 12)
                 
-                Divider()
-                    .opacity(0.3)
-                
                 if !clipboardManager.hasAccessibilityPermission {
                     accessibilityWarning
                 }
