@@ -486,12 +486,12 @@ struct ContentView: View {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
                             style: .clear,
-                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.82),
+                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.89),
                             cornerRadius: 16
                         )
                     } else {
                         VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
-                        Color.black.opacity(0.3)
+                        Color.black.opacity(0.4)
                     }
                     
                     // macOS Golden Gate liquid glass light-reflection overlay
@@ -1634,12 +1634,12 @@ struct ClipboardDetailView: View {
                     if #available(macOS 26.0, *) {
                         GlassEffectView(
                             style: .clear,
-                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.82),
+                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.89),
                             cornerRadius: 16
                         )
                     } else {
                         VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
-                        Color.black.opacity(0.3)
+                        Color.black.opacity(0.4)
                     }
                     
                     // macOS Golden Gate liquid glass light-reflection overlay
