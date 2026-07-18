@@ -311,7 +311,7 @@ struct ContentView: View {
             
             VStack(spacing: 0) {
                 // macOS Golden Gate Spotlight Style AI Search Header
-                HStack(spacing: 12) {
+                HStack(spacing: 6) {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(isSearchFocused ? .primary : .secondary)
@@ -371,8 +371,10 @@ struct ContentView: View {
                     }
                     
                     HoverIconHelper(systemName: "gearshape", action: openSettings, tooltip: "Settings")
+                        .padding(.trailing, 1)
                 }
-                .padding(.horizontal, 12)
+                .padding(.leading, 12)
+                .padding(.trailing, 6)
                 .padding(.top, 14) 
                 .padding(.bottom, 12)
                 
