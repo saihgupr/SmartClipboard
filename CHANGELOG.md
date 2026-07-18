@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-07-18
+
+### Changed
+- Increased Dark Glass theme background opacity to make it darker and more refined.
+- Removed a horizontal divider line in the main status bar popup window.
+
 ## [1.0.4] - 2026-07-13
 
 ### Changed
