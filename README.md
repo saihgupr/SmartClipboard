@@ -44,7 +44,7 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 ## Settings
 
 <p align="center">
-  <img src="assets/screenshot1_v2.png" width="48%" alt="Menu Bar Popover" />
+  <img src="assets/menubar.png" width="48%" alt="Menu Bar Popover" />
   <img src="assets/screenshot2.png" width="48%" alt="Detail View" />
 </p>
 
