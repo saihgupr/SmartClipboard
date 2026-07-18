@@ -223,8 +223,8 @@ struct GeneralSettingsView: View {
                     }
                     Spacer()
                     Picker("", selection: $themeStyle) {
-                        Text("Glass").tag("glass")
                         Text("Dark Glass").tag("darkGlass")
+                        Text("Glass").tag("glass")
                         Text("Dark").tag("dark")
                         Text("Light").tag("light")
                     }

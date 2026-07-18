@@ -25,14 +25,14 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 
 <table>
   <tr>
-    <td><img src="assets/theme_glass_v2.png" alt="Glass Theme" /></td>
     <td><img src="assets/theme_darkglass_v2.png" alt="Dark Glass Theme" /></td>
+    <td><img src="assets/theme_glass_v2.png" alt="Glass Theme" /></td>
     <td><img src="assets/theme_dark_v2.png" alt="Dark Theme" /></td>
     <td><img src="assets/theme_light_v2.png" alt="Light Theme" /></td>
   </tr>
   <tr align="center">
-    <td><b>Glass</b></td>
     <td><b>Dark Glass</b></td>
+    <td><b>Glass</b></td>
     <td><b>Dark</b></td>
     <td><b>Light</b></td>
   </tr>
