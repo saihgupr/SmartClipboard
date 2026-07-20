@@ -9,7 +9,7 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 
 ## Features
 
-* AI Search: Find anything in your clipboard by asking a question in plain English. For example, “Where was that API key?” or “Find the code snippet.” Powered by Gemini AI.
+* AI Search: Find anything in your clipboard by asking a question in plain English. For example, “Where was that API key?” or “Find the code snippet.” Powered by local Apple Silicon (Ollama) or Google Gemini AI.
 * Find by Date or Time: Search for items you copied using terms like “today”, “yesterday”, “Monday”, “2:30 PM”, “July 13”, or “07/13”.
 * Two Ways to Access Your Clipboard: Open it from the menu bar for quick access, or use a Spotlight-style floating window that appears in the center of your screen.
 * Keyboard-First Shortcuts:
@@ -74,7 +74,9 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 
 - macOS 13.0 or later
 - Xcode 15.0 or later
-- A [Google Gemini API Key](https://aistudio.google.com/app/apikey)
+- **AI Search Engine (one of the following):**
+  - **Local AI:** [Ollama](https://ollama.com) running locally on your Mac (`gemma2:2b`, `llama3.2`).
+  - **Cloud AI:** A [Google Gemini API Key](https://aistudio.google.com/app/apikey).
 
 ### Installation
 
@@ -100,7 +102,7 @@ Choose one of the following methods to install SmartClipboard:
 
 3. Build and run the project in Xcode (`Cmd + R`) or run the included `deploy.sh` script to install it directly to `/Applications`.
 
-*Once installed, provide your Gemini API key in the app settings to enable semantic search features.*
+*Once installed, open the app settings to select your search mode: either Local Apple Silicon (Ollama) or Cloud Gemini AI.*
 
 ### macOS Security (Gatekeeper) Warning
 

@@ -286,6 +286,9 @@ struct GeneralSettingsView: View {
 struct IntelligenceSettingsView: View {
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-2.5-flash"
+    @AppStorage("aiSearchMode") private var aiSearchMode: String = "cloud"
+    @AppStorage("ollamaUrl") private var ollamaUrl: String = "http://localhost:11434"
+    @AppStorage("ollamaModel") private var ollamaModel: String = "gemma2:2b"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     
     @State private var availableModels: [String] = []
@@ -293,68 +296,182 @@ struct IntelligenceSettingsView: View {
     @State private var errorMessage: String?
     @State private var showSuccessMessage = false
     
+    @State private var availableOllamaModels: [String] = []
+    @State private var isLoadingOllama = false
+    @State private var ollamaSuccessMessage = false
+    @State private var ollamaErrorMessage: String?
+    
     private let geminiService = GeminiService()
+    private let ollamaService = OllamaService()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            SettingsSection(title: "Gemini Configuration") {
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("API Key")
-                            .font(.system(size: 14, weight: .medium))
-                        
-                        HStack {
-                            SecureField("Enter Gemini API Key", text: $apiKey)
-                                .textFieldStyle(.plain)
-                                .padding(10)
-                                .background(Color.secondary.opacity(0.1))
-                                .cornerRadius(8)
+            SettingsSection(title: "AI Search Mode") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Picker("", selection: $aiSearchMode) {
+                        Text("Cloud Gemini").tag("cloud")
+                        Text("Local Ollama").tag("local")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 260)
+                    
+                    if aiSearchMode == "local" {
+                        Text("Secure, offline search powered by your local Ollama models.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text("Advanced search utilizing cloud-based Google Gemini AI.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+
+            if aiSearchMode == "local" {
+                SettingsSection(title: "Ollama Configuration") {
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Local Server URL")
+                                .font(.system(size: 14, weight: .medium))
                             
-                            Button {
-                                fetchModels()
-                            } label: {
-                                if isLoadingModels {
-                                    ProgressView().controlSize(.small)
-                                } else {
-                                    Text("Verify")
-                                        .font(.system(size: 12, weight: .bold))
+                            HStack {
+                                TextField("e.g. http://localhost:11434", text: $ollamaUrl)
+                                    .textFieldStyle(.plain)
+                                    .padding(10)
+                                    .background(Color.secondary.opacity(0.1))
+                                    .cornerRadius(8)
+                                
+                                Button {
+                                    fetchOllamaModels()
+                                } label: {
+                                    if isLoadingOllama {
+                                        ProgressView().controlSize(.small)
+                                    } else {
+                                        Text("Verify")
+                                            .font(.system(size: 12, weight: .bold))
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(isLoadingOllama || ollamaUrl.isEmpty)
+                            }
+                            
+                            HStack {
+                                Text("Ollama must be running on your system.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                if ollamaSuccessMessage {
+                                    Text("Connected Successfully")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                                
+                                if let errorMsg = ollamaErrorMessage {
+                                    Text(errorMsg)
+                                        .font(.caption)
+                                        .foregroundColor(.red)
                                 }
                             }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(isLoadingModels || apiKey.isEmpty)
                         }
                         
-                        HStack {
-                            Link(destination: URL(string: "https://aistudio.google.com/app/apikey")!) {
-                                Label("Get Key from Google AI Studio", systemImage: "arrow.up.right.square")
-                                    .font(.caption)
-                            }
-                            
-                            Spacer()
-                            
-                            if showSuccessMessage {
-                                Text("Verified Successfully")
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                            }
-                        }
-                    }
-                    
-                    if !availableModels.isEmpty {
                         Divider()
                         
                         HStack {
-                            Text("AI Model")
+                            Text("Active Local Model")
                                 .font(.system(size: 14, weight: .medium))
                             Spacer()
-                            Picker("", selection: $selectedModel) {
-                                ForEach(availableModels, id: \.self) { model in
-                                    Text(model).tag(model)
+                            
+                            if !availableOllamaModels.isEmpty {
+                                Picker("", selection: $ollamaModel) {
+                                    ForEach(availableOllamaModels, id: \.self) { model in
+                                        Text(model).tag(model)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                                .frame(width: 200)
+                            } else {
+                                TextField("e.g. gemma2:2b", text: $ollamaModel)
+                                    .textFieldStyle(.plain)
+                                    .padding(6)
+                                    .background(Color.secondary.opacity(0.1))
+                                    .cornerRadius(6)
+                                    .frame(width: 200)
+                            }
+                        }
+                    }
+                }
+            } else {
+                SettingsSection(title: "Gemini Configuration") {
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("API Key")
+                                .font(.system(size: 14, weight: .medium))
+                            
+                            HStack {
+                                SecureField("Enter Gemini API Key", text: $apiKey)
+                                    .textFieldStyle(.plain)
+                                    .padding(10)
+                                    .background(Color.secondary.opacity(0.1))
+                                    .cornerRadius(8)
+                                
+                                Button {
+                                    fetchModels()
+                                } label: {
+                                    if isLoadingModels {
+                                        ProgressView().controlSize(.small)
+                                    } else {
+                                        Text("Verify")
+                                            .font(.system(size: 12, weight: .bold))
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(isLoadingModels || apiKey.isEmpty)
+                            }
+                            
+                            HStack {
+                                Link(destination: URL(string: "https://aistudio.google.com/app/apikey")!) {
+                                    Label("Get Key from Google AI Studio", systemImage: "arrow.up.right.square")
+                                        .font(.caption)
+                                }
+                                
+                                Spacer()
+                                
+                                if showSuccessMessage {
+                                    Text("Verified Successfully")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                                
+                                if let errorMsg = errorMessage {
+                                    Text(errorMsg)
+                                        .font(.caption)
+                                        .foregroundColor(.red)
                                 }
                             }
-                            .pickerStyle(.menu)
-                            .labelsHidden()
-                            .frame(width: 200)
+                        }
+                        
+                        if !availableModels.isEmpty {
+                            Divider()
+                            
+                            HStack {
+                                Text("AI Model")
+                                    .font(.system(size: 14, weight: .medium))
+                                Spacer()
+                                Picker("", selection: $selectedModel) {
+                                    ForEach(availableModels, id: \.self) { model in
+                                        Text(model).tag(model)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                                .frame(width: 200)
+                            }
                         }
                     }
                 }
@@ -390,8 +507,10 @@ struct IntelligenceSettingsView: View {
             }
         }
         .onAppear {
-            if availableModels.isEmpty && !apiKey.isEmpty {
+            if aiSearchMode == "cloud" && availableModels.isEmpty && !apiKey.isEmpty {
                 fetchModels()
+            } else if aiSearchMode == "local" && availableOllamaModels.isEmpty && !ollamaUrl.isEmpty {
+                fetchOllamaModels()
             }
         }
     }
@@ -423,6 +542,37 @@ struct IntelligenceSettingsView: View {
                 await MainActor.run {
                     self.errorMessage = "Connection error: Check your API key or internet."
                     self.isLoadingModels = false
+                }
+            }
+        }
+    }
+
+    func fetchOllamaModels() {
+        isLoadingOllama = true
+        ollamaErrorMessage = nil
+        ollamaSuccessMessage = false
+        
+        Task {
+            do {
+                let models = try await ollamaService.fetchModels(baseURL: ollamaUrl)
+                await MainActor.run {
+                    self.availableOllamaModels = models
+                    withAnimation {
+                        self.ollamaSuccessMessage = true
+                    }
+                    if !models.contains(ollamaModel) && !models.isEmpty {
+                        self.ollamaModel = models.first ?? "gemma2:2b"
+                    }
+                    self.isLoadingOllama = false
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation { self.ollamaSuccessMessage = false }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.ollamaErrorMessage = "Failed to connect to local Ollama server."
+                    self.isLoadingOllama = false
                 }
             }
         }

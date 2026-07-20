@@ -234,6 +234,9 @@ struct ContentView: View {
     
     @AppStorage("geminiApiKey") private var apiKey: String = ""
     @AppStorage("geminiModel") private var selectedModel: String = "gemini-2.5-flash"
+    @AppStorage("aiSearchMode") private var aiSearchMode: String = "cloud"
+    @AppStorage("ollamaUrl") private var ollamaUrl: String = "http://localhost:11434"
+    @AppStorage("ollamaModel") private var ollamaModel: String = "gemma2:2b"
     @AppStorage("semanticSearchDepth") private var semanticSearchDepth: Int = 200
     @AppStorage("leftArrowAction") private var leftArrowAction: String = "googleSearch"
     @AppStorage("longLeftArrowAction") private var longLeftArrowAction: String = "delete"
@@ -247,6 +250,7 @@ struct ContentView: View {
     @State private var nextItemBeforeCopyId: UUID?
     
     private let geminiService = GeminiService()
+    private let ollamaService = OllamaService()
     
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -1174,10 +1178,16 @@ struct ContentView: View {
         guard !searchQuery.isEmpty else { return }
         isSearching = true
         aiSearchError = nil
-        print("[AI Search] Starting search for: \(searchQuery)")
+        print("[AI Search] Starting search for: \(searchQuery) in mode: \(aiSearchMode)")
         Task {
             do {
-                let intent = try await geminiService.parseSearchIntent(query: searchQuery, history: history, apiKey: apiKey, modelName: selectedModel, searchDepth: semanticSearchDepth)
+                let intent: GeminiService.SearchIntent
+                if aiSearchMode == "local" {
+                    let localIntent = try await ollamaService.parseSearchIntent(query: searchQuery, history: history, baseURL: ollamaUrl, modelName: ollamaModel, searchDepth: semanticSearchDepth)
+                    intent = GeminiService.SearchIntent(textQuery: localIntent.textQuery, startDate: localIntent.startDate, endDate: localIntent.endDate, semanticMatchIds: localIntent.semanticMatchIds)
+                } else {
+                    intent = try await geminiService.parseSearchIntent(query: searchQuery, history: history, apiKey: apiKey, modelName: selectedModel, searchDepth: semanticSearchDepth)
+                }
                 print("[AI Search] Received Intent: \(intent)")
                 
                 let logURL = FileManager.default.temporaryDirectory.appendingPathComponent("SmartClipboard_ai_debug.log")
@@ -1237,9 +1247,11 @@ struct ContentView: View {
                 await MainActor.run {
                     let userMsg: String
                     if errMsg.contains("503") || errMsg.contains("high demand") || errMsg.contains("UNAVAILABLE") {
-                        userMsg = "⚠️ AI is overloaded. Try again in a moment."
+                        userMsg = "⚠️ Local model or cloud service is overloaded/unavailable."
                     } else if errMsg.contains("401") || errMsg.contains("API key") {
                         userMsg = "⚠️ Invalid API key. Check Settings."
+                    } else if errMsg.contains("connection") || errMsg.contains("connect") || errMsg.contains("local") {
+                        userMsg = "⚠️ Could not connect to local Ollama server."
                     } else {
                         userMsg = "⚠️ AI search failed. Try again."
                     }
