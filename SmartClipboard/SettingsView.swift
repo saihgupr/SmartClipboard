@@ -306,86 +306,212 @@ struct IntelligenceSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            SettingsSection(title: "AI Search Mode") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Picker("", selection: $aiSearchMode) {
-                        Text("Cloud Gemini").tag("cloud")
-                        Text("Local Ollama").tag("local")
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .frame(width: 260)
+            
+            // ── Model Provider Section ──────────────────────────────────────
+            SettingsSection(title: "Model Provider") {
+                VStack(alignment: .leading, spacing: 0) {
                     
-                    if aiSearchMode == "local" {
-                        Text("Secure, offline search powered by your local Ollama models.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    } else {
-                        Text("Advanced search utilizing cloud-based Google Gemini AI.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                    // Row: Provider switcher
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("AI Engine")
+                                .font(.system(size: 14, weight: .medium))
+                            Text(aiSearchMode == "cloud"
+                                 ? "Cloud-based Google Gemini AI"
+                                 : "Local, private Ollama inference")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Picker("", selection: $aiSearchMode) {
+                            Text("Cloud Gemini").tag("cloud")
+                            Text("Local Ollama").tag("local")
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 220)
                     }
-                }
-            }
-
-            if aiSearchMode == "local" {
-                SettingsSection(title: "Ollama Configuration") {
-                    VStack(alignment: .leading, spacing: 16) {
+                    .padding(.vertical, 2)
+                    
+                    if aiSearchMode == "cloud" {
+                        // ── Cloud / Gemini rows ──────────────────────────────
+                        Divider().padding(.vertical, 12)
+                        
+                        // Row: API Key
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Local Server URL")
+                            HStack {
+                                Text("API Key")
+                                    .font(.system(size: 14, weight: .medium))
+                                Spacer()
+                                Link(destination: URL(string: "https://aistudio.google.com/app/apikey")!) {
+                                    Label("Get key", systemImage: "arrow.up.right.square")
+                                        .font(.caption)
+                                }
+                            }
+                            
+                            HStack(spacing: 8) {
+                                SecureField("Enter your Gemini API key", text: $apiKey)
+                                    .textFieldStyle(.plain)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 8)
+                                    .background(Color.secondary.opacity(0.08))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                                    )
+                                
+                                Button {
+                                    fetchModels()
+                                } label: {
+                                    if isLoadingModels {
+                                        ProgressView().controlSize(.small)
+                                            .frame(width: 54)
+                                    } else {
+                                        Text("Verify")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .frame(width: 54)
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.regular)
+                                .disabled(isLoadingModels || apiKey.isEmpty)
+                            }
+                            
+                            // Status line
+                            HStack(spacing: 4) {
+                                if showSuccessMessage {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.caption)
+                                    Text("API key verified")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                } else if let errorMsg = errorMessage {
+                                    Image(systemName: "exclamationmark.circle.fill")
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                    Text(errorMsg)
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                }
+                                Spacer()
+                            }
+                            .frame(minHeight: 16)
+                        }
+                        
+                        Divider().padding(.vertical, 12)
+                        
+                        // Row: Active Model (always shown)
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Active Model")
+                                    .font(.system(size: 14, weight: .medium))
+                                Text("The Gemini model used for AI search and summarization")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            if !availableModels.isEmpty {
+                                Picker("", selection: $selectedModel) {
+                                    ForEach(availableModels, id: \.self) { model in
+                                        Text(model).tag(model)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                                .frame(width: 210)
+                            } else {
+                                Text(selectedModel.isEmpty ? "—" : selectedModel)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.secondary.opacity(0.08))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                                    )
+                            }
+                        }
+                        
+                    } else {
+                        // ── Local / Ollama rows ──────────────────────────────
+                        Divider().padding(.vertical, 12)
+                        
+                        // Row: Server URL
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Server URL")
                                 .font(.system(size: 14, weight: .medium))
                             
-                            HStack {
+                            HStack(spacing: 8) {
                                 TextField("e.g. http://localhost:11434", text: $ollamaUrl)
                                     .textFieldStyle(.plain)
-                                    .padding(10)
-                                    .background(Color.secondary.opacity(0.1))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 8)
+                                    .background(Color.secondary.opacity(0.08))
                                     .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                                    )
                                 
                                 Button {
                                     fetchOllamaModels()
                                 } label: {
                                     if isLoadingOllama {
                                         ProgressView().controlSize(.small)
+                                            .frame(width: 54)
                                     } else {
                                         Text("Verify")
-                                            .font(.system(size: 12, weight: .bold))
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .frame(width: 54)
                                     }
                                 }
                                 .buttonStyle(.borderedProminent)
+                                .controlSize(.regular)
                                 .disabled(isLoadingOllama || ollamaUrl.isEmpty)
                             }
                             
-                            HStack {
-                                Text("Ollama must be running on your system.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
+                            // Status line
+                            HStack(spacing: 4) {
                                 if ollamaSuccessMessage {
-                                    Text("Connected Successfully")
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.caption)
+                                    Text("Connected successfully")
                                         .font(.caption)
                                         .foregroundColor(.green)
-                                }
-                                
-                                if let errorMsg = ollamaErrorMessage {
+                                } else if let errorMsg = ollamaErrorMessage {
+                                    Image(systemName: "exclamationmark.circle.fill")
+                                        .foregroundColor(.red)
+                                        .font(.caption)
                                     Text(errorMsg)
                                         .font(.caption)
                                         .foregroundColor(.red)
+                                } else {
+                                    Text("Ollama must be running on your system.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
+                                Spacer()
                             }
+                            .frame(minHeight: 16)
                         }
                         
-                        Divider()
+                        Divider().padding(.vertical, 12)
                         
+                        // Row: Active Local Model
                         HStack {
-                            Text("Active Local Model")
-                                .font(.system(size: 14, weight: .medium))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Active Model")
+                                    .font(.system(size: 14, weight: .medium))
+                                Text("The local model used for AI search and summarization")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                             Spacer()
-                            
                             if !availableOllamaModels.isEmpty {
                                 Picker("", selection: $ollamaModel) {
                                     ForEach(availableOllamaModels, id: \.self) { model in
@@ -394,83 +520,19 @@ struct IntelligenceSettingsView: View {
                                 }
                                 .pickerStyle(.menu)
                                 .labelsHidden()
-                                .frame(width: 200)
+                                .frame(width: 210)
                             } else {
                                 TextField("e.g. gemma2:2b", text: $ollamaModel)
                                     .textFieldStyle(.plain)
-                                    .padding(6)
-                                    .background(Color.secondary.opacity(0.1))
-                                    .cornerRadius(6)
-                                    .frame(width: 200)
-                            }
-                        }
-                    }
-                }
-            } else {
-                SettingsSection(title: "Gemini Configuration") {
-                    VStack(alignment: .leading, spacing: 16) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("API Key")
-                                .font(.system(size: 14, weight: .medium))
-                            
-                            HStack {
-                                SecureField("Enter Gemini API Key", text: $apiKey)
-                                    .textFieldStyle(.plain)
-                                    .padding(10)
-                                    .background(Color.secondary.opacity(0.1))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.secondary.opacity(0.08))
                                     .cornerRadius(8)
-                                
-                                Button {
-                                    fetchModels()
-                                } label: {
-                                    if isLoadingModels {
-                                        ProgressView().controlSize(.small)
-                                    } else {
-                                        Text("Verify")
-                                            .font(.system(size: 12, weight: .bold))
-                                    }
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(isLoadingModels || apiKey.isEmpty)
-                            }
-                            
-                            HStack {
-                                Link(destination: URL(string: "https://aistudio.google.com/app/apikey")!) {
-                                    Label("Get Key from Google AI Studio", systemImage: "arrow.up.right.square")
-                                        .font(.caption)
-                                }
-                                
-                                Spacer()
-                                
-                                if showSuccessMessage {
-                                    Text("Verified Successfully")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                }
-                                
-                                if let errorMsg = errorMessage {
-                                    Text(errorMsg)
-                                        .font(.caption)
-                                        .foregroundColor(.red)
-                                }
-                            }
-                        }
-                        
-                        if !availableModels.isEmpty {
-                            Divider()
-                            
-                            HStack {
-                                Text("AI Model")
-                                    .font(.system(size: 14, weight: .medium))
-                                Spacer()
-                                Picker("", selection: $selectedModel) {
-                                    ForEach(availableModels, id: \.self) { model in
-                                        Text(model).tag(model)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .labelsHidden()
-                                .frame(width: 200)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                                    )
+                                    .frame(width: 210)
                             }
                         }
                     }
