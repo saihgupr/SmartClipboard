@@ -1303,9 +1303,6 @@ struct ContentView: View {
             
             Button {
                 clipboardManager.requestAccessibilityPermission()
-                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                    NSWorkspace.shared.open(url)
-                }
             } label: {
                 Text("Enable")
                     .font(.system(size: 11, weight: .medium))

@@ -62,8 +62,11 @@ class ClipboardManager: ObservableObject {
         }
         GlobalHotkeyManager.shared.install()
 
-        // Check permissions immediately
+        // Check permissions immediately; auto-prompt if missing
         refreshAccessibilityPermission()
+        if !hasAccessibilityPermission {
+            requestAccessibilityPermission()
+        }
     }
 
     func startPolling() {
@@ -89,13 +92,6 @@ class ClipboardManager: ObservableObject {
 
     /// Triggers the macOS system prompt to request Accessibility permissions.
     func requestAccessibilityPermission() {
-        // Reset stale/invalid accessibility entries for this bundle ID first
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
-        task.arguments = ["reset", "Accessibility", "com.saihgupr.SmartClipboard"]
-        try? task.run()
-        task.waitUntilExit()
-
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         AXIsProcessTrustedWithOptions(options as CFDictionary)
         refreshAccessibilityPermission()

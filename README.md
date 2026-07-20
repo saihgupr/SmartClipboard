@@ -19,6 +19,28 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 * Privacy & Security: Use incognito mode when you don’t want items saved. Clipboard entries from password managers are automatically ignored, and all history is stored securely on your device.
 * Easy Migration: Import your existing clipboard history from Alfred, BetterTouchTool, or Keyboard Maestro in a few clicks.
 
+## AI Search Examples
+
+SmartClipboard uses semantic AI search to find copied items even if you don't remember the exact text or keywords. 
+
+### Recommended Queries
+* **Conceptual & Intent-Based:**
+  * `"the sql query to delete stale logs"` — finds database commands without needing the exact table names.
+  * `"troubleshooting guide about docker networking"` — retrieves logs or terminal outputs related to Docker networks.
+  * `"that recipe ingredient list from last week"` — locates recipe card contents or lists of ingredients.
+* **Temporal & Contextual:**
+  * `"links I copied while working on settings layout"` — groups URLs copied during a specific development window.
+  * `"that crash log from Chrome"` — extracts stack traces that mention Chrome.
+* **Categorical Exclusions:**
+  * `"show me all emails"` — automatically parses and presents only email addresses.
+  * `"all code snippets"` — filters for programming languages.
+  * `"web links"` — isolates URL strings.
+
+> [!NOTE]
+> **AI Model Intelligence & Quality:** 
+> The quality and success of your search depends directly on the model you use. Cloud-based models (like **Gemini 1.5/2.5 Pro**) offer the highest level of conceptual intelligence and will understand abstract queries best. If using **Local Ollama**, smaller local models (like `gemma2:2b` or `llama3.2`) run fast and privately, but may require more direct keywords or simpler phrasing compared to their cloud counterparts.
+
+
 ## Appearance & Themes
 
 SmartClipboard is designed to look modern and native on macOS. Choose between four premium styles:

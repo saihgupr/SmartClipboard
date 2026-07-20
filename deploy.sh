@@ -36,8 +36,9 @@ cp -R ./build/Build/Products/Release/SmartClipboard.app "$APP_PATH"
 echo "🖋️ Re-signing binary with stable identity..."
 codesign --force --deep --sign "$SIGN_IDENTITY" "$APP_PATH"
 
-# 6. Build validation complete
-echo "🔐 Accessibility permission will persist via macOS stable signing identity"
+# 6. Reset stale accessibility entry (ad-hoc signing changes hash each build)
+echo "🔐 Resetting accessibility entry for clean re-authorization..."
+tccutil reset Accessibility "$BUNDLE_ID" 2>/dev/null || true
 
 # 7. Launch
 echo "🚀 Launching SmartClipboard..."
