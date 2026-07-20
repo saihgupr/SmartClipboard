@@ -97,7 +97,8 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 - macOS 13.0 or later
 - Xcode 15.0 or later
 - **AI Search Engine (one of the following):**
-  - **Local AI:** [Ollama](https://ollama.com) running locally on your Mac (`gemma2:2b`, `llama3.2`).
+  - **Local AI:** [Ollama](https://ollama.com) running locally on your Mac (run `ollama run gemma2:2b` or `ollama run llama3.2` in Terminal).
+    * *Note on Memory footprint:* The local model is loaded into memory only when actively searching. By default, Ollama unloads the model from RAM/VRAM after 5 minutes of inactivity, bringing idle usage down to 0% CPU and ~15MB memory.
   - **Cloud AI:** A [Google Gemini API Key](https://aistudio.google.com/app/apikey).
 
 ### Installation
