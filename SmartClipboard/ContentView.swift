@@ -1465,6 +1465,32 @@ struct GlassEffectView: NSViewRepresentable {
     }
 }
 
+// MARK: - TwoTonePinIcon
+struct TwoTonePinIcon: View {
+    var body: some View {
+        Image(systemName: "pin.fill")
+            .font(.system(size: 9, weight: .medium))
+            .foregroundColor(.primary.opacity(0.6))
+            .overlay(
+                GeometryReader { geo in
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.red)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .mask(
+                            VStack(spacing: 0) {
+                                Rectangle()
+                                    .frame(height: geo.size.height * 0.68)
+                                Spacer(minLength: 0)
+                            }
+                        )
+                }
+            )
+            .offset(y: 1)
+            .help("Pinned")
+    }
+}
+
 // MARK: - ClipboardRow
 struct ClipboardRow: View {
     let item: ClipboardItem
@@ -1490,15 +1516,8 @@ struct ClipboardRow: View {
                 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
-                        Text(timestamp)
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
                         if item.isPinned {
-                            Image(systemName: "pin.fill")
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundColor(.primary.opacity(0.6))
-                                .help("Pinned")
+                            TwoTonePinIcon()
                         }
                         if item.isFavorite {
                             Image(systemName: "star.fill")
@@ -1507,6 +1526,11 @@ struct ClipboardRow: View {
                                 .offset(y: -1)
                                 .help("Favorite")
                         }
+                        
+                        Text(timestamp)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
                         if item.isIncognito {
                             IncognitoGlyph()
                                 .frame(width: 10, height: 10)
