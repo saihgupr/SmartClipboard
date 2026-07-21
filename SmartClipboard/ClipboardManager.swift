@@ -256,11 +256,13 @@ class ClipboardManager: ObservableObject {
         // Move to top when explicitly copying via Quick Copy or similar
         item.timestamp = Date()
         try? modelContext.save()
-        copyToClipboard(content: item.content)
+        copyToClipboard(content: item.content, recordInDatabase: false)
     }
 
-    func copyToClipboard(content: String) {
-        recordContentInDatabase(content: content)
+    func copyToClipboard(content: String, recordInDatabase: Bool = false) {
+        if recordInDatabase {
+            recordContentInDatabase(content: content)
+        }
         
         pasteboard.clearContents()
         pasteboard.setString(content, forType: .string)

@@ -815,11 +815,12 @@ struct ContentView: View {
         // Copy and move to top of the list for all non-delete actions
         if action != "delete" {
             let joinedContent = targets.map { $0.content }.joined(separator: "\n")
-            for target in targets {
-                target.timestamp = Date()
+            let now = Date()
+            for (idx, target) in targets.reversed().enumerated() {
+                target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
             }
             try? modelContext.save()
-            clipboardManager.copyToClipboard(content: joinedContent)
+            clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
         }
         
         if action == "quickCopy" {
@@ -957,7 +958,8 @@ struct ContentView: View {
                 target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
             }
             try? self.modelContext.save()
-            self.clipboardManager.copyToClipboard(content: joinedContent)
+            self.clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
+            NotificationCenter.default.post(name: .closeUI, object: nil)
         }
         let copyItem = NSMenuItem(title: "Copy", action: #selector(MenuItemActionTarget.execute), keyEquivalent: "")
         copyItem.target = copyTarget
