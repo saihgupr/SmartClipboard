@@ -406,6 +406,7 @@ struct ContentView: View {
                                         index: index,
                                         isSelected: isSelected,
                                         timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart),
+                                        showKeycaps: searchQuery.isEmpty,
                                         onRowTap: {
                                             clearNavigationFallbacks()
                                             let modifiers = NSEvent.modifierFlags
@@ -1515,6 +1516,7 @@ struct ClipboardRow: View {
     let index: Int
     let isSelected: Bool
     let timestamp: String
+    var showKeycaps: Bool = true
     let onRowTap: () -> Void
     let onLeftClickWithModifiers: (NSEvent.ModifierFlags) -> Void
     let onRightClick: (NSEvent.ModifierFlags) -> Void
@@ -1526,7 +1528,7 @@ struct ClipboardRow: View {
         HStack(spacing: 12) {
             // Main left/middle content
             HStack(spacing: 12) {
-                if index < 10 {
+                if showKeycaps && index < 10 {
                     KeycapBadge(index: index, isSelected: isSelected)
                 } else {
                     Spacer().frame(width: 18, height: 18)
