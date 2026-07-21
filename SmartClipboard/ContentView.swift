@@ -300,8 +300,17 @@ struct ContentView: View {
         Array(allFilteredItems.prefix(pageLimit * pageSize))
     }
 
+    private var displayItemIds: [UUID] {
+        displayItems.map { $0.id }
+    }
+
     var selectedItem: ClipboardItem? {
         displayItems.first { $0.id == selectedItemId }
+    }
+
+    private func getBadgeIndex(index: Int) -> Int? {
+        guard searchQuery.isEmpty else { return nil }
+        return index < 9 ? index : nil
     }
 
     var body: some View {
@@ -401,12 +410,13 @@ struct ContentView: View {
 
                                 ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
                                     let isSelected = selectedItemIds.contains(item.id)
+                                    let badgeIndex = getBadgeIndex(index: index)
                                     ClipboardRow(
                                         item: item,
                                         index: index,
                                         isSelected: isSelected,
                                         timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart),
-                                        showKeycaps: searchQuery.isEmpty,
+                                        badgeIndex: badgeIndex,
                                         onRowTap: {
                                             clearNavigationFallbacks()
                                             let modifiers = NSEvent.modifierFlags
@@ -556,9 +566,11 @@ struct ContentView: View {
             if let firstId = selectedItemId {
                 selectedItemIds = [firstId]
             }
+            clipboardManager.visibleItems = displayItems
         }
         .onDisappear {
             removeKeyboardMonitor()
+            clipboardManager.visibleItems = []
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
             let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool ?? false
@@ -580,9 +592,14 @@ struct ContentView: View {
             removeKeyboardMonitor()
             setupKeyboardMonitor()
             
+            clipboardManager.visibleItems = displayItems
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
             }
+        }
+        .onChange(of: displayItemIds) { _, _ in
+            clipboardManager.visibleItems = displayItems
         }
     }
 
@@ -700,7 +717,21 @@ struct ContentView: View {
 
             let isFocused = keyWindow.firstResponder is NSTextView
 
-            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command && event.keyCode == 8 {
+            let flags = event.modifierFlags
+            let isCommandOnly = flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control) && !flags.contains(.option)
+            if isCommandOnly, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
+                if let num = Int(chars), num >= 1 && num <= 9 {
+                    let targetIndex = num - 1
+                    let currentItems = displayItems
+                    if targetIndex < currentItems.count {
+                        let targetItem = currentItems[targetIndex]
+                        clipboardManager.paste(item: targetItem)
+                        return nil
+                    }
+                }
+            }
+
+            if isCommandOnly && event.keyCode == 8 {
                 if showingDetail {
                     var hasSelection = false
                     if let textView = keyWindow.firstResponder as? NSTextView {
@@ -1516,7 +1547,7 @@ struct ClipboardRow: View {
     let index: Int
     let isSelected: Bool
     let timestamp: String
-    var showKeycaps: Bool = true
+    var badgeIndex: Int? = nil
     let onRowTap: () -> Void
     let onLeftClickWithModifiers: (NSEvent.ModifierFlags) -> Void
     let onRightClick: (NSEvent.ModifierFlags) -> Void
@@ -1528,8 +1559,8 @@ struct ClipboardRow: View {
         HStack(spacing: 12) {
             // Main left/middle content
             HStack(spacing: 12) {
-                if showKeycaps && index < 10 {
-                    KeycapBadge(index: index, isSelected: isSelected)
+                if let badgeIndex = badgeIndex {
+                    KeycapBadge(index: badgeIndex, isSelected: isSelected)
                 } else {
                     Spacer().frame(width: 18, height: 18)
                 }

@@ -36,6 +36,9 @@ class ClipboardManager: ObservableObject {
     /// Tracks if the app has macOS Accessibility permissions required for simulated keystrokes (Cmd+V).
     @Published var hasAccessibilityPermission: Bool = AXIsProcessTrusted()
     
+    /// The currently visible/displayed clipboard items in the UI.
+    @Published var visibleItems: [ClipboardItem] = []
+    
     @Published var incognitoMode: Bool = UserDefaults.standard.bool(forKey: "incognitoMode") {
         didSet {
             UserDefaults.standard.set(incognitoMode, forKey: "incognitoMode")
@@ -336,14 +339,23 @@ class ClipboardManager: ObservableObject {
 
     // MARK: - Global hotkey handlers
 
-    /// Fetches the item at the given 0-based index (newest-first) and pastes it.
+    /// Fetches the item at the given 0-based index (pinned first, newest-first) and pastes it.
     func pasteItem(at index: Int) {
-        var descriptor = FetchDescriptor<ClipboardItem>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-        descriptor.fetchLimit = index + 1
-        guard let items = try? modelContext.fetch(descriptor),
-              index < items.count else { return }
+        let isUIVisible = NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false
+        
+        let items: [ClipboardItem]
+        if isUIVisible, !visibleItems.isEmpty {
+            items = visibleItems
+        } else {
+            var descriptor = FetchDescriptor<ClipboardItem>(
+                sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+            )
+            guard let allItems = try? modelContext.fetch(descriptor) else { return }
+            let pinned = allItems.filter { $0.isPinned }
+            let unpinned = allItems.filter { !$0.isPinned }
+            items = pinned + unpinned
+        }
+        guard index < items.count else { return }
         paste(item: items[index], isGlobalHotkey: true)
     }
 
@@ -354,11 +366,21 @@ class ClipboardManager: ObservableObject {
             return
         }
         
-        var descriptor = FetchDescriptor<ClipboardItem>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-        descriptor.fetchLimit = count
-        guard let items = try? modelContext.fetch(descriptor) else { return }
+        let isUIVisible = NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false
+        
+        let items: [ClipboardItem]
+        if isUIVisible, !visibleItems.isEmpty {
+            items = visibleItems
+        } else {
+            var descriptor = FetchDescriptor<ClipboardItem>(
+                sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+            )
+            guard let allItems = try? modelContext.fetch(descriptor) else { return }
+            let pinned = allItems.filter { $0.isPinned }
+            let unpinned = allItems.filter { !$0.isPinned }
+            items = pinned + unpinned
+        }
+        guard !items.isEmpty else { return }
         
         isPastingSequentially = true
         // Reverse so oldest lands in the target app first
