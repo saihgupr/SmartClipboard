@@ -950,23 +950,6 @@ struct ContentView: View {
     private func showNativeContextMenu(for item: ClipboardItem) {
         let menu = NSMenu()
         
-        let copyTarget = MenuItemActionTarget {
-            let targets = self.selectedItemIds.contains(item.id) ? self.displayItems.filter { self.selectedItemIds.contains($0.id) } : [item]
-            let joinedContent = targets.map { $0.content }.joined(separator: "\n")
-            let now = Date()
-            for (idx, target) in targets.reversed().enumerated() {
-                target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
-            }
-            try? self.modelContext.save()
-            self.clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
-            NotificationCenter.default.post(name: .closeUI, object: nil)
-        }
-        let copyItem = NSMenuItem(title: "Copy", action: #selector(MenuItemActionTarget.execute), keyEquivalent: "")
-        copyItem.target = copyTarget
-        copyItem.image = NSImage(systemSymbolName: "doc.on.doc", accessibilityDescription: nil)
-        objc_setAssociatedObject(copyItem, &actionTargetKey, copyTarget, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        menu.addItem(copyItem)
-        
         let pasteTarget = MenuItemActionTarget {
             if self.selectedItemIds.contains(item.id) {
                 let selectedItems = self.displayItems.filter { self.selectedItemIds.contains($0.id) }
@@ -994,6 +977,23 @@ struct ContentView: View {
         detailItem.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
         objc_setAssociatedObject(detailItem, &actionTargetKey, detailTarget, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         menu.addItem(detailItem)
+        
+        let copyTarget = MenuItemActionTarget {
+            let targets = self.selectedItemIds.contains(item.id) ? self.displayItems.filter { self.selectedItemIds.contains($0.id) } : [item]
+            let joinedContent = targets.map { $0.content }.joined(separator: "\n")
+            let now = Date()
+            for (idx, target) in targets.reversed().enumerated() {
+                target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
+            }
+            try? self.modelContext.save()
+            self.clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
+            NotificationCenter.default.post(name: .closeUI, object: nil)
+        }
+        let copyItem = NSMenuItem(title: "Copy", action: #selector(MenuItemActionTarget.execute), keyEquivalent: "")
+        copyItem.target = copyTarget
+        copyItem.image = NSImage(systemSymbolName: "doc.on.doc", accessibilityDescription: nil)
+        objc_setAssociatedObject(copyItem, &actionTargetKey, copyTarget, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        menu.addItem(copyItem)
         
         let shareTarget = MenuItemActionTarget {
             let targets = self.selectedItemIds.contains(item.id) ? self.displayItems.filter { self.selectedItemIds.contains($0.id) } : [item]
