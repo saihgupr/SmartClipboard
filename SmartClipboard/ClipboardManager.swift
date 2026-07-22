@@ -341,7 +341,7 @@ class ClipboardManager: ObservableObject {
 
     /// Fetches the item at the given 0-based index (pinned first, newest-first) and pastes it.
     func pasteItem(at index: Int) {
-        let isUIVisible = NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false
+        let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
         
         let items: [ClipboardItem]
         if isUIVisible, !visibleItems.isEmpty {
@@ -356,7 +356,7 @@ class ClipboardManager: ObservableObject {
             items = pinned + unpinned
         }
         guard index < items.count else { return }
-        paste(item: items[index], isGlobalHotkey: true)
+        paste(item: items[index], isGlobalHotkey: !isUIVisible)
     }
 
     /// Fetches the most-recent `count` items and pastes them oldest→newest.
@@ -366,7 +366,7 @@ class ClipboardManager: ObservableObject {
             return
         }
         
-        let isUIVisible = NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false
+        let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
         
         let items: [ClipboardItem]
         if isUIVisible, !visibleItems.isEmpty {
@@ -382,9 +382,21 @@ class ClipboardManager: ObservableObject {
         }
         guard !items.isEmpty else { return }
         
-        isPastingSequentially = true
-        // Reverse so oldest lands in the target app first
-        pasteSequentially(Array(items.prefix(count).reversed()))
+        let targetItems = Array(items.prefix(count).reversed())
+        
+        if isUIVisible {
+            isPastingSequentially = true
+            onPaste?()
+            if NSApp.isActive {
+                NSApp.hide(nil)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                self?.pasteSequentially(targetItems)
+            }
+        } else {
+            isPastingSequentially = true
+            pasteSequentially(targetItems)
+        }
     }
 
     private func pasteSequentially(_ items: [ClipboardItem], index: Int = 0) {

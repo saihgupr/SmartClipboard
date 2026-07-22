@@ -720,13 +720,19 @@ struct ContentView: View {
             let flags = event.modifierFlags
             let isCommandOnly = flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control) && !flags.contains(.option)
             if isCommandOnly, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
-                if let num = Int(chars), num >= 1 && num <= 9 {
-                    let targetIndex = num - 1
-                    let currentItems = displayItems
-                    if targetIndex < currentItems.count {
-                        let targetItem = currentItems[targetIndex]
-                        clipboardManager.paste(item: targetItem)
+                if let num = Int(chars) {
+                    let targetIndex: Int? = {
+                        if num >= 1 && num <= 9 { return num - 1 }
+                        if num == 0 { return 9 }
                         return nil
+                    }()
+                    if let targetIndex = targetIndex {
+                        let currentItems = displayItems
+                        if targetIndex < currentItems.count {
+                            let targetItem = currentItems[targetIndex]
+                            clipboardManager.paste(item: targetItem)
+                            return nil
+                        }
                     }
                 }
             }
