@@ -211,6 +211,7 @@ struct ContentView: View {
     @EnvironmentObject private var clipboardManager: ClipboardManager
     @EnvironmentObject private var importManager: ImportManager
     @Query(sort: \ClipboardItem.timestamp, order: .reverse) private var history: [ClipboardItem]
+    @Query(sort: \WorkflowSnippet.trigger, order: .forward) private var allWorkflows: [WorkflowSnippet]
     @State private var isShownAsPopover: Bool
     
     init(isInPopover: Bool) {
@@ -226,6 +227,7 @@ struct ContentView: View {
     private let pageSize = 40
     
     @State private var selectedItemId: UUID?
+    @State private var selectedWorkflowId: UUID?
     @State private var selectedItemIds: Set<UUID> = []
     @State private var showingDetail = false
     @State private var isSelectionFromMouse = false
@@ -296,8 +298,42 @@ struct ContentView: View {
         return pinned + unpinned
     }
 
+    private var matchingWorkflows: [WorkflowSnippet] {
+        let query = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !query.isEmpty else { return [] }
+        
+        if query.hasPrefix("/") {
+            let cleanQuery = String(query.dropFirst())
+            if cleanQuery.isEmpty {
+                return allWorkflows
+            }
+            return allWorkflows.filter { item in
+                let trig = item.trigger.lowercased()
+                let title = item.title.lowercased()
+                let content = item.content.lowercased()
+                let matchesTrig = trig.contains(query) || trig.contains(cleanQuery)
+                let matchesText = title.contains(cleanQuery) || content.contains(cleanQuery)
+                return matchesTrig || matchesText
+            }
+        } else {
+            return allWorkflows.filter { item in
+                let trig = item.trigger.lowercased()
+                let title = item.title.lowercased()
+                return trig.contains(query) || title.contains(query)
+            }
+        }
+    }
+
     var displayItems: [ClipboardItem] {
         Array(allFilteredItems.prefix(pageLimit * pageSize))
+    }
+
+    var top10ItemIds: [UUID] {
+        Array(displayItems.prefix(10).map { $0.id })
+    }
+
+    var itemIndexMap: [UUID: Int] {
+        Dictionary(uniqueKeysWithValues: displayItems.enumerated().map { ($1.id, $0) })
     }
 
     private var displayItemIds: [UUID] {
@@ -305,7 +341,17 @@ struct ContentView: View {
     }
 
     var selectedItem: ClipboardItem? {
-        displayItems.first { $0.id == selectedItemId }
+        if let id = selectedItemId, let idx = itemIndexMap[id], idx < displayItems.count {
+            return displayItems[idx]
+        }
+        return nil
+    }
+
+    private func clearSearch() {
+        searchQuery = ""
+        DispatchQueue.main.async {
+            isSearchFocused = true
+        }
     }
 
     private func getBadgeIndex(index: Int) -> Int? {
@@ -323,161 +369,13 @@ struct ContentView: View {
             .opacity(0)
             
             VStack(spacing: 0) {
-                // macOS Golden Gate Spotlight Style AI Search Header
-                HStack(spacing: 6) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(isSearchFocused ? .primary : .secondary)
-                            .font(.system(size: 13, weight: .medium))
-                        
-                        TextField("Search or Ask...", text: $searchQuery)
-                            .textFieldStyle(.plain)
-                            .focused($isSearchFocused)
-                            .accentColor(.secondary)
-                            .onChange(of: searchQuery) { _, newValue in
-                                if newValue.count > 2000 {
-                                    searchQuery = String(newValue.prefix(2000))
-                                }
-                                pageLimit = 1
-                                performLocalSearch()
-                                isSelectionFromMouse = false
-                                if let firstId = displayItems.first?.id {
-                                    selectedItemId = firstId
-                                    selectedItemIds = [firstId]
-                                } else {
-                                    selectedItemId = nil
-                                    selectedItemIds = []
-                                }
-                            }
-                            .onSubmit {
-                                if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
-                                    clipboardManager.paste(item: item)
-                                } else if let first = displayItems.first {
-                                    clipboardManager.paste(item: first)
-                                }
-                            }
-                        
-                        if isSearching {
-                            ProgressView().scaleEffect(0.4).frame(width: 16, height: 16)
-                        } else if !searchQuery.isEmpty {
-                            SparklesButton(
-                                action: performAISearch,
-                                isDisabled: apiKey.isEmpty,
-                                tooltip: apiKey.isEmpty ? "API key required for AI Search (Configure in Settings)" : "Ask Siri AI Search"
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .frame(height: 32)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.primary.opacity(isSearchFocused ? 0.08 : 0.05))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .stroke(Color.primary.opacity(isSearchFocused ? 0.12 : 0.06), lineWidth: 0.5)
-                    )
-                    
-                    if clipboardManager.incognitoMode {
-                        IncognitoIcon()
-                            .transition(.scale.combined(with: .opacity))
-                    }
-                    
-                    HoverIconHelper(systemName: "gearshape", action: openSettings, tooltip: "Settings")
-                        .padding(.trailing, 1)
-                }
-                .padding(.leading, 12)
-                .padding(.trailing, 6)
-                .padding(.top, 14) 
-                .padding(.bottom, 12)
+                headerViewArea
                 
                 if !clipboardManager.hasAccessibilityPermission {
                     accessibilityWarning
                 }
                 
-                // Clipboard Items List
-                if displayItems.isEmpty {
-                    emptyStateView
-                } else {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(spacing: 6) {
-                                let now = Date()
-                                let calendar = Calendar.current
-                                let todayStart = calendar.startOfDay(for: now)
-                                let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
-                                let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
-
-                                ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                                    let isSelected = selectedItemIds.contains(item.id)
-                                    let badgeIndex = getBadgeIndex(index: index)
-                                    ClipboardRow(
-                                        item: item,
-                                        index: index,
-                                        isSelected: isSelected,
-                                        timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart),
-                                        badgeIndex: badgeIndex,
-                                        onRowTap: {
-                                            clearNavigationFallbacks()
-                                            let modifiers = NSEvent.modifierFlags
-                                            if !modifiers.contains(.shift) && !modifiers.contains(.command) {
-                                                isSelectionFromMouse = true
-                                                selectedItemIds = [item.id]
-                                                selectedItemId = item.id
-                                                clipboardManager.paste(item: item)
-                                            }
-                                        },
-                                        onLeftClickWithModifiers: { modifiers in
-                                            isSelectionFromMouse = true
-                                            handleRowClick(itemId: item.id, modifiers: modifiers)
-                                        },
-                                        onRightClick: { modifiers in
-                                            isSelectionFromMouse = true
-                                            handleRowRightClick(itemId: item.id, modifiers: modifiers)
-                                            showNativeContextMenu(for: item)
-                                        },
-                                        onChevronTap: {
-                                            isSelectionFromMouse = true
-                                            selectedItemId = item.id
-                                            selectedItemIds = [item.id]
-                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                                showingDetail = true
-                                            }
-                                        }
-                                    )
-                                    .tag(item.id)
-                                    .padding(.horizontal, 4)
-                                    .background(RowBackground(isSelected: isSelected))
-                                }
-                                
-                                if allFilteredItems.count > pageLimit * pageSize {
-                                    HStack {
-                                        Spacer()
-                                        ProgressView()
-                                            .scaleEffect(0.8)
-                                        Spacer()
-                                    }
-                                    .frame(height: 44)
-                                    .onAppear {
-                                        pageLimit += 1
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-
-                        }
-                        .onChange(of: selectedItemId) { _, newValue in
-                            if let id = newValue, !isSelectionFromMouse {
-                                DispatchQueue.main.async {
-                                    withAnimation(.easeInOut(duration: 0.12)) {
-                                        proxy.scrollTo(id)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                mainListContentArea
             }
             .padding(.top, isShownAsPopover ? 10 : 0)
             
@@ -615,8 +513,9 @@ struct ContentView: View {
         
         let items = displayItems
         guard !items.isEmpty else { return }
+        let indexMap = itemIndexMap
         if let currentId = selectedItemId,
-           let idx = items.firstIndex(where: { $0.id == currentId }) {
+           let idx = indexMap[currentId] {
             if idx < items.count - 1 {
                 let nextId = items[idx + 1].id
                 selectedItemId = nextId
@@ -653,8 +552,9 @@ struct ContentView: View {
         
         let items = displayItems
         guard !items.isEmpty else { return }
+        let indexMap = itemIndexMap
         if let currentId = selectedItemId,
-           let idx = items.firstIndex(where: { $0.id == currentId }) {
+           let idx = indexMap[currentId] {
             if idx > 0 {
                 let prevId = items[idx - 1].id
                 selectedItemId = prevId
@@ -671,7 +571,7 @@ struct ContentView: View {
 
     private func saveFallbackNavigationTargets(for itemId: UUID) {
         let items = displayItems
-        if let idx = items.firstIndex(where: { $0.id == itemId }) {
+        if let idx = itemIndexMap[itemId] {
             previousItemBeforeCopyId = idx > 0 ? items[idx - 1].id : nil
             nextItemBeforeCopyId = idx < items.count - 1 ? items[idx + 1].id : nil
         }
@@ -863,8 +763,9 @@ struct ContentView: View {
         
         if action == "quickCopy" {
             let currentItems = displayItems
+            let indexMap = itemIndexMap
             let targetIndices = targets.compactMap { target in
-                currentItems.firstIndex(where: { $0.id == target.id })
+                indexMap[target.id]
             }
             if let maxIndex = targetIndices.max(), maxIndex + 1 < currentItems.count {
                 let nextId = currentItems[maxIndex + 1].id
@@ -905,8 +806,9 @@ struct ContentView: View {
             }
         } else if action == "delete" {
             let currentItems = displayItems
+            let indexMap = itemIndexMap
             let targetIndices = targets.compactMap { target in
-                currentItems.firstIndex(where: { $0.id == target.id })
+                indexMap[target.id]
             }
             let nextItem: ClipboardItem? = {
                 guard let maxIndex = targetIndices.max() else { return nil }
@@ -942,11 +844,12 @@ struct ContentView: View {
         isSelectionFromMouse = true
         clearNavigationFallbacks()
         let items = displayItems
-        guard let clickedIndex = items.firstIndex(where: { $0.id == itemId }) else { return }
+        let indexMap = itemIndexMap
+        guard let clickedIndex = indexMap[itemId] else { return }
         
         if modifiers.contains(.shift) {
             if let firstSelectedId = selectedItemId,
-               let anchorIndex = items.firstIndex(where: { $0.id == firstSelectedId }) {
+               let anchorIndex = indexMap[firstSelectedId] {
                 let start = min(anchorIndex, clickedIndex)
                 let end = max(anchorIndex, clickedIndex)
                 let rangeIds = items[start...end].map { $0.id }
@@ -1376,6 +1279,206 @@ struct ContentView: View {
         )
     }
     
+    @ViewBuilder
+    private var headerViewArea: some View {
+        HStack(spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(isSearchFocused ? .primary : .secondary)
+                    .font(.system(size: 13, weight: .medium))
+                
+                TextField("Search or Ask...", text: $searchQuery)
+                    .textFieldStyle(.plain)
+                    .focused($isSearchFocused)
+                    .accentColor(.secondary)
+                    .onChange(of: searchQuery) { _, newValue in
+                        if newValue.count > 2000 {
+                            searchQuery = String(newValue.prefix(2000))
+                        }
+                        pageLimit = 1
+                        performLocalSearch()
+                        isSelectionFromMouse = false
+                        if let firstId = displayItems.first?.id {
+                            selectedItemId = firstId
+                            selectedItemIds = [firstId]
+                        } else {
+                            selectedItemId = nil
+                            selectedItemIds = []
+                        }
+                    }
+                    .onSubmit {
+                        if let selectedWorkflow = matchingWorkflows.first(where: { $0.id == selectedWorkflowId }) ?? (searchQuery.hasPrefix("/") ? matchingWorkflows.first : nil) {
+                            clipboardManager.paste(content: selectedWorkflow.content)
+                        } else if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
+                            clipboardManager.paste(item: item)
+                        } else if let first = displayItems.first {
+                            clipboardManager.paste(item: first)
+                        }
+                    }
+                
+                if isSearching {
+                    ProgressView().scaleEffect(0.4).frame(width: 16, height: 16)
+                } else if !searchQuery.isEmpty {
+                    SparklesButton(
+                        action: performAISearch,
+                        isDisabled: apiKey.isEmpty,
+                        tooltip: apiKey.isEmpty ? "API key required for AI Search (Configure in Settings)" : "Ask Siri AI Search"
+                    )
+                }
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 32)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.primary.opacity(isSearchFocused ? 0.08 : 0.05))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.primary.opacity(isSearchFocused ? 0.12 : 0.06), lineWidth: 0.5)
+            )
+            
+            if clipboardManager.incognitoMode {
+                IncognitoIcon()
+                    .transition(.scale.combined(with: .opacity))
+            }
+            
+            HoverIconHelper(systemName: "gearshape", action: openSettings, tooltip: "Settings")
+                .padding(.trailing, 1)
+        }
+        .padding(.leading, 12)
+        .padding(.trailing, 6)
+        .padding(.top, 14) 
+        .padding(.bottom, 12)
+    }
+
+    @ViewBuilder
+    private var mainListContentArea: some View {
+        if displayItems.isEmpty && matchingWorkflows.isEmpty {
+            emptyStateView
+        } else {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        workflowSectionView
+
+                        let now = Date()
+                        let calendar = Calendar.current
+                        let todayStart = calendar.startOfDay(for: now)
+                        let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+                        let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
+
+                        ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
+                            let isSelected = selectedItemIds.contains(item.id)
+                            let badgeIndex = getBadgeIndex(index: index)
+                            ClipboardRow(
+                                item: item,
+                                index: index,
+                                isSelected: isSelected,
+                                timestamp: formatTimestamp(item.timestamp, todayStart: todayStart, tomorrowStart: tomorrowStart, yesterdayStart: yesterdayStart),
+                                badgeIndex: badgeIndex,
+                                onRowTap: {
+                                    clearNavigationFallbacks()
+                                    let modifiers = NSEvent.modifierFlags
+                                    if !modifiers.contains(.shift) && !modifiers.contains(.command) {
+                                        isSelectionFromMouse = true
+                                        selectedItemIds = [item.id]
+                                        selectedItemId = item.id
+                                        clipboardManager.paste(item: item)
+                                    }
+                                },
+                                onLeftClickWithModifiers: { modifiers in
+                                    isSelectionFromMouse = true
+                                    handleRowClick(itemId: item.id, modifiers: modifiers)
+                                },
+                                onRightClick: { modifiers in
+                                    isSelectionFromMouse = true
+                                    handleRowRightClick(itemId: item.id, modifiers: modifiers)
+                                    showNativeContextMenu(for: item)
+                                },
+                                onChevronTap: {
+                                    isSelectionFromMouse = true
+                                    selectedItemId = item.id
+                                    selectedItemIds = [item.id]
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                        showingDetail = true
+                                    }
+                                }
+                            )
+                            .tag(item.id)
+                            .padding(.horizontal, 4)
+                            .background(RowBackground(isSelected: isSelected))
+                        }
+                        
+                        if allFilteredItems.count > pageLimit * pageSize {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Spacer()
+                            }
+                            .frame(height: 44)
+                            .onAppear {
+                                pageLimit += 1
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+
+                }
+                .onChange(of: selectedItemId) { _, newValue in
+                    if let id = newValue, !isSelectionFromMouse {
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut(duration: 0.12)) {
+                                proxy.scrollTo(id)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var workflowSectionView: some View {
+        if !matchingWorkflows.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "terminal.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.purple)
+                    Text("Workflows & Slash Commands")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(matchingWorkflows.count) prompt\(matchingWorkflows.count == 1 ? "" : "s")")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary.opacity(0.7))
+                }
+                .padding(.horizontal, 4)
+                .padding(.top, 4)
+                
+                let firstWorkflowId = matchingWorkflows.first?.id
+                let isSlashQuery = searchQuery.hasPrefix("/")
+                
+                ForEach(matchingWorkflows) { snippet in
+                    let isFirstAndSlash = selectedWorkflowId == nil && snippet.id == firstWorkflowId && isSlashQuery
+                    let isSelected = selectedWorkflowId == snippet.id || isFirstAndSlash
+                    WorkflowRow(
+                        snippet: snippet,
+                        isSelected: isSelected,
+                        onTap: {
+                            clipboardManager.paste(content: snippet.content)
+                        }
+                    )
+                }
+                
+                Divider()
+                    .padding(.vertical, 4)
+            }
+        }
+    }
+    
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Spacer()
@@ -1518,6 +1621,80 @@ struct GlassEffectView: NSViewRepresentable {
             nsView.cornerRadius = cornerRadius
         }
         nsView.tintColor = tintColor
+    }
+}
+
+// MARK: - WorkflowRow
+struct WorkflowRow: View {
+    let snippet: WorkflowSnippet
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.purple.opacity(0.2), Color.blue.opacity(0.15)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(Color.purple.opacity(0.4), lineWidth: 0.8)
+                    )
+                
+                Text(snippet.trigger)
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundColor(.purple)
+                    .padding(.horizontal, 6)
+            }
+            .frame(height: 22)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(snippet.title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    if snippet.isBuiltIn {
+                        Text("Preset")
+                            .font(.system(size: 9, weight: .medium))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(Color.secondary.opacity(0.15)))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Text(snippet.content)
+                    .font(.system(size: 11, weight: .regular))
+                    .lineLimit(1)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer(minLength: 0)
+            
+            Image(systemName: "arrow.turn.down.left")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(isSelected ? .purple : .secondary.opacity(0.4))
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isSelected ? Color.purple.opacity(0.12) : Color.primary.opacity(0.03))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(isSelected ? Color.purple.opacity(0.35) : Color.primary.opacity(0.06), lineWidth: 0.8)
+                )
+        )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 

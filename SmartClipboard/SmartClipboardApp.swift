@@ -7,6 +7,7 @@ struct SmartClipboardApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             ClipboardItem.self,
+            WorkflowSnippet.self,
         ])
         
         let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!

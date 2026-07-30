@@ -8,6 +8,7 @@ struct SettingsView: View {
     
     enum SettingsTab: String, CaseIterable, Identifiable {
         case general
+        case workflows
         case intelligence
         case shortcuts
         case apps
@@ -19,6 +20,7 @@ struct SettingsView: View {
         var title: String {
             switch self {
             case .general: return "General"
+            case .workflows: return "Workflows & Snippets"
             case .intelligence: return "Intelligence"
             case .shortcuts: return "Shortcuts"
             case .apps: return "Apps"
@@ -30,6 +32,7 @@ struct SettingsView: View {
         var icon: String {
             switch self {
             case .general: return "gearshape.fill"
+            case .workflows: return "terminal.fill"
             case .intelligence: return "sparkles"
             case .shortcuts: return "command"
             case .apps: return "app.badge.checkmark.fill"
@@ -64,6 +67,8 @@ struct SettingsView: View {
                                 switch tab {
                                 case .general:
                                     GeneralSettingsView()
+                                case .workflows:
+                                    WorkflowsSettingsView()
                                 case .intelligence:
                                     IntelligenceSettingsView()
                                 case .shortcuts:
@@ -119,6 +124,7 @@ struct SettingsView: View {
     private func description(for tab: SettingsTab) -> String {
         switch tab {
         case .general: return "Configure how SmartClipboard behaves on your system."
+        case .workflows: return "Create slash command shortcuts (/word) for prompts and frequent snippets."
         case .intelligence: return "Power up your search and organization with Gemini AI."
         case .shortcuts: return "Manage keyboard interactions and quick navigation."
         case .apps: return "Customize behavior for specific applications."
@@ -1105,6 +1111,229 @@ struct SegmentedToggle: View {
         .buttonStyle(.plain)
         .onHover { hovering in
             NSCursor.pointingHand.set() // always reset; macOS reverts on exit
+        }
+    }
+}
+
+// MARK: - Workflows & Snippets Settings
+struct WorkflowsSettingsView: View {
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var clipboardManager: ClipboardManager
+    @Query(sort: \WorkflowSnippet.trigger, order: .forward) private var workflows: [WorkflowSnippet]
+    
+    @State private var showingAddSheet = false
+    @State private var editingSnippet: WorkflowSnippet? = nil
+    
+    @State private var newTitle = ""
+    @State private var newTrigger = ""
+    @State private var newContent = ""
+    @State private var filterQuery = ""
+    
+    var filteredWorkflows: [WorkflowSnippet] {
+        if filterQuery.isEmpty {
+            return workflows
+        } else {
+            return workflows.filter {
+                $0.title.localizedCaseInsensitiveContains(filterQuery) ||
+                $0.trigger.localizedCaseInsensitiveContains(filterQuery) ||
+                $0.content.localizedCaseInsensitiveContains(filterQuery)
+            }
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            SettingsSection(title: "Workflow Shortcuts & Prompts") {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Slash commands allow you to quickly paste frequently used prompt templates, skills, or snippets by typing /trigger in the search box.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        
+                    HStack {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.secondary)
+                            TextField("Filter workflows...", text: $filterQuery)
+                                .textFieldStyle(.plain)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.primary.opacity(0.05))
+                        )
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            newTitle = ""
+                            newTrigger = ""
+                            newContent = ""
+                            editingSnippet = nil
+                            showingAddSheet = true
+                        }) {
+                            Label("Add Workflow", systemImage: "plus")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    
+                    if filteredWorkflows.isEmpty {
+                        VStack(spacing: 8) {
+                            Text("No workflows found")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Button("Reset Default Workflows") {
+                                clipboardManager.resetWorkflowsToDefaults()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(filteredWorkflows) { snippet in
+                                HStack(spacing: 12) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color.purple.opacity(0.15))
+                                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.purple.opacity(0.3), lineWidth: 0.8))
+                                        Text(snippet.trigger)
+                                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.purple)
+                                            .padding(.horizontal, 6)
+                                    }
+                                    .frame(height: 22)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(spacing: 6) {
+                                            Text(snippet.title)
+                                                .font(.system(size: 13, weight: .semibold))
+                                            if snippet.isBuiltIn {
+                                                Text("Preset")
+                                                    .font(.system(size: 9, weight: .medium))
+                                                    .padding(.horizontal, 4)
+                                                    .padding(.vertical, 1)
+                                                    .background(Capsule().fill(Color.secondary.opacity(0.15)))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        Text(snippet.content)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(1)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Button(action: {
+                                        editingSnippet = snippet
+                                        newTitle = snippet.title
+                                        newTrigger = snippet.trigger
+                                        newContent = snippet.content
+                                        showingAddSheet = true
+                                    }) {
+                                        Image(systemName: "pencil")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .help("Edit Workflow")
+                                    
+                                    Button(action: {
+                                        clipboardManager.deleteWorkflow(snippet)
+                                    }) {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red.opacity(0.8))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .help("Delete Workflow")
+                                }
+                                .padding(10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.primary.opacity(0.04))
+                                )
+                            }
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Button("Restore Default Presets") {
+                            clipboardManager.resetWorkflowsToDefaults()
+                        }
+                        .buttonStyle(.plain)
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                    .padding(.top, 4)
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddSheet) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(editingSnippet == nil ? "New Workflow Shortcut" : "Edit Workflow Shortcut")
+                    .font(.headline)
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Trigger (Slash Command)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("e.g. /100answers or /codereview", text: $newTrigger)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Title / Label")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("e.g. 100 Answers & Pick Best", text: $newTitle)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Prompt / Snippet Content")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextEditor(text: $newContent)
+                        .font(.system(size: 12, design: .monospaced))
+                        .frame(height: 120)
+                        .padding(4)
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.15), lineWidth: 1))
+                }
+                
+                HStack {
+                    Button("Cancel") {
+                        showingAddSheet = false
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    Spacer()
+                    
+                    Button(editingSnippet == nil ? "Save Workflow" : "Update Workflow") {
+                        if !newTrigger.trimmingCharacters(in: .whitespaces).isEmpty && !newContent.isEmpty {
+                            if let snippet = editingSnippet {
+                                snippet.title = newTitle.isEmpty ? newTrigger : newTitle
+                                let formatted = newTrigger.trimmingCharacters(in: .whitespaces)
+                                snippet.trigger = formatted.hasPrefix("/") ? formatted : "/\(formatted)"
+                                snippet.content = newContent
+                                try? modelContext.save()
+                            } else {
+                                clipboardManager.addWorkflow(
+                                    title: newTitle.isEmpty ? newTrigger : newTitle,
+                                    trigger: newTrigger,
+                                    content: newContent
+                                )
+                            }
+                            showingAddSheet = false
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(newTrigger.trimmingCharacters(in: .whitespaces).isEmpty || newContent.isEmpty)
+                }
+            }
+            .padding(20)
+            .frame(width: 440)
         }
     }
 }

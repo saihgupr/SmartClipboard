@@ -55,6 +55,9 @@ class ClipboardManager: ObservableObject {
 
         // Run an initial pruning of old records
         pruneOldRecords()
+        
+        // Seed default workflows if empty
+        seedDefaultWorkflowsIfNeeded()
 
         // Install global hotkeys (Cmd+N and Option+N) that work from any app
         GlobalHotkeyManager.shared.onPasteItem = { [weak self] index in
@@ -455,5 +458,53 @@ class ClipboardManager: ObservableObject {
             // Last item pasted, reset flag
             isPastingSequentially = false
         }
+    }
+
+    // MARK: - Workflow & Slash Command Snippets
+    
+    func seedDefaultWorkflowsIfNeeded() {
+        let descriptor = FetchDescriptor<WorkflowSnippet>()
+        do {
+            let existing = try modelContext.fetch(descriptor)
+            if existing.isEmpty {
+                for preset in WorkflowSnippet.defaultPresets {
+                    modelContext.insert(preset)
+                }
+                try modelContext.save()
+            }
+        } catch {
+            print("Failed to seed default workflows: \(error)")
+        }
+    }
+    
+    func fetchWorkflows() -> [WorkflowSnippet] {
+        let descriptor = FetchDescriptor<WorkflowSnippet>(
+            sortBy: [SortDescriptor(\WorkflowSnippet.trigger, order: .forward)]
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
+    
+    func addWorkflow(title: String, trigger: String, content: String) {
+        let snippet = WorkflowSnippet(title: title, trigger: trigger, content: content)
+        modelContext.insert(snippet)
+        try? modelContext.save()
+    }
+    
+    func deleteWorkflow(_ snippet: WorkflowSnippet) {
+        modelContext.delete(snippet)
+        try? modelContext.save()
+    }
+    
+    func resetWorkflowsToDefaults() {
+        let descriptor = FetchDescriptor<WorkflowSnippet>()
+        if let existing = try? modelContext.fetch(descriptor) {
+            for item in existing {
+                modelContext.delete(item)
+            }
+        }
+        for preset in WorkflowSnippet.defaultPresets {
+            modelContext.insert(preset)
+        }
+        try? modelContext.save()
     }
 }
