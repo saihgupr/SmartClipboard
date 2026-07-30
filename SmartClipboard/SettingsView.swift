@@ -1215,14 +1215,7 @@ struct SnippetsSettingsView: View {
                                         Text(snippet.title)
                                             .font(.system(size: 13, weight: .medium))
                                             .lineLimit(1)
-                                        if snippet.isBuiltIn {
-                                            Text("Built-in")
-                                                .font(.system(size: 9, weight: .medium))
-                                                .padding(.horizontal, 4)
-                                                .padding(.vertical, 1)
-                                                .background(Capsule().fill(Color.secondary.opacity(0.12)))
-                                                .foregroundColor(.secondary)
-                                        }
+
                                     }
                                     Text(snippet.content)
                                         .font(.system(size: 11))

@@ -230,6 +230,8 @@ struct ContentView: View {
     @State private var selectedWorkflowId: UUID?
     @State private var selectedItemIds: Set<UUID> = []
     @State private var showingDetail = false
+    @State private var showingSnippetDetail = false
+    @State private var detailSnippet: WorkflowSnippet? = nil
     @State private var isSelectionFromMouse = false
     @FocusState private var isSearchFocused: Bool
     @State private var hostWindow: NSWindow?
@@ -388,6 +390,16 @@ struct ContentView: View {
                 .transition(.move(edge: .trailing).combined(with: .opacity))
                 .zIndex(1)
             }
+            
+            if showingSnippetDetail, let snippet = detailSnippet {
+                SnippetDetailView(snippet: snippet, isInPopover: isShownAsPopover) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showingSnippetDetail = false
+                    }
+                }
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .zIndex(2)
+            }
         }
         .frame(width: 380, height: 500)
         .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
@@ -477,6 +489,7 @@ struct ContentView: View {
             searchQuery = ""
             pageLimit = 1
             isSelectionFromMouse = false
+            selectedWorkflowId = nil
             selectedItemId = history.first?.id
             if let firstId = selectedItemId {
                 selectedItemIds = [firstId]
@@ -484,6 +497,8 @@ struct ContentView: View {
                 selectedItemIds = []
             }
             showingDetail = false
+            showingSnippetDetail = false
+            detailSnippet = nil
             leftArrowDismissedDetail = false
             isSharingPickerOpen = false
             
@@ -511,7 +526,34 @@ struct ContentView: View {
             return
         }
         
+        let snippets = matchingWorkflows
         let items = displayItems
+        
+        // If a snippet is currently selected, move down within snippets or into clipboard
+        if let wfId = selectedWorkflowId {
+            if let idx = snippets.firstIndex(where: { $0.id == wfId }) {
+                if idx < snippets.count - 1 {
+                    // Move to next snippet
+                    selectedWorkflowId = snippets[idx + 1].id
+                } else {
+                    // Fall into first clipboard item
+                    selectedWorkflowId = nil
+                    if let firstId = items.first?.id {
+                        selectedItemId = firstId
+                        selectedItemIds = [firstId]
+                    }
+                }
+            }
+            return
+        }
+        
+        // No snippet selected — are we starting fresh with snippets present?
+        if selectedItemId == nil && !snippets.isEmpty {
+            selectedWorkflowId = snippets.first?.id
+            return
+        }
+        
+        // Navigate within clipboard items
         guard !items.isEmpty else { return }
         let indexMap = itemIndexMap
         if let currentId = selectedItemId,
@@ -550,7 +592,32 @@ struct ContentView: View {
             return
         }
         
+        let snippets = matchingWorkflows
         let items = displayItems
+        
+        // If a snippet is currently selected, move up within snippets
+        if let wfId = selectedWorkflowId {
+            if let idx = snippets.firstIndex(where: { $0.id == wfId }) {
+                if idx > 0 {
+                    selectedWorkflowId = snippets[idx - 1].id
+                }
+                // Already at first snippet — stay there, don't wrap
+            }
+            return
+        }
+        
+        // If on first clipboard item and snippets exist, move up into last snippet
+        if let currentId = selectedItemId,
+           let idx = itemIndexMap[currentId],
+           idx == 0,
+           !snippets.isEmpty {
+            selectedItemId = nil
+            selectedItemIds = []
+            selectedWorkflowId = snippets.last?.id
+            return
+        }
+        
+        // Navigate within clipboard items
         guard !items.isEmpty else { return }
         let indexMap = itemIndexMap
         if let currentId = selectedItemId,
@@ -665,6 +732,27 @@ struct ContentView: View {
                 return nil
 
             case 124:
+                if showingSnippetDetail {
+                    // Right arrow inside snippet detail: nothing extra
+                    return nil
+                }
+                // If a snippet is the active selection (slash query and workflow focused)
+                let activeSnippet: WorkflowSnippet? = {
+                    if let id = selectedWorkflowId {
+                        return matchingWorkflows.first(where: { $0.id == id })
+                    }
+                    if searchQuery.hasPrefix("/") {
+                        return matchingWorkflows.first
+                    }
+                    return nil
+                }()
+                if let snippet = activeSnippet {
+                    detailSnippet = snippet
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showingSnippetDetail = true
+                    }
+                    return nil
+                }
                 if !showingDetail {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         showingDetail = true
@@ -697,7 +785,12 @@ struct ContentView: View {
                 return nil
 
             case 53: // Escape
-                if showingDetail {
+                if showingSnippetDetail {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showingSnippetDetail = false
+                    }
+                    return nil
+                } else if showingDetail {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         showingDetail = false
                     }
@@ -710,7 +803,10 @@ struct ContentView: View {
             case 36:
                 if isFocused { return event }
                 if showingDetail { showingDetail = false }
-                if let id = selectedItemId,
+                if let wfId = selectedWorkflowId,
+                   let snippet = matchingWorkflows.first(where: { $0.id == wfId }) {
+                    clipboardManager.paste(content: snippet.content)
+                } else if let id = selectedItemId,
                    let item = displayItems.first(where: { $0.id == id }) {
                     clipboardManager.paste(item: item)
                 }
@@ -1298,17 +1394,25 @@ struct ContentView: View {
                         pageLimit = 1
                         performLocalSearch()
                         isSelectionFromMouse = false
-                        if let firstId = displayItems.first?.id {
+                        let currentSnippets = matchingWorkflows
+                        if !currentSnippets.isEmpty {
+                            selectedWorkflowId = currentSnippets.first?.id
+                            selectedItemId = nil
+                            selectedItemIds = []
+                        } else if let firstId = displayItems.first?.id {
+                            selectedWorkflowId = nil
                             selectedItemId = firstId
                             selectedItemIds = [firstId]
                         } else {
+                            selectedWorkflowId = nil
                             selectedItemId = nil
                             selectedItemIds = []
                         }
                     }
                     .onSubmit {
-                        if let selectedWorkflow = matchingWorkflows.first(where: { $0.id == selectedWorkflowId }) ?? (searchQuery.hasPrefix("/") ? matchingWorkflows.first : nil) {
-                            clipboardManager.paste(content: selectedWorkflow.content)
+                        if let wfId = selectedWorkflowId,
+                           let snippet = matchingWorkflows.first(where: { $0.id == wfId }) {
+                            clipboardManager.paste(content: snippet.content)
                         } else if let id = selectedItemId, let item = displayItems.first(where: { $0.id == id }) {
                             clipboardManager.paste(item: item)
                         } else if let first = displayItems.first {
@@ -1368,7 +1472,8 @@ struct ContentView: View {
                         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
                         ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                            let isSelected = selectedItemIds.contains(item.id)
+                            // Don't highlight clipboard items when a snippet is the active selection
+                            let isSelected = selectedWorkflowId == nil && selectedItemIds.contains(item.id)
                             let badgeIndex = getBadgeIndex(index: index)
                             ClipboardRow(
                                 item: item,
@@ -1442,39 +1547,31 @@ struct ContentView: View {
     @ViewBuilder
     private var workflowSectionView: some View {
         if !matchingWorkflows.isEmpty {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Image(systemName: "doc.text")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.secondary)
-                    Text("Snippets")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(matchingWorkflows.count) snippet\(matchingWorkflows.count == 1 ? "" : "s")")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary.opacity(0.7))
-                }
-                .padding(.horizontal, 4)
-                .padding(.top, 4)
-                
-                let firstWorkflowId = matchingWorkflows.first?.id
-                let isSlashQuery = searchQuery.hasPrefix("/")
-                
+            VStack(alignment: .leading, spacing: 0) {
                 ForEach(matchingWorkflows) { snippet in
-                    let isFirstAndSlash = selectedWorkflowId == nil && snippet.id == firstWorkflowId && isSlashQuery
-                    let isSelected = selectedWorkflowId == snippet.id || isFirstAndSlash
+                    let isSelected = selectedWorkflowId == snippet.id
                     WorkflowRow(
                         snippet: snippet,
                         isSelected: isSelected,
                         onTap: {
                             clipboardManager.paste(content: snippet.content)
+                        },
+                        onChevronTap: {
+                            selectedWorkflowId = snippet.id
+                            detailSnippet = snippet
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                showingSnippetDetail = true
+                            }
                         }
                     )
+                    .padding(.horizontal, 4)
+                    .background(RowBackground(isSelected: isSelected))
                 }
                 
+                // Subtle divider between snippets and clipboard items
                 Divider()
-                    .padding(.vertical, 4)
+                    .padding(.top, 6)
+                    .padding(.bottom, 2)
             }
         }
     }
@@ -1629,60 +1726,56 @@ struct WorkflowRow: View {
     let snippet: WorkflowSnippet
     let isSelected: Bool
     let onTap: () -> Void
+    let onChevronTap: () -> Void
+    
+    @State private var isChevronHovered = false
     
     var body: some View {
-        HStack(spacing: 10) {
-            // Trigger badge
-            Text(snippet.trigger)
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(
-                    RoundedRectangle(cornerRadius: 5, style: .continuous)
-                        .fill(Color.primary.opacity(0.06))
-                )
-                .fixedSize()
-            
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 5) {
-                    Text(snippet.title)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.primary.opacity(0.9))
-                        .lineLimit(1)
+        // Same outer structure as ClipboardRow
+        HStack(spacing: 12) {
+            HStack(spacing: 12) {
+                // Spacer to align with ClipboardRow which has a badge or spacer in this slot
+                Spacer().frame(width: 18, height: 18)
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    // Trigger badge on top line (like timestamp row)
+                    Text(snippet.trigger)
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundColor(.secondary)
                     
-                    if snippet.isBuiltIn {
-                        Text("Built-in")
-                            .font(.system(size: 9, weight: .medium))
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .background(Capsule().fill(Color.secondary.opacity(0.12)))
-                            .foregroundColor(.secondary)
-                    }
+                    // Title as the main content line
+                    Text(snippet.title)
+                        .font(.system(size: 13, weight: .regular))
+                        .lineLimit(2)
+                        .lineSpacing(2.5)
+                        .foregroundColor(.primary.opacity(0.9))
                 }
                 
-                Text(snippet.content)
-                    .font(.system(size: 11, weight: .regular))
-                    .lineLimit(1)
-                    .foregroundColor(.secondary)
+                Spacer(minLength: 0)
             }
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
             
-            Spacer(minLength: 0)
-            
-            Image(systemName: "arrow.turn.down.left")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(isSelected ? .accentColor : .secondary.opacity(0.3))
+            // Chevron — identical to ClipboardRow
+            Image(systemName: "chevron.right")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(isChevronHovered ? .primary : .secondary.opacity(0.4))
+                .frame(width: 24, height: 24)
+                .background(
+                    Circle()
+                        .fill(isChevronHovered ? Color.primary.opacity(0.06) : Color.clear)
+                )
+                .contentShape(Circle())
+                .onHover { hovering in
+                    if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+                    withAnimation(.easeOut(duration: 0.12)) { isChevronHovered = hovering }
+                }
+                .onTapGesture { onChevronTap() }
+                .padding(.trailing, 2)
         }
-        .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
+        .padding(.leading, 8)
+        .padding(.trailing, 8)
     }
 }
 
@@ -1943,6 +2036,293 @@ struct ClipboardDetailView: View {
             )
             .ignoresSafeArea()
         )
+    }
+}
+
+// MARK: - SnippetDetailView
+struct SnippetDetailView: View {
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var clipboardManager: ClipboardManager
+    let snippet: WorkflowSnippet
+    let isInPopover: Bool
+    let onBack: () -> Void
+    @AppStorage("themeStyle") private var themeStyle = "darkGlass"
+    
+    @State private var isEditing = false
+    @State private var editTitle = ""
+    @State private var editTrigger = ""
+    @State private var editContent = ""
+    @State private var isSaved = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header bar — matches ClipboardDetailView
+            HStack(spacing: 12) {
+                BackButton(action: onBack)
+                
+                Spacer()
+                
+                Text(isEditing ? "Edit Snippet" : "Snippet")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.primary.opacity(0.8))
+                
+                Spacer()
+                
+                if isEditing {
+                    Button("Done") {
+                        saveEdits()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(editTrigger.trimmingCharacters(in: .whitespaces).isEmpty || editContent.isEmpty)
+                } else {
+                    Button(action: { enterEditing() }) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(width: 28, height: 28)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.secondary)
+                    .help("Edit Snippet")
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .textSelection(.disabled)
+            
+            Divider().opacity(0.3)
+            
+            if isEditing {
+                // Edit mode — inline edit fields
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Trigger
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Slash Command")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary)
+                                .textCase(.uppercase)
+                            TextField("/trigger", text: $editTrigger)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 13, design: .monospaced))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .background(Color.primary.opacity(0.05))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                                )
+                        }
+                        
+                        // Name
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Name")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary)
+                                .textCase(.uppercase)
+                            TextField("Name", text: $editTitle)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 13))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .background(Color.primary.opacity(0.05))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                                )
+                        }
+                        
+                        // Content
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Content")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary)
+                                .textCase(.uppercase)
+                            ZStack(alignment: .topLeading) {
+                                if editContent.isEmpty {
+                                    Text("Content...")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                        .padding(.horizontal, 10)
+                                        .padding(.top, 10)
+                                        .allowsHitTesting(false)
+                                }
+                                TextEditor(text: $editContent)
+                                    .font(.system(size: 12.5))
+                                    .lineSpacing(3)
+                                    .frame(minHeight: 160)
+                                    .scrollContentBackground(.hidden)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 4)
+                            }
+                            .background(Color.primary.opacity(0.05))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                            )
+                        }
+                        
+                        if isSaved {
+                            HStack(spacing: 5) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption)
+                                Text("Saved")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                // Read mode — shows full content, selectable
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        // Trigger + title row
+                        HStack(spacing: 8) {
+                            Text(snippet.trigger)
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(Color.primary.opacity(0.06))
+                                )
+                            
+                            Text(snippet.title)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.primary.opacity(0.8))
+                            
+
+                        }
+                        
+                        Divider().opacity(0.3)
+                        
+                        // Full content
+                        Text(snippet.content)
+                            .font(.system(size: 12.5))
+                            .lineSpacing(4)
+                            .foregroundColor(.primary.opacity(0.85))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                
+                // Paste button at bottom
+                Divider().opacity(0.3)
+                
+                Button(action: {
+                    clipboardManager.paste(content: snippet.content)
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "return")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text("Paste Snippet")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.primary.opacity(0.8))
+                .background(Color.primary.opacity(0.04))
+            }
+        }
+        .padding(.top, isInPopover ? 10 : 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .preferredColorScheme((themeStyle == "dark" || themeStyle == "darkGlass") ? .dark : (themeStyle == "light" ? .light : nil))
+        .background(
+            ZStack {
+                if themeStyle == "dark" {
+                    Color(red: 0.118, green: 0.118, blue: 0.118)
+                } else if themeStyle == "light" {
+                    Color(red: 0.96, green: 0.96, blue: 0.96)
+                } else if themeStyle == "darkGlass" {
+                    if #available(macOS 26.0, *) {
+                        GlassEffectView(
+                            style: .clear,
+                            tintColor: NSColor(red: 0.02, green: 0.02, blue: 0.02, alpha: 0.89),
+                            cornerRadius: 16
+                        )
+                    } else {
+                        VisualEffectView(material: .hudWindow, blendingMode: .behindWindow, cornerRadius: 16)
+                        Color.black.opacity(0.4)
+                    }
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
+                            Color.clear,
+                            Color.white.opacity(0.04)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .cornerRadius(16)
+                } else {
+                    if #available(macOS 26.0, *) {
+                        GlassEffectView(style: .regular, cornerRadius: 16)
+                    } else {
+                        VisualEffectView(material: .popover, blendingMode: .behindWindow, cornerRadius: 16)
+                    }
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.06),
+                            Color.clear,
+                            Color.white.opacity(0.04)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .cornerRadius(16)
+                }
+            }
+            .clipShape(PopoverBubbleShape(showArrow: isInPopover))
+            .overlay(
+                PopoverBubbleShape(showArrow: isInPopover)
+                    .stroke(
+                        themeStyle == "light" ? Color.black.opacity(0.03) : Color.white.opacity(0.08),
+                        lineWidth: 0.5
+                    )
+            )
+            .ignoresSafeArea()
+        )
+    }
+    
+    private func enterEditing() {
+        editTitle = snippet.title
+        editTrigger = snippet.trigger
+        editContent = snippet.content
+        isSaved = false
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isEditing = true
+        }
+    }
+    
+    private func saveEdits() {
+        guard !editTrigger.trimmingCharacters(in: .whitespaces).isEmpty,
+              !editContent.isEmpty else { return }
+        snippet.title = editTitle.isEmpty ? editTrigger : editTitle
+        let formatted = editTrigger.trimmingCharacters(in: .whitespaces)
+        snippet.trigger = formatted.hasPrefix("/") ? formatted : "/\(formatted)"
+        snippet.content = editContent
+        try? modelContext.save()
+        withAnimation {
+            isSaved = true
+            isEditing = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            isSaved = false
+        }
     }
 }
 
