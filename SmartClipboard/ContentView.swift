@@ -1444,14 +1444,14 @@ struct ContentView: View {
         if !matchingWorkflows.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Image(systemName: "terminal.fill")
+                    Image(systemName: "doc.text")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.purple)
-                    Text("Workflows & Slash Commands")
+                        .foregroundColor(.secondary)
+                    Text("Snippets")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("\(matchingWorkflows.count) prompt\(matchingWorkflows.count == 1 ? "" : "s")")
+                    Text("\(matchingWorkflows.count) snippet\(matchingWorkflows.count == 1 ? "" : "s")")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary.opacity(0.7))
                 }
