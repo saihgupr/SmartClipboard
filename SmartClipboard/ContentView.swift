@@ -1631,40 +1631,32 @@ struct WorkflowRow: View {
     let onTap: () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.purple.opacity(0.2), Color.blue.opacity(0.15)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .stroke(Color.purple.opacity(0.4), lineWidth: 0.8)
-                    )
-                
-                Text(snippet.trigger)
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundColor(.purple)
-                    .padding(.horizontal, 6)
-            }
-            .frame(height: 22)
+        HStack(spacing: 10) {
+            // Trigger badge
+            Text(snippet.trigger)
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .fill(Color.primary.opacity(0.06))
+                )
+                .fixedSize()
             
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
+                HStack(spacing: 5) {
                     Text(snippet.title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .lineLimit(1)
                     
                     if snippet.isBuiltIn {
-                        Text("Preset")
+                        Text("Built-in")
                             .font(.system(size: 9, weight: .medium))
                             .padding(.horizontal, 4)
                             .padding(.vertical, 1)
-                            .background(Capsule().fill(Color.secondary.opacity(0.15)))
+                            .background(Capsule().fill(Color.secondary.opacity(0.12)))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -1678,18 +1670,14 @@ struct WorkflowRow: View {
             Spacer(minLength: 0)
             
             Image(systemName: "arrow.turn.down.left")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(isSelected ? .purple : .secondary.opacity(0.4))
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(isSelected ? .accentColor : .secondary.opacity(0.3))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? Color.purple.opacity(0.12) : Color.primary.opacity(0.03))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(isSelected ? Color.purple.opacity(0.35) : Color.primary.opacity(0.06), lineWidth: 0.8)
-                )
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
         )
         .contentShape(Rectangle())
         .onTapGesture {
@@ -1697,6 +1685,7 @@ struct WorkflowRow: View {
         }
     }
 }
+
 
 // MARK: - TwoTonePinIcon
 struct TwoTonePinIcon: View {
