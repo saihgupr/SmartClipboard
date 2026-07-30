@@ -313,10 +313,9 @@ struct ContentView: View {
                 let trig = item.trigger.lowercased()
                 let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
                 let title = item.title.lowercased()
-                let titleWords = title.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
                 
                 let trigMatches = trig.hasPrefix(rawQuery) || cleanTrig.hasPrefix(cleanQuery)
-                let titleMatches = title.hasPrefix(cleanQuery) || titleWords.contains(where: { $0.hasPrefix(cleanQuery) })
+                let titleMatches = title.hasPrefix(cleanQuery)
                 
                 return trigMatches || titleMatches
             }
@@ -326,7 +325,7 @@ struct ContentView: View {
                 let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
                 let title = item.title.lowercased()
                 
-                return cleanTrig.contains(rawQuery) || title.contains(rawQuery)
+                return cleanTrig.hasPrefix(rawQuery) || title.hasPrefix(rawQuery) || cleanTrig.contains(rawQuery) || title.contains(rawQuery)
             }
         }
     }
@@ -361,9 +360,8 @@ struct ContentView: View {
         }
     }
 
-    private func getBadgeIndex(index: Int, snippetsCount: Int = 0) -> Int? {
-        let combinedIndex = snippetsCount + index
-        return combinedIndex < 10 ? combinedIndex : nil
+    private func getBadgeIndex(index: Int) -> Int? {
+        return index < 10 ? index : nil
     }
 
     var body: some View {
@@ -706,31 +704,15 @@ struct ContentView: View {
                         let totalCount = snippets.count + items.count
                         
                         if isCommandOnly {
-                            if targetIndex < snippets.count {
-                                clipboardManager.paste(content: snippets[targetIndex].content)
+                            if targetIndex < items.count {
+                                let targetItem = items[targetIndex]
+                                clipboardManager.paste(item: targetItem)
                                 return nil
-                            } else {
-                                let cbIndex = targetIndex - snippets.count
-                                if cbIndex < items.count {
-                                    let targetItem = items[cbIndex]
-                                    clipboardManager.paste(item: targetItem)
-                                    return nil
-                                }
                             }
                         } else if isOptionOnly {
-                            let countToPaste = min(targetIndex + 1, totalCount)
+                            let countToPaste = min(targetIndex + 1, items.count)
                             if countToPaste > 0 {
-                                var contentsToPaste: [String] = []
-                                for i in 0..<countToPaste {
-                                    if i < snippets.count {
-                                        contentsToPaste.append(snippets[i].content)
-                                    } else {
-                                        let cbIndex = i - snippets.count
-                                        if cbIndex < items.count {
-                                            contentsToPaste.append(items[cbIndex].content)
-                                        }
-                                    }
-                                }
+                                let contentsToPaste = items[0..<countToPaste].map { $0.content }
                                 clipboardManager.pasteMultipleContents(contentsToPaste)
                                 return nil
                             }
@@ -1508,9 +1490,8 @@ struct ContentView: View {
 
                         let snippetsCount = matchingWorkflows.count
                         ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                            // Don't highlight clipboard items when a snippet is the active selection
                             let isSelected = selectedWorkflowId == nil && selectedItemIds.contains(item.id)
-                            let badgeIndex = getBadgeIndex(index: index, snippetsCount: snippetsCount)
+                            let badgeIndex = getBadgeIndex(index: index)
                             ClipboardRow(
                                 item: item,
                                 index: index,
@@ -1586,11 +1567,10 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(matchingWorkflows.enumerated()), id: \.element.id) { index, snippet in
                     let isSelected = selectedWorkflowId == snippet.id
-                    let badgeIndex = index < 10 ? index : nil
                     WorkflowRow(
                         snippet: snippet,
                         isSelected: isSelected,
-                        badgeIndex: badgeIndex,
+                        badgeIndex: nil,
                         onTap: {
                             clipboardManager.paste(content: snippet.content)
                         },
@@ -2104,40 +2084,6 @@ struct SnippetPencilButton: View {
     }
 }
 
-// MARK: - SnippetCopyButton
-struct SnippetCopyButton: View {
-    let content: String
-    @State private var isHovered = false
-    @State private var isCopied = false
-
-    var body: some View {
-        Button {
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(content, forType: .string)
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                isCopied = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-                withAnimation { isCopied = false }
-            }
-        } label: {
-            Image(systemName: isCopied ? "checkmark" : "doc.on.doc")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(isCopied ? .green : (isHovered ? .primary : .secondary))
-                .frame(width: 28, height: 28)
-                .animation(.easeInOut(duration: 0.15), value: isCopied)
-        }
-        .buttonStyle(.plain)
-        .focusable(false)
-        .focusEffectDisabled()
-        .onHover { hovering in
-            if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
-            withAnimation(.easeOut(duration: 0.15)) { isHovered = hovering }
-        }
-        .help(isCopied ? "Copied!" : "Copy Content")
-    }
-}
-
 // MARK: - SnippetDetailView
 struct SnippetDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -2175,8 +2121,6 @@ struct SnippetDetailView: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.small)
                         .disabled(editTrigger.trimmingCharacters(in: .whitespaces).isEmpty || editContent.isEmpty)
-                    } else {
-                        SnippetPencilButton(action: enterEditing)
                     }
                 }
             }
@@ -2277,7 +2221,7 @@ struct SnippetDetailView: View {
                 // Read mode — mirrors ClipboardDetailView layout
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        // Metadata row: trigger pill + title + copy button
+                        // Metadata row: trigger pill + title + edit button
                         HStack(spacing: 8) {
                             Text(snippet.trigger)
                                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
@@ -2300,7 +2244,7 @@ struct SnippetDetailView: View {
 
                             Spacer()
 
-                            SnippetCopyButton(content: snippet.content)
+                            SnippetPencilButton(action: enterEditing)
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 14)
