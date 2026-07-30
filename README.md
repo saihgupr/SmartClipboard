@@ -81,13 +81,14 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 | Shortcut | Context | Action |
 | --- | --- | --- |
 | `Cmd + Option + V` (default) | Global | Toggle SmartClipboard search window (Spotlight-style) |
-| `Cmd + [1-9]` | Main List | Instant indexed paste of the corresponding item |
-| `Option + [1-9]` | Main List | Sequential multi-paste (perfect for batch filling forms) |
+| `/` or `/command` | Main List | Search and filter built-in and custom Snippets |
+| `Cmd + [1-9, 0]` | Main List / Search | Instant indexed paste of the corresponding snippet or clipboard item |
+| `Option + [1-9, 0]` | Main List / Search | Sequential multi-paste of top N items (snippets or clipboard entries) |
 | `Cmd + Shift + N` | Any | Toggle **Incognito Mode** |
-| `Right Arrow` | Main List | Open detail view for the selected item |
+| `Right Arrow` | Main List | Open detail & inline editor view for selected item or snippet |
 | `Left Arrow` | Main List | Perform configured quick action (Quick Copy, Pin, etc.) |
 | `Left Arrow` | Detail View | Return to main list |
-| `Up / Down Arrow` | Detail View | Navigate and view previous / next item content |
+| `Up / Down Arrow` | Main List | Unified navigation through snippets and clipboard entries |
 | `Cmd + C` | Detail View | Copy item to clipboard without closing window (or copies text selection if active) |
 | `Escape` | Any | Close detail view / dismiss SmartClipboard window |
 

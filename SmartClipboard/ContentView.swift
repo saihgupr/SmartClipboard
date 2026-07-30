@@ -2257,25 +2257,7 @@ struct SnippetDetailView: View {
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
-                // Paste button at bottom
-                Divider().opacity(0.3)
-                
-                Button(action: {
-                    clipboardManager.paste(content: snippet.content)
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "return")
-                            .font(.system(size: 11, weight: .semibold))
-                        Text("Paste Snippet")
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.primary.opacity(0.8))
-                .background(Color.primary.opacity(0.04))
+
             }
         }
         .padding(.top, isInPopover ? 10 : 0)
