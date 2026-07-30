@@ -2081,6 +2081,73 @@ struct ClipboardDetailView: View {
     }
 }
 
+// MARK: - SnippetPencilButton
+struct SnippetPencilButton: View {
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "pencil")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(isHovered ? .primary : .secondary)
+                .frame(width: 28, height: 28)
+                .background(
+                    Circle()
+                        .fill(isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.03))
+                )
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .focusEffectDisabled()
+        .onHover { hovering in
+            if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+            withAnimation(.easeOut(duration: 0.15)) { isHovered = hovering }
+        }
+        .help("Edit Snippet")
+    }
+}
+
+// MARK: - SnippetCopyButton
+struct SnippetCopyButton: View {
+    let content: String
+    @State private var isHovered = false
+    @State private var isCopied = false
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(content, forType: .string)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                isCopied = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                withAnimation { isCopied = false }
+            }
+        } label: {
+            Image(systemName: isCopied ? "checkmark" : "doc.on.doc")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(isCopied ? .green : (isHovered ? .primary : .secondary))
+                .frame(width: 28, height: 28)
+                .background(
+                    Circle()
+                        .fill(isCopied
+                              ? Color.green.opacity(0.12)
+                              : (isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.03)))
+                )
+                .animation(.easeInOut(duration: 0.15), value: isCopied)
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .focusEffectDisabled()
+        .onHover { hovering in
+            if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+            withAnimation(.easeOut(duration: 0.15)) { isHovered = hovering }
+        }
+        .help(isCopied ? "Copied!" : "Copy Content")
+    }
+}
+
 // MARK: - SnippetDetailView
 struct SnippetDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -2098,7 +2165,7 @@ struct SnippetDetailView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header bar — matches ClipboardDetailView
+            // Header bar — mirrors ClipboardDetailView
             HStack(spacing: 12) {
                 BackButton(action: onBack)
                 
@@ -2110,22 +2177,17 @@ struct SnippetDetailView: View {
                 
                 Spacer()
                 
-                if isEditing {
-                    Button("Done") {
-                        saveEdits()
+                HStack(spacing: 8) {
+                    if isEditing {
+                        Button("Done") {
+                            saveEdits()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(editTrigger.trimmingCharacters(in: .whitespaces).isEmpty || editContent.isEmpty)
+                    } else {
+                        SnippetPencilButton(action: enterEditing)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .disabled(editTrigger.trimmingCharacters(in: .whitespaces).isEmpty || editContent.isEmpty)
-                } else {
-                    Button(action: { enterEditing() }) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 13, weight: .medium))
-                            .frame(width: 28, height: 28)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.secondary)
-                    .help("Edit Snippet")
                 }
             }
             .padding(.horizontal, 12)
@@ -2222,42 +2284,50 @@ struct SnippetDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
-                // Read mode — shows full content, selectable
+                // Read mode — mirrors ClipboardDetailView layout
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        // Trigger + title row
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Metadata row: trigger pill + title + copy button
                         HStack(spacing: 8) {
                             Text(snippet.trigger)
                                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                                 .foregroundColor(.secondary)
-                                .padding(.horizontal, 7)
+                                .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(
                                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                        .fill(Color.primary.opacity(0.06))
+                                        .fill(Color.primary.opacity(0.07))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                                        )
                                 )
-                            
+
                             Text(snippet.title)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.primary.opacity(0.8))
-                            
+                                .foregroundColor(.primary.opacity(0.85))
+                                .lineLimit(1)
 
+                            Spacer()
+
+                            SnippetCopyButton(content: snippet.content)
                         }
-                        
+                        .padding(.horizontal, 16)
+                        .padding(.top, 14)
+                        .padding(.bottom, 12)
+
                         Divider().opacity(0.3)
-                        
-                        // Full content
+
+                        // Full snippet content — same treatment as clipboard detail
                         Text(snippet.content)
                             .font(.system(size: 12.5))
                             .lineSpacing(4)
-                            .foregroundColor(.primary.opacity(0.85))
+                            .padding(16)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
+                            .foregroundColor(.primary.opacity(0.85))
                     }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
             }
         }
         .padding(.top, isInPopover ? 10 : 0)
