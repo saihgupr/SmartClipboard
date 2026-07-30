@@ -363,6 +363,70 @@ class ClipboardManager: ObservableObject {
     }
 
     /// Fetches the most-recent `count` items and pastes them oldest→newest.
+
+    /// Pastes a list of text strings sequentially (oldest/lowest-indexed item first).
+    func pasteMultipleContents(_ contents: [String]) {
+        guard !contents.isEmpty, !isPastingSequentially else { return }
+        let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
+        let targetContents = Array(contents.reversed())
+        isPastingSequentially = true
+        onPaste?()
+        if isUIVisible && NSApp.isActive {
+            NSApp.hide(nil)
+        }
+        let delay: Double = (isUIVisible && NSApp.isActive) ? 0.25 : 0.05
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.pasteSequentiallyStrings(targetContents)
+        }
+    }
+
+    private func pasteSequentiallyStrings(_ contents: [String], index: Int = 0) {
+        guard index < contents.count else {
+            isPastingSequentially = false
+            return
+        }
+        
+        copyToClipboard(content: contents[index])
+        simulatePaste()
+        
+        if index < contents.count - 1 {
+            let separatorDelay: Double = 0.40
+            DispatchQueue.main.asyncAfter(deadline: .now() + separatorDelay) { [weak self] in
+                guard let self = self else { return }
+                let source = CGEventSource(stateID: .combinedSessionState)
+                source?.setLocalEventsFilterDuringSuppressionState([.permitLocalMouseEvents, .permitSystemDefinedEvents],
+                                                                   state: .eventSuppressionStateSuppressionInterval)
+                
+                let activeApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                let useShift = activeApp != nil && self.shiftEnterBundleIDs.contains(activeApp!)
+                
+                let kVK_Return: CGKeyCode = 0x24
+                
+                let retd = CGEvent(keyboardEventSource: source, virtualKey: kVK_Return, keyDown: true)
+                let retu = CGEvent(keyboardEventSource: source, virtualKey: kVK_Return, keyDown: false)
+                
+                if useShift {
+                    let shiftFlag = CGEventFlags(rawValue: UInt64(NSEvent.ModifierFlags.shift.rawValue) | 0x000002)
+                    retd?.flags = shiftFlag
+                    retu?.flags = shiftFlag
+                } else {
+                    retd?.flags = CGEventFlags()
+                    retu?.flags = CGEventFlags()
+                }
+                
+                retd?.post(tap: .cgSessionEventTap)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                    retu?.post(tap: .cgSessionEventTap)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        self.pasteSequentiallyStrings(contents, index: index + 1)
+                    }
+                }
+            }
+        } else {
+            isPastingSequentially = false
+        }
+    }
+
     func pasteMultiple(count: Int) {
         guard !isPastingSequentially else {
             print("[ClipboardManager] Already pasting sequentially, ignoring request.")

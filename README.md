@@ -9,13 +9,14 @@ SmartClipboard is a modern macOS menu bar application built with SwiftUI that en
 
 ## Features
 
+* Snippets & Slash Commands: Create, edit, and trigger reusable prompt templates or code snippets using slash commands (e.g., `/fixbugs`, `/summarize`, `/codereview`).
 * AI Search: Find anything in your clipboard by asking a question in plain English. For example, “Where was that API key?” or “Find the code snippet.” Powered by local Apple Silicon (Ollama) or Google Gemini AI.
 * Find by Date or Time: Search for items you copied using terms like “today”, “yesterday”, “Monday”, “2:30 PM”, “July 13”, or “07/13”.
 * Two Ways to Access Your Clipboard: Open it from the menu bar for quick access, or use a Spotlight-style floating window that appears in the center of your screen.
 * Keyboard-First Shortcuts:
-    * Paste recent items instantly with ⌘ + 1–9.
-    * Paste multiple items in order with ⌥ + 1–9, useful for filling out forms.
-    * Browse your clipboard using the arrow keys.
+    * Paste recent items or search results instantly with ⌘ + 1–9 and ⌘ + 0.
+    * Paste multiple items in order with ⌥ + 1–9 and ⌥ + 0, useful for filling out forms.
+    * Seamlessly arrow down from snippets into clipboard items using a unified navigation model.
 * Privacy & Security: Use incognito mode when you don’t want items saved. Clipboard entries from password managers are automatically ignored, and all history is stored securely on your device.
 * Easy Migration: Import your existing clipboard history from Alfred, BetterTouchTool, or Keyboard Maestro in a few clicks.
 

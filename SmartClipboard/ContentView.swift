@@ -361,9 +361,9 @@ struct ContentView: View {
         }
     }
 
-    private func getBadgeIndex(index: Int) -> Int? {
-        guard searchQuery.isEmpty else { return nil }
-        return index < 9 ? index : nil
+    private func getBadgeIndex(index: Int, snippetsCount: Int = 0) -> Int? {
+        let combinedIndex = snippetsCount + index
+        return combinedIndex < 10 ? combinedIndex : nil
     }
 
     var body: some View {
@@ -691,7 +691,9 @@ struct ContentView: View {
 
             let flags = event.modifierFlags
             let isCommandOnly = flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control) && !flags.contains(.option)
-            if isCommandOnly, let chars = event.charactersIgnoringModifiers, chars.count == 1 {
+            let isOptionOnly = flags.contains(.option) && !flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control)
+
+            if (isCommandOnly || isOptionOnly), let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                 if let num = Int(chars) {
                     let targetIndex: Int? = {
                         if num >= 1 && num <= 9 { return num - 1 }
@@ -699,11 +701,39 @@ struct ContentView: View {
                         return nil
                     }()
                     if let targetIndex = targetIndex {
-                        let currentItems = displayItems
-                        if targetIndex < currentItems.count {
-                            let targetItem = currentItems[targetIndex]
-                            clipboardManager.paste(item: targetItem)
-                            return nil
+                        let snippets = matchingWorkflows
+                        let items = displayItems
+                        let totalCount = snippets.count + items.count
+                        
+                        if isCommandOnly {
+                            if targetIndex < snippets.count {
+                                clipboardManager.paste(content: snippets[targetIndex].content)
+                                return nil
+                            } else {
+                                let cbIndex = targetIndex - snippets.count
+                                if cbIndex < items.count {
+                                    let targetItem = items[cbIndex]
+                                    clipboardManager.paste(item: targetItem)
+                                    return nil
+                                }
+                            }
+                        } else if isOptionOnly {
+                            let countToPaste = min(targetIndex + 1, totalCount)
+                            if countToPaste > 0 {
+                                var contentsToPaste: [String] = []
+                                for i in 0..<countToPaste {
+                                    if i < snippets.count {
+                                        contentsToPaste.append(snippets[i].content)
+                                    } else {
+                                        let cbIndex = i - snippets.count
+                                        if cbIndex < items.count {
+                                            contentsToPaste.append(items[cbIndex].content)
+                                        }
+                                    }
+                                }
+                                clipboardManager.pasteMultipleContents(contentsToPaste)
+                                return nil
+                            }
                         }
                     }
                 }
@@ -1476,10 +1506,11 @@ struct ContentView: View {
                         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
                         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
+                        let snippetsCount = matchingWorkflows.count
                         ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
                             // Don't highlight clipboard items when a snippet is the active selection
                             let isSelected = selectedWorkflowId == nil && selectedItemIds.contains(item.id)
-                            let badgeIndex = getBadgeIndex(index: index)
+                            let badgeIndex = getBadgeIndex(index: index, snippetsCount: snippetsCount)
                             ClipboardRow(
                                 item: item,
                                 index: index,
@@ -1553,11 +1584,13 @@ struct ContentView: View {
     private var workflowSectionView: some View {
         if !matchingWorkflows.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(matchingWorkflows) { snippet in
+                ForEach(Array(matchingWorkflows.enumerated()), id: \.element.id) { index, snippet in
                     let isSelected = selectedWorkflowId == snippet.id
+                    let badgeIndex = index < 10 ? index : nil
                     WorkflowRow(
                         snippet: snippet,
                         isSelected: isSelected,
+                        badgeIndex: badgeIndex,
                         onTap: {
                             clipboardManager.paste(content: snippet.content)
                         },
@@ -1730,6 +1763,7 @@ struct GlassEffectView: NSViewRepresentable {
 struct WorkflowRow: View {
     let snippet: WorkflowSnippet
     let isSelected: Bool
+    var badgeIndex: Int? = nil
     let onTap: () -> Void
     let onChevronTap: () -> Void
     
@@ -1739,8 +1773,11 @@ struct WorkflowRow: View {
         // Same outer structure as ClipboardRow
         HStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Spacer to align with ClipboardRow which has a badge or spacer in this slot
-                Spacer().frame(width: 18, height: 18)
+                if let badgeIndex = badgeIndex {
+                    KeycapBadge(index: badgeIndex, isSelected: isSelected)
+                } else {
+                    Spacer().frame(width: 18, height: 18)
+                }
                 
                 VStack(alignment: .leading, spacing: 3) {
                     // Trigger badge on top line (like timestamp row)
