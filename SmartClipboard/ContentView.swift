@@ -301,27 +301,32 @@ struct ContentView: View {
     }
 
     private var matchingWorkflows: [WorkflowSnippet] {
-        let query = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !query.isEmpty else { return [] }
+        let rawQuery = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !rawQuery.isEmpty else { return [] }
         
-        if query.hasPrefix("/") {
-            let cleanQuery = String(query.dropFirst())
+        if rawQuery.hasPrefix("/") {
+            let cleanQuery = String(rawQuery.dropFirst())
             if cleanQuery.isEmpty {
                 return allWorkflows
             }
             return allWorkflows.filter { item in
                 let trig = item.trigger.lowercased()
+                let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
                 let title = item.title.lowercased()
-                let content = item.content.lowercased()
-                let matchesTrig = trig.contains(query) || trig.contains(cleanQuery)
-                let matchesText = title.contains(cleanQuery) || content.contains(cleanQuery)
-                return matchesTrig || matchesText
+                let titleWords = title.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
+                
+                let trigMatches = trig.hasPrefix(rawQuery) || cleanTrig.hasPrefix(cleanQuery)
+                let titleMatches = title.hasPrefix(cleanQuery) || titleWords.contains(where: { $0.hasPrefix(cleanQuery) })
+                
+                return trigMatches || titleMatches
             }
         } else {
             return allWorkflows.filter { item in
                 let trig = item.trigger.lowercased()
+                let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
                 let title = item.title.lowercased()
-                return trig.contains(query) || title.contains(query)
+                
+                return cleanTrig.contains(rawQuery) || title.contains(rawQuery)
             }
         }
     }
