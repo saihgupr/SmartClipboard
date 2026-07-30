@@ -2089,13 +2089,9 @@ struct SnippetPencilButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "pencil")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 13, weight: .bold))
                 .foregroundColor(isHovered ? .primary : .secondary)
                 .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.03))
-                )
         }
         .buttonStyle(.plain)
         .focusable(false)
@@ -2129,12 +2125,6 @@ struct SnippetCopyButton: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(isCopied ? .green : (isHovered ? .primary : .secondary))
                 .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(isCopied
-                              ? Color.green.opacity(0.12)
-                              : (isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.03)))
-                )
                 .animation(.easeInOut(duration: 0.15), value: isCopied)
         }
         .buttonStyle(.plain)
@@ -2455,10 +2445,6 @@ struct ShareButton: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(isHovered ? .primary : .secondary)
                 .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.03))
-                )
         }
         .buttonStyle(.plain)
         .focusable(false)
