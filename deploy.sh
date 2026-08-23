@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # deploy.sh - SmartClipboard Build & Install Script
 
@@ -10,7 +11,18 @@ fi
 
 BUNDLE_ID="${SMARTCLIPBOARD_BUNDLE_ID:-com.saihgupr.SmartClipboard}"
 APP_PATH="/Applications/SmartClipboard.app"
-SIGN_IDENTITY="${SMARTCLIPBOARD_SIGN_IDENTITY:--}"
+
+# Identify signing identity — prefer a stable Apple Development cert so
+# macOS doesn't revoke accessibility/automation permissions on each build.
+SIGN_IDENTITY=$(security find-identity -v -p codesigning | awk -F'"' '{print $2}' | head -1 || true)
+if [[ -z "$SIGN_IDENTITY" ]]; then
+    SIGN_IDENTITY="-"
+    echo "⚠️  No codesigning identity found — using ad-hoc signing (-)"
+    USING_ADHOC=true
+else
+    echo "🔏 Using stable signing identity: $SIGN_IDENTITY"
+    USING_ADHOC=false
+fi
 
 # 1. Generate Xcode project
 echo "🔄 Generating Xcode project..."
@@ -32,15 +44,24 @@ echo "📦 Installing to /Applications..."
 rm -rf "$APP_PATH"
 cp -R ./build/Build/Products/Release/SmartClipboard.app "$APP_PATH"
 
-# 5. Sign the app with a stable ad-hoc identity
-echo "🖋️ Re-signing binary with stable identity..."
+# 5. Sign with stable identity
+echo "🖋️  Re-signing binary..."
 codesign --force --deep --sign "$SIGN_IDENTITY" "$APP_PATH"
 
-# 6. Reset stale accessibility entry (ad-hoc signing changes hash each build)
-echo "🔐 Resetting accessibility entry for clean re-authorization..."
-tccutil reset Accessibility "$BUNDLE_ID" 2>/dev/null || true
+# 6. Only reset TCC when using ad-hoc (stable identity preserves permissions)
+if [ "$USING_ADHOC" = true ]; then
+    echo "🔐 Resetting accessibility entry (ad-hoc build changes hash)..."
+    tccutil reset Accessibility "$BUNDLE_ID" 2>/dev/null || true
+else
+    echo "✅ Stable identity — skipping TCC reset (permissions preserved)"
+fi
 
-# 7. Launch
+# 7. Refresh icon cache
+/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister \
+    -f -r "$APP_PATH"
+touch "$APP_PATH"
+
+# 8. Launch
 echo "🚀 Launching SmartClipboard..."
 open "$APP_PATH"
 
