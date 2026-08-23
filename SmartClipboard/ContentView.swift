@@ -526,6 +526,9 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .cancelQuickSelectMode)) { _ in
             isQuickSelectActive = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: .activateQuickSelectMode)) { _ in
+            isQuickSelectActive = true
+        }
         .onReceive(NotificationCenter.default.publisher(for: .quickSelectNavigate)) { notification in
             guard isQuickSelectActive else { return }
             let delta = notification.userInfo?["delta"] as? Int ?? 0

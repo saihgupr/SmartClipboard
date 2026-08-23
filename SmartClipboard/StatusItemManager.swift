@@ -9,6 +9,7 @@ extension Notification.Name {
     static let closeUI = Notification.Name("closeUI")
     static let quickSelectTriggerReleased = Notification.Name("quickSelectTriggerReleased")
     static let cancelQuickSelectMode = Notification.Name("cancelQuickSelectMode")
+    static let activateQuickSelectMode = Notification.Name("activateQuickSelectMode")
     static let quickSelectNavigate = Notification.Name("quickSelectNavigate")
 }
 
@@ -201,13 +202,19 @@ final class StatusItemManager: NSObject {
         triggerKeyDownTime = Date()
         let isVisible = isWindowFrontmost()
         wasWindowVisibleOnKeyDown = isVisible
-        
+
         if !isVisible {
-            isQuickSelectActive = true
-            showMainWindow(relativeTo: nil, isQuickSelect: true)
-        } else {
-            isQuickSelectActive = true
+            // Open in normal mode immediately; quick select activates only if held
+            showMainWindow(relativeTo: nil, isQuickSelect: false)
         }
+
+        // After the long-press threshold, switch into quick select mode
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { [weak self] in
+            guard let self, self.triggerKeyDownTime != nil else { return }
+            self.isQuickSelectActive = true
+            NotificationCenter.default.post(name: .activateQuickSelectMode, object: nil)
+        }
+
         // Start scroll-to-navigate capture
         GlobalHotkeyManager.shared.startScrollTap()
     }
