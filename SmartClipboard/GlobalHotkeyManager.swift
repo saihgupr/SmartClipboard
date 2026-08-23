@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import CoreGraphics
 
 /// Registers system-wide hotkeys using the Carbon Event Manager.
 /// Fires regardless of which application is currently frontmost.
@@ -22,9 +23,17 @@ final class GlobalHotkeyManager {
     /// Called when the trigger hotkey is released.
     var onTriggerKeyUp: (() -> Void)?
 
+    /// Called with a relative delta (+1 = down/next, -1 = up/previous) during quick select scroll.
+    var onNavigate: ((Int) -> Void)?
+
     private var hotKeyRefs: [EventHotKeyRef?] = []
     private var toggleUIKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
+
+    // MARK: Scroll tap (active only during quick select)
+    private var scrollTap: CFMachPort?
+    private var scrollRunLoopSource: CFRunLoopSource?
+    private var scrollAccumulator: Double = 0
 
     private let cmdKey = 0x0100
     private let optionKey = 0x0800
@@ -118,6 +127,88 @@ final class GlobalHotkeyManager {
             RemoveEventHandler(h)
             eventHandler = nil
         }
+
+        stopScrollTap()
+    }
+
+    // MARK: - Scroll tap (quick select scroll-to-navigate)
+
+    /// Start intercepting scroll wheel events to drive quick-select navigation.
+    func startScrollTap() {
+        guard scrollTap == nil else { return }
+        scrollAccumulator = 0
+
+        let selfPtr = Unmanaged.passUnretained(self).toOpaque()
+        let mask = CGEventMask(1 << CGEventType.scrollWheel.rawValue)
+
+        let callback: CGEventTapCallBack = { _, type, event, userInfo -> Unmanaged<CGEvent>? in
+            guard let userInfo else { return Unmanaged.passUnretained(event) }
+            let mgr = Unmanaged<GlobalHotkeyManager>.fromOpaque(userInfo).takeUnretainedValue()
+            return mgr.handleScrollEvent(type: type, event: event)
+        }
+
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: mask,
+            callback: callback,
+            userInfo: selfPtr
+        ) else {
+            print("[GlobalHotkeyManager] Could not create scroll event tap (check Accessibility permission)")
+            return
+        }
+
+        scrollTap = tap
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        scrollRunLoopSource = source
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+        print("[GlobalHotkeyManager] Scroll tap started")
+    }
+
+    /// Stop the scroll wheel event tap.
+    func stopScrollTap() {
+        if let tap = scrollTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            if let source = scrollRunLoopSource {
+                CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
+            }
+        }
+        scrollTap = nil
+        scrollRunLoopSource = nil
+        scrollAccumulator = 0
+        print("[GlobalHotkeyManager] Scroll tap stopped")
+    }
+
+    private func handleScrollEvent(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        guard type == .scrollWheel else { return Unmanaged.passUnretained(event) }
+
+        let intDelta = event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
+        let pointDelta = Double(event.getIntegerValueField(.scrollWheelEventPointDeltaAxis1))
+
+        if intDelta != 0 {
+            // Discrete mouse wheel notch → immediate single step
+            scrollAccumulator = 0
+            let delta = intDelta > 0 ? -1 : 1  // scroll up = previous (-1), scroll down = next (+1)
+            DispatchQueue.main.async { [weak self] in
+                self?.onNavigate?(delta)
+            }
+        } else if pointDelta != 0 {
+            // Continuous trackpad scrolling with accumulator (same threshold as QuickSelect: 6 pts)
+            scrollAccumulator += pointDelta
+            let threshold: Double = 6.0
+            if scrollAccumulator >= threshold {
+                scrollAccumulator = 0
+                DispatchQueue.main.async { [weak self] in self?.onNavigate?(-1) }
+            } else if scrollAccumulator <= -threshold {
+                scrollAccumulator = 0
+                DispatchQueue.main.async { [weak self] in self?.onNavigate?(1) }
+            }
+        }
+
+        // Consume the scroll event so it doesn't reach the window underneath
+        return nil
     }
 
     // MARK: - Private

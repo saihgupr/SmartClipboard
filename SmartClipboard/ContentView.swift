@@ -526,6 +526,15 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .cancelQuickSelectMode)) { _ in
             isQuickSelectActive = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: .quickSelectNavigate)) { notification in
+            guard isQuickSelectActive else { return }
+            let delta = notification.userInfo?["delta"] as? Int ?? 0
+            if delta > 0 {
+                navigateNextItem()
+            } else if delta < 0 {
+                navigatePreviousItem()
+            }
+        }
         .onChange(of: displayItemIds) { _, _ in
             clipboardManager.visibleItems = displayItems
         }

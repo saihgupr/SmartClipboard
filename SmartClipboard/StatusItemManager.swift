@@ -9,6 +9,7 @@ extension Notification.Name {
     static let closeUI = Notification.Name("closeUI")
     static let quickSelectTriggerReleased = Notification.Name("quickSelectTriggerReleased")
     static let cancelQuickSelectMode = Notification.Name("cancelQuickSelectMode")
+    static let quickSelectNavigate = Notification.Name("quickSelectNavigate")
 }
 
 /// A custom NSPanel that allows becoming the key window even without a title bar.
@@ -126,6 +127,16 @@ final class StatusItemManager: NSObject {
             DispatchQueue.main.async { self?.handleTriggerKeyUp() }
         }
 
+        GlobalHotkeyManager.shared.onNavigate = { delta in
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(
+                    name: .quickSelectNavigate,
+                    object: nil,
+                    userInfo: ["delta": delta]
+                )
+            }
+        }
+
         NotificationCenter.default.addObserver(forName: .closeUI, object: nil, queue: .main) { [weak self] _ in
             self?.closeUI()
         }
@@ -197,11 +208,15 @@ final class StatusItemManager: NSObject {
         } else {
             isQuickSelectActive = true
         }
+        // Start scroll-to-navigate capture
+        GlobalHotkeyManager.shared.startScrollTap()
     }
 
     private func handleTriggerKeyUp() {
         let duration = triggerKeyDownTime.map { Date().timeIntervalSince($0) } ?? 0
         triggerKeyDownTime = nil
+        // Stop scroll capture regardless of outcome
+        GlobalHotkeyManager.shared.stopScrollTap()
         
         if wasWindowVisibleOnKeyDown {
             if duration < 0.22 {
@@ -291,6 +306,7 @@ final class StatusItemManager: NSObject {
     
     func closeUI() {
         isQuickSelectActive = false
+        GlobalHotkeyManager.shared.stopScrollTap()
         mainWindow?.orderOut(nil)
     }
     
