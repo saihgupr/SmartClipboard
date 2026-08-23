@@ -233,6 +233,7 @@ struct ContentView: View {
     @State private var showingSnippetDetail = false
     @State private var detailSnippet: WorkflowSnippet? = nil
     @State private var isSelectionFromMouse = false
+    @State private var isQuickSelectActive = false
     @FocusState private var isSearchFocused: Bool
     @State private var hostWindow: NSWindow?
     
@@ -487,7 +488,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .uiWillShow)) { notification in
             let targetIsPopover = notification.userInfo?["isInPopover"] as? Bool ?? false
+            let isQuickSelect = notification.userInfo?["isQuickSelect"] as? Bool ?? false
             isShownAsPopover = targetIsPopover
+            isQuickSelectActive = isQuickSelect
             
             searchQuery = ""
             pageLimit = 1
@@ -514,12 +517,36 @@ struct ContentView: View {
                 isSearchFocused = true
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .quickSelectTriggerReleased)) { _ in
+            if isQuickSelectActive {
+                isQuickSelectActive = false
+                pasteCurrentSelection()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .cancelQuickSelectMode)) { _ in
+            isQuickSelectActive = false
+        }
         .onChange(of: displayItemIds) { _, _ in
             clipboardManager.visibleItems = displayItems
         }
     }
 
     @State private var keyboardMonitor: Any?
+
+    private func pasteCurrentSelection() {
+        if showingDetail { showingDetail = false }
+        if showingSnippetDetail { showingSnippetDetail = false }
+        
+        if let wfId = selectedWorkflowId,
+           let snippet = matchingWorkflows.first(where: { $0.id == wfId }) {
+            clipboardManager.paste(content: snippet.content)
+        } else if let id = selectedItemId,
+           let item = displayItems.first(where: { $0.id == id }) {
+            clipboardManager.paste(item: item)
+        } else if let first = displayItems.first {
+            clipboardManager.paste(item: first)
+        }
+    }
 
     private func navigateNextItem() {
         if let fallbackId = nextItemBeforeCopyId {
@@ -1458,6 +1485,23 @@ struct ContentView: View {
                     .stroke(Color.primary.opacity(isSearchFocused ? 0.12 : 0.06), lineWidth: 0.5)
             )
             
+            if isQuickSelectActive {
+                HStack(spacing: 4) {
+                    Image(systemName: "hand.point.up.left.fill")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text("Release key to paste")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color.primary.opacity(0.08))
+                )
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+            }
+            
             if clipboardManager.incognitoMode {
                 IncognitoIcon()
                     .transition(.scale.combined(with: .opacity))
@@ -1524,6 +1568,14 @@ struct ContentView: View {
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                                         showingDetail = true
                                     }
+                                },
+                                onHover: { hovering in
+                                    if hovering && isQuickSelectActive {
+                                        isSelectionFromMouse = true
+                                        selectedWorkflowId = nil
+                                        selectedItemId = item.id
+                                        selectedItemIds = [item.id]
+                                    }
                                 }
                             )
                             .tag(item.id)
@@ -1579,6 +1631,14 @@ struct ContentView: View {
                             detailSnippet = snippet
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                                 showingSnippetDetail = true
+                            }
+                        },
+                        onHover: { hovering in
+                            if hovering && isQuickSelectActive {
+                                isSelectionFromMouse = true
+                                selectedWorkflowId = snippet.id
+                                selectedItemId = nil
+                                selectedItemIds = []
                             }
                         }
                     )
@@ -1746,6 +1806,7 @@ struct WorkflowRow: View {
     var badgeIndex: Int? = nil
     let onTap: () -> Void
     let onChevronTap: () -> Void
+    var onHover: ((Bool) -> Void)? = nil
     
     @State private var isChevronHovered = false
     
@@ -1798,6 +1859,9 @@ struct WorkflowRow: View {
         .padding(.vertical, 8)
         .padding(.leading, 8)
         .padding(.trailing, 8)
+        .onHover { hovering in
+            onHover?(hovering)
+        }
     }
 }
 
@@ -1839,6 +1903,7 @@ struct ClipboardRow: View {
     let onLeftClickWithModifiers: (NSEvent.ModifierFlags) -> Void
     let onRightClick: (NSEvent.ModifierFlags) -> Void
     let onChevronTap: () -> Void
+    var onHover: ((Bool) -> Void)? = nil
     
     @State private var isChevronHovered = false
     
@@ -1894,6 +1959,9 @@ struct ClipboardRow: View {
                     },
                     onRightClick: { modifiers in
                         onRightClick(modifiers)
+                    },
+                    onHover: { hovering in
+                        onHover?(hovering)
                     }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -1930,6 +1998,9 @@ struct ClipboardRow: View {
         .padding(.vertical, 8)
         .padding(.leading, 8)
         .padding(.trailing, 8)
+        .onHover { hovering in
+            onHover?(hovering)
+        }
     }
 }
 
@@ -2540,20 +2611,51 @@ struct IncognitoIcon: View {
 struct MouseDetectorView: NSViewRepresentable {
     let onLeftClick: (NSEvent.ModifierFlags) -> Void
     let onRightClick: (NSEvent.ModifierFlags) -> Void
+    var onHover: ((Bool) -> Void)? = nil
 
     func makeNSView(context: Context) -> NSView {
         let view = MouseDetectingNSView()
         view.onLeftClick = onLeftClick
         view.onRightClick = onRightClick
+        view.onHover = onHover
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {}
+    func updateNSView(_ nsView: NSView, context: Context) {
+        if let view = nsView as? MouseDetectingNSView {
+            view.onLeftClick = onLeftClick
+            view.onRightClick = onRightClick
+            view.onHover = onHover
+        }
+    }
 }
 
 class MouseDetectingNSView: NSView {
     var onLeftClick: ((NSEvent.ModifierFlags) -> Void)?
     var onRightClick: ((NSEvent.ModifierFlags) -> Void)?
+    var onHover: ((Bool) -> Void)?
+    private var trackingArea: NSTrackingArea?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let existing = trackingArea {
+            removeTrackingArea(existing)
+        }
+        let options: NSTrackingArea.Options = [.mouseEnteredAndExited, .activeAlways, .inVisibleRect]
+        let area = NSTrackingArea(rect: bounds, options: options, owner: self, userInfo: nil)
+        addTrackingArea(area)
+        trackingArea = area
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        onHover?(true)
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        onHover?(false)
+    }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
         if self.bounds.contains(point) {

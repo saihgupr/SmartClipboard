@@ -13,8 +13,14 @@ final class GlobalHotkeyManager {
     /// Called on the main actor with the count of recent items to paste in sequence.
     var onPasteMultiple: ((Int) -> Void)?
 
-    /// Called when the "Toggle UI" hotkey is fired.
+    /// Called when the "Toggle UI" hotkey is fired (legacy).
     var onToggleUI: (() -> Void)?
+
+    /// Called when the trigger hotkey is pressed down.
+    var onTriggerKeyDown: (() -> Void)?
+
+    /// Called when the trigger hotkey is released.
+    var onTriggerKeyUp: (() -> Void)?
 
     private var hotKeyRefs: [EventHotKeyRef?] = []
     private var toggleUIKeyRef: EventHotKeyRef?
@@ -32,10 +38,16 @@ final class GlobalHotkeyManager {
     func install() {
         guard eventHandler == nil else { return }
 
-        var spec = EventTypeSpec(
-            eventClass: OSType(kEventClassKeyboard),
-            eventKind: UInt32(kEventHotKeyPressed)
-        )
+        var specs = [
+            EventTypeSpec(
+                eventClass: OSType(kEventClassKeyboard),
+                eventKind: UInt32(kEventHotKeyPressed)
+            ),
+            EventTypeSpec(
+                eventClass: OSType(kEventClassKeyboard),
+                eventKind: UInt32(kEventHotKeyReleased)
+            )
+        ]
 
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
 
@@ -59,27 +71,35 @@ final class GlobalHotkeyManager {
                     .fromOpaque(userData)
                     .takeUnretainedValue()
                 let id = Int(hkID.id)
+                let eventKind = Int(GetEventKind(event))
 
                 Task { @MainActor in
-                    print("[GlobalHotkeyManager] Hotkey fired: ID \(id)")
+                    print("[GlobalHotkeyManager] Hotkey event: ID \(id), kind: \(eventKind)")
                     
                     if id == 100 {
-                        mgr.onToggleUI?()
-                    } else if id >= 1 && id <= 10 {
-                        // Cmd+1…9 → index 0…8; Cmd+0 → index 9
-                        let index = (id == 10) ? 9 : id - 1
-                        print("[GlobalHotkeyManager] Pasting index: \(index)")
-                        mgr.onPasteItem?(index)
-                    } else if id >= 11 && id <= 19 {
-                        // Option+1…9 → paste last N items
-                        let count = id - 10
-                        print("[GlobalHotkeyManager] Pasting multiple: \(count)")
-                        mgr.onPasteMultiple?(count)
+                        if eventKind == kEventHotKeyPressed {
+                            mgr.onToggleUI?()
+                            mgr.onTriggerKeyDown?()
+                        } else if eventKind == kEventHotKeyReleased {
+                            mgr.onTriggerKeyUp?()
+                        }
+                    } else if eventKind == kEventHotKeyPressed {
+                        if id >= 1 && id <= 10 {
+                            // Cmd+1…9 → index 0…8; Cmd+0 → index 9
+                            let index = (id == 10) ? 9 : id - 1
+                            print("[GlobalHotkeyManager] Pasting index: \(index)")
+                            mgr.onPasteItem?(index)
+                        } else if id >= 11 && id <= 19 {
+                            // Option+1…9 → paste last N items
+                            let count = id - 10
+                            print("[GlobalHotkeyManager] Pasting multiple: \(count)")
+                            mgr.onPasteMultiple?(count)
+                        }
                     }
                 }
                 return noErr
             },
-            1, &spec, selfPtr, &eventHandler
+            2, &specs, selfPtr, &eventHandler
         )
 
         registerHotkeys()

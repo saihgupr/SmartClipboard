@@ -7,6 +7,8 @@ extension Notification.Name {
     static let uiWillShow = Notification.Name("uiWillShow")
     static let settingsWillShow = Notification.Name("settingsWillShow")
     static let closeUI = Notification.Name("closeUI")
+    static let quickSelectTriggerReleased = Notification.Name("quickSelectTriggerReleased")
+    static let cancelQuickSelectMode = Notification.Name("cancelQuickSelectMode")
 }
 
 /// A custom NSPanel that allows becoming the key window even without a title bar.
@@ -84,6 +86,10 @@ final class StatusItemManager: NSObject {
     private var mainWindow: NSPanel?
     private var lastCloseTime: Date?
     
+    private var triggerKeyDownTime: Date?
+    private var wasWindowVisibleOnKeyDown = false
+    private var isQuickSelectActive = false
+
     private let clipboardManager: ClipboardManager
     private let importManager: ImportManager
     private let modelContainer: ModelContainer
@@ -104,6 +110,7 @@ final class StatusItemManager: NSObject {
                 queue: .main
             ) { [weak self] _ in
                 self?.lastCloseTime = Date()
+                self?.isQuickSelectActive = false
             }
         }
         
@@ -111,8 +118,12 @@ final class StatusItemManager: NSObject {
             DispatchQueue.main.async { self?.closeUI() }
         }
         
-        GlobalHotkeyManager.shared.onToggleUI = { [weak self] in
-            DispatchQueue.main.async { self?.toggleMainWindow() }
+        GlobalHotkeyManager.shared.onTriggerKeyDown = { [weak self] in
+            DispatchQueue.main.async { self?.handleTriggerKeyDown() }
+        }
+        
+        GlobalHotkeyManager.shared.onTriggerKeyUp = { [weak self] in
+            DispatchQueue.main.async { self?.handleTriggerKeyUp() }
         }
 
         NotificationCenter.default.addObserver(forName: .closeUI, object: nil, queue: .main) { [weak self] _ in
@@ -167,10 +178,60 @@ final class StatusItemManager: NSObject {
         }
     }
     
-    private func showMainWindow(relativeTo button: NSButton?) {
+    private func isWindowFrontmost() -> Bool {
+        guard let window = mainWindow else { return false }
+        return window.isVisible
+            && window.occlusionState.contains(.visible)
+            && NSApp.isActive
+            && NSApp.keyWindow === window
+    }
+
+    private func handleTriggerKeyDown() {
+        triggerKeyDownTime = Date()
+        let isVisible = isWindowFrontmost()
+        wasWindowVisibleOnKeyDown = isVisible
+        
+        if !isVisible {
+            isQuickSelectActive = true
+            showMainWindow(relativeTo: nil, isQuickSelect: true)
+        } else {
+            isQuickSelectActive = true
+        }
+    }
+
+    private func handleTriggerKeyUp() {
+        let duration = triggerKeyDownTime.map { Date().timeIntervalSince($0) } ?? 0
+        triggerKeyDownTime = nil
+        
+        if wasWindowVisibleOnKeyDown {
+            if duration < 0.22 {
+                // Quick tap while window was already open -> Close window
+                closeUI()
+            } else if isQuickSelectActive {
+                // Held while window was open -> paste current selection
+                NotificationCenter.default.post(name: .quickSelectTriggerReleased, object: nil)
+            }
+        } else {
+            // Window was opened by this key press
+            if duration >= 0.18 {
+                // Key was held down -> Paste selected item
+                NotificationCenter.default.post(name: .quickSelectTriggerReleased, object: nil)
+            } else {
+                // Quick tap (< 180ms) -> Keep open in standard search mode
+                isQuickSelectActive = false
+                NotificationCenter.default.post(name: .cancelQuickSelectMode, object: nil)
+            }
+        }
+        isQuickSelectActive = false
+    }
+
+    private func showMainWindow(relativeTo button: NSButton?, isQuickSelect: Bool = false) {
         guard let window = mainWindow else { return }
         
-        NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: ["isInPopover": button != nil])
+        NotificationCenter.default.post(name: .uiWillShow, object: nil, userInfo: [
+            "isInPopover": button != nil,
+            "isQuickSelect": isQuickSelect
+        ])
         NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
         NSApp.activate(ignoringOtherApps: true)
         
@@ -213,36 +274,23 @@ final class StatusItemManager: NSObject {
             return
         }
         
-        guard let window = mainWindow else { return }
-        
-        let isActuallyFrontmost = window.isVisible
-            && window.occlusionState.contains(.visible)
-            && NSApp.isActive
-            && NSApp.keyWindow === window
-            
-        if isActuallyFrontmost {
-            window.orderOut(nil)
+        if isWindowFrontmost() {
+            closeUI()
         } else {
-            showMainWindow(relativeTo: statusItem?.button)
+            showMainWindow(relativeTo: statusItem?.button, isQuickSelect: false)
         }
     }
     
     private func toggleMainWindow() {
-        guard let window = mainWindow else { return }
-        
-        let isActuallyFrontmost = window.isVisible
-            && window.occlusionState.contains(.visible)
-            && NSApp.isActive
-            && NSApp.keyWindow === window
-            
-        if isActuallyFrontmost {
-            window.orderOut(nil)
+        if isWindowFrontmost() {
+            closeUI()
         } else {
-            showMainWindow(relativeTo: nil)
+            showMainWindow(relativeTo: nil, isQuickSelect: false)
         }
     }
     
     func closeUI() {
+        isQuickSelectActive = false
         mainWindow?.orderOut(nil)
     }
     
