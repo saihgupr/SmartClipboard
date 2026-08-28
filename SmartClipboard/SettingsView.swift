@@ -653,11 +653,11 @@ struct ShortcutsSettingsView: View {
                 LeftArrowActionSettingView()
             }
             
-            SnippetsSettingsView()
-            
             SettingsSection(title: "Select All Hotkeys") {
                 SelectAllShortcutsSettingView()
             }
+            
+            SnippetsSettingsView()
         }
     }
 }

@@ -357,11 +357,9 @@ class ClipboardManager: ObservableObject {
         keyDown?.flags = cmdFlag
         keyUp?.flags = cmdFlag
 
-        keyDown?.post(tap: .cghidEventTap)
         keyDown?.post(tap: .cgSessionEventTap)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.025) {
-            keyUp?.post(tap: .cghidEventTap)
             keyUp?.post(tap: .cgSessionEventTap)
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 completion?()
