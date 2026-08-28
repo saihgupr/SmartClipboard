@@ -1007,60 +1007,20 @@ struct SelectAllShortcutsSettingView: View {
     @AppStorage("enableSelectAllHotkeys") private var enableSelectAllHotkeys = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: $enableSelectAllHotkeys) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Enable Select All Hotkeys (⌥C & ⌥V)")
-                        .font(.system(size: 14, weight: .medium))
-                    Text("Global shortcuts to Select All then Copy or Paste in any active application.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+        Toggle(isOn: $enableSelectAllHotkeys) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Enable Select All Hotkeys (⌥C & ⌥V)")
+                    .font(.system(size: 14, weight: .medium))
+                Text("Global shortcuts to Select All then Copy or Paste in any active application.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .toggleStyle(.switch)
-            .focusEffectDisabled()
-            .onChange(of: enableSelectAllHotkeys) { _, newValue in
-                GlobalHotkeyManager.shared.updateSelectAllHotkeys(enabled: newValue)
-            }
-            
-            if enableSelectAllHotkeys {
-                VStack(alignment: .leading, spacing: 8) {
-                    Divider().padding(.vertical, 4)
-                    
-                    HStack(spacing: 12) {
-                        Text("⌥C")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(Color.primary.opacity(0.06))
-                            .cornerRadius(5)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Select All & Copy")
-                                .font(.system(size: 13, weight: .medium))
-                            Text("Simulates ⌘A followed by ⌘C in the frontmost app.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    HStack(spacing: 12) {
-                        Text("⌥V")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(Color.primary.opacity(0.06))
-                            .cornerRadius(5)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Select All & Paste")
-                                .font(.system(size: 13, weight: .medium))
-                            Text("Simulates ⌘A followed by ⌘V in the frontmost app.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            }
+        }
+        .toggleStyle(.switch)
+        .focusEffectDisabled()
+        .onChange(of: enableSelectAllHotkeys) { _, newValue in
+            GlobalHotkeyManager.shared.updateSelectAllHotkeys(enabled: newValue)
         }
     }
 }
