@@ -787,35 +787,21 @@ struct ContentView: View {
 
             let isFocused = keyWindow.firstResponder is NSTextView
 
-            let flags = event.modifierFlags
-            let isCommandOnly = flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control) && !flags.contains(.option)
-            let isOptionOnly = flags.contains(.option) && !flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control)
+            let relevantModifiers = event.modifierFlags.intersection([.command, .option, .control, .shift])
+            let isCommandOnly = relevantModifiers == .command
+            let isOptionOnly = relevantModifiers == .option
 
-            // MARK: - Option + V (Batch Paste All) and Option + C (Batch Copy All)
-            if isOptionOnly {
-                if event.keyCode == 9 { // ⌥V - Select All & Sequential Paste
-                    let itemsToPaste = displayItems
-                    if !itemsToPaste.isEmpty {
-                        selectedItemIds = Set(itemsToPaste.map { $0.id })
-                        clipboardManager.pasteMultipleContents(itemsToPaste.map { $0.content })
-                        return nil
-                    }
-                } else if event.keyCode == 8 { // ⌥C - Select All & Batch Copy
-                    let itemsToCopy = displayItems
-                    if !itemsToCopy.isEmpty {
-                        selectedItemIds = Set(itemsToCopy.map { $0.id })
-                        let joinedContent = itemsToCopy.map { $0.content }.joined(separator: "\n")
-                        let now = Date()
-                        for (idx, target) in itemsToCopy.reversed().enumerated() {
-                            target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
-                        }
-                        try? modelContext.save()
-                        clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
-                        NotificationCenter.default.post(name: .closeUI, object: nil)
-                        return nil
-                    }
+            // MARK: - Option + V (Cmd+A, Cmd+V) and Option + C (Cmd+A, Cmd+C)
+            let hasOption = event.modifierFlags.contains(.option) && !event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.control)
+            if hasOption && (event.keyCode == 9 || event.keyCode == 8) { // kVK_ANSI_V = 9, kVK_ANSI_C = 8
+                if event.keyCode == 9 { // ⌥V - Select All & Paste
+                    clipboardManager.selectAllAndPaste()
+                } else { // ⌥C - Select All & Copy
+                    clipboardManager.selectAllAndCopy()
                 }
+                return nil
             }
+
 
             if (isCommandOnly || isOptionOnly), let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                 if let num = Int(chars) {

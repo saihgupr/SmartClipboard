@@ -14,6 +14,12 @@ final class GlobalHotkeyManager {
     /// Called on the main actor with the count of recent items to paste in sequence.
     var onPasteMultiple: ((Int) -> Void)?
 
+    /// Called on the main actor for Option+V (Cmd+A then Cmd+V).
+    var onSelectAllAndPaste: (() -> Void)?
+
+    /// Called on the main actor for Option+C (Cmd+A then Cmd+C).
+    var onSelectAllAndCopy: (() -> Void)?
+
     /// Called when the "Toggle UI" hotkey is fired (legacy).
     var onToggleUI: (() -> Void)?
 
@@ -103,6 +109,14 @@ final class GlobalHotkeyManager {
                             let count = id - 10
                             print("[GlobalHotkeyManager] Pasting multiple: \(count)")
                             mgr.onPasteMultiple?(count)
+                        } else if id == 20 {
+                            // Option+V → Cmd+A, Cmd+V
+                            print("[GlobalHotkeyManager] Option+V (Select All & Paste)")
+                            mgr.onSelectAllAndPaste?()
+                        } else if id == 21 {
+                            // Option+C → Cmd+A, Cmd+C
+                            print("[GlobalHotkeyManager] Option+C (Select All & Copy)")
+                            mgr.onSelectAllAndCopy?()
                         }
                     }
                 }
@@ -231,11 +245,12 @@ final class GlobalHotkeyManager {
             hotKeyRefs.append(ref)
         }
 
-        // Option+1…9 → hotkey IDs 11…19
+        // Option+1…9 → hotkey IDs 11…19; Option+V → ID 20; Option+C → ID 21
         let optPairs: [(Int, Int)] = [
             (kVK_ANSI_1, 11), (kVK_ANSI_2, 12), (kVK_ANSI_3, 13),
             (kVK_ANSI_4, 14), (kVK_ANSI_5, 15), (kVK_ANSI_6, 16),
-            (kVK_ANSI_7, 17), (kVK_ANSI_8, 18), (kVK_ANSI_9, 19)
+            (kVK_ANSI_7, 17), (kVK_ANSI_8, 18), (kVK_ANSI_9, 19),
+            (kVK_ANSI_V, 20), (kVK_ANSI_C, 21)
         ]
         for (key, id) in optPairs {
             var ref: EventHotKeyRef?

@@ -59,12 +59,18 @@ class ClipboardManager: ObservableObject {
         // Seed default workflows if empty
         seedDefaultWorkflowsIfNeeded()
 
-        // Install global hotkeys (Cmd+N and Option+N) that work from any app
+        // Install global hotkeys (Cmd+N, Option+N, Option+V, Option+C) that work from any app
         GlobalHotkeyManager.shared.onPasteItem = { [weak self] index in
             self?.pasteItem(at: index)
         }
         GlobalHotkeyManager.shared.onPasteMultiple = { [weak self] count in
             self?.pasteMultiple(count: count)
+        }
+        GlobalHotkeyManager.shared.onSelectAllAndPaste = { [weak self] in
+            self?.selectAllAndPaste()
+        }
+        GlobalHotkeyManager.shared.onSelectAllAndCopy = { [weak self] in
+            self?.selectAllAndCopy()
         }
         GlobalHotkeyManager.shared.install()
 
@@ -340,6 +346,47 @@ class ClipboardManager: ObservableObject {
         }
     }
 
+    private func simulateCmdKey(virtualKey: CGKeyCode, delay: Double = 0.02, completion: (() -> Void)? = nil) {
+        let source = CGEventSource(stateID: .hidSystemState)
+        source?.setLocalEventsFilterDuringSuppressionState([.permitLocalMouseEvents, .permitSystemDefinedEvents],
+                                                           state: .eventSuppressionStateSuppressionInterval)
+
+        let cmdFlag: CGEventFlags = [.maskCommand]
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: virtualKey, keyDown: true)
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: virtualKey, keyDown: false)
+        keyDown?.flags = cmdFlag
+        keyUp?.flags = cmdFlag
+
+        keyDown?.post(tap: .cghidEventTap)
+        keyDown?.post(tap: .cgSessionEventTap)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.025) {
+            keyUp?.post(tap: .cghidEventTap)
+            keyUp?.post(tap: .cgSessionEventTap)
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                completion?()
+            }
+        }
+    }
+
+    /// Global Option+C handler: Select All (Cmd+A) then Copy (Cmd+C) in the frontmost app.
+    func selectAllAndCopy() {
+        let aCode: CGKeyCode = 0x00 // kVK_ANSI_A
+        let cCode: CGKeyCode = 0x08 // kVK_ANSI_C
+        simulateCmdKey(virtualKey: aCode, delay: 0.10) { [weak self] in
+            self?.simulateCmdKey(virtualKey: cCode, delay: 0.02)
+        }
+    }
+
+    /// Global Option+V handler: Select All (Cmd+A) then Paste (Cmd+V) in the frontmost app.
+    func selectAllAndPaste() {
+        let aCode: CGKeyCode = 0x00 // kVK_ANSI_A
+        let vCode: CGKeyCode = 0x09 // kVK_ANSI_V
+        simulateCmdKey(virtualKey: aCode, delay: 0.10) { [weak self] in
+            self?.simulateCmdKey(virtualKey: vCode, delay: 0.02)
+        }
+    }
+
     // MARK: - Global hotkey handlers
 
     /// Fetches the item at the given 0-based index (pinned first, newest-first) and pastes it.
@@ -424,6 +471,54 @@ class ClipboardManager: ObservableObject {
             }
         } else {
             isPastingSequentially = false
+        }
+    }
+
+    /// Pastes all visible (if UI is open) or recent items sequentially.
+    func pasteAll() {
+        let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
+        let items: [ClipboardItem]
+        if isUIVisible, !visibleItems.isEmpty {
+            items = visibleItems
+        } else {
+            var descriptor = FetchDescriptor<ClipboardItem>(
+                sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+            )
+            guard let allItems = try? modelContext.fetch(descriptor) else { return }
+            let pinned = allItems.filter { $0.isPinned }
+            let unpinned = allItems.filter { !$0.isPinned }
+            items = pinned + unpinned
+        }
+        guard !items.isEmpty else { return }
+        pasteMultipleContents(items.map { $0.content })
+    }
+
+    /// Copies all visible (if UI is open) or recent items joined by newlines.
+    func copyAll() {
+        let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
+        let items: [ClipboardItem]
+        if isUIVisible, !visibleItems.isEmpty {
+            items = visibleItems
+        } else {
+            var descriptor = FetchDescriptor<ClipboardItem>(
+                sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+            )
+            guard let allItems = try? modelContext.fetch(descriptor) else { return }
+            let pinned = allItems.filter { $0.isPinned }
+            let unpinned = allItems.filter { !$0.isPinned }
+            items = pinned + unpinned
+        }
+        guard !items.isEmpty else { return }
+        let joinedContent = items.map { $0.content }.joined(separator: "\n")
+        let now = Date()
+        for (idx, target) in items.reversed().enumerated() {
+            target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
+        }
+        try? modelContext.save()
+        copyToClipboard(content: joinedContent, recordInDatabase: false)
+        if isUIVisible {
+            onPaste?()
+            NotificationCenter.default.post(name: .closeUI, object: nil)
         }
     }
 
