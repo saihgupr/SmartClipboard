@@ -234,6 +234,8 @@ struct ContentView: View {
     @State private var detailSnippet: WorkflowSnippet? = nil
     @State private var isSelectionFromMouse = false
     @State private var isQuickSelectActive = false
+    @State private var isDismissSelected = false
+    @State private var scrollToTopTrigger = false
     @FocusState private var isSearchFocused: Bool
     @State private var hostWindow: NSWindow?
     
@@ -476,11 +478,15 @@ struct ContentView: View {
             setupKeyboardMonitor()
             isSearchFocused = true
             isSelectionFromMouse = false
+            clearNavigationFallbacks()
+            isDismissSelected = false
+            selectedWorkflowId = nil
             selectedItemId = displayItems.first?.id
             if let firstId = selectedItemId {
                 selectedItemIds = [firstId]
             }
             clipboardManager.visibleItems = displayItems
+            scrollToTopTrigger.toggle()
         }
         .onDisappear {
             removeKeyboardMonitor()
@@ -495,13 +501,19 @@ struct ContentView: View {
             searchQuery = ""
             pageLimit = 1
             isSelectionFromMouse = false
+            clearNavigationFallbacks()
+            isDismissSelected = false
             selectedWorkflowId = nil
-            selectedItemId = history.first?.id
-            if let firstId = selectedItemId {
-                selectedItemIds = [firstId]
+            
+            // Set initial selection to Index 0
+            if let firstItem = displayItems.first {
+                selectedItemId = firstItem.id
+                selectedItemIds = [firstItem.id]
             } else {
+                selectedItemId = nil
                 selectedItemIds = []
             }
+            
             showingDetail = false
             showingSnippetDetail = false
             detailSnippet = nil
@@ -512,6 +524,7 @@ struct ContentView: View {
             setupKeyboardMonitor()
             
             clipboardManager.visibleItems = displayItems
+            scrollToTopTrigger.toggle()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isSearchFocused = true
@@ -520,17 +533,24 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .quickSelectTriggerReleased)) { _ in
             if isQuickSelectActive {
                 isQuickSelectActive = false
-                pasteCurrentSelection()
+                if isDismissSelected {
+                    isDismissSelected = false
+                    NotificationCenter.default.post(name: .closeUI, object: nil)
+                } else {
+                    pasteCurrentSelection()
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .cancelQuickSelectMode)) { _ in
             isQuickSelectActive = false
+            isDismissSelected = false
         }
         .onReceive(NotificationCenter.default.publisher(for: .activateQuickSelectMode)) { _ in
             isQuickSelectActive = true
         }
         .onReceive(NotificationCenter.default.publisher(for: .quickSelectNavigate)) { notification in
             guard isQuickSelectActive else { return }
+            isSelectionFromMouse = false
             let delta = notification.userInfo?["delta"] as? Int ?? 0
             if delta > 0 {
                 navigateNextItem()
@@ -549,6 +569,12 @@ struct ContentView: View {
         if showingDetail { showingDetail = false }
         if showingSnippetDetail { showingSnippetDetail = false }
         
+        if isDismissSelected {
+            isDismissSelected = false
+            NotificationCenter.default.post(name: .closeUI, object: nil)
+            return
+        }
+        
         if let wfId = selectedWorkflowId,
            let snippet = matchingWorkflows.first(where: { $0.id == wfId }) {
             clipboardManager.paste(content: snippet.content)
@@ -562,9 +588,26 @@ struct ContentView: View {
 
     private func navigateNextItem() {
         if let fallbackId = nextItemBeforeCopyId {
+            isDismissSelected = false
             selectedItemId = fallbackId
             selectedItemIds = [fallbackId]
             clearNavigationFallbacks()
+            return
+        }
+        
+        // If we are on Dismiss row in Quick Select, step down to top item or top snippet
+        if isDismissSelected {
+            isDismissSelected = false
+            let snippets = matchingWorkflows
+            if !snippets.isEmpty {
+                selectedWorkflowId = snippets.first?.id
+                selectedItemId = nil
+                selectedItemIds = []
+            } else if let firstId = displayItems.first?.id {
+                selectedWorkflowId = nil
+                selectedItemId = firstId
+                selectedItemIds = [firstId]
+            }
             return
         }
         
@@ -609,11 +652,11 @@ struct ContentView: View {
                     pageLimit += 1
                 }
                 DispatchQueue.main.async {
-                    let newItems = displayItems
+                    let newItems = self.displayItems
                     if idx + 1 < newItems.count {
                         let nextId = newItems[idx + 1].id
-                        selectedItemId = nextId
-                        selectedItemIds = [nextId]
+                        self.selectedItemId = nextId
+                        self.selectedItemIds = [nextId]
                     }
                 }
             }
@@ -628,22 +671,33 @@ struct ContentView: View {
 
     private func navigatePreviousItem() {
         if let fallbackId = previousItemBeforeCopyId {
+            isDismissSelected = false
             selectedItemId = fallbackId
             selectedItemIds = [fallbackId]
             clearNavigationFallbacks()
             return
         }
         
+        // Already at dismiss row
+        if isDismissSelected {
+            return
+        }
+        
         let snippets = matchingWorkflows
         let items = displayItems
         
-        // If a snippet is currently selected, move up within snippets
+        // If a snippet is currently selected, move up within snippets or to Dismiss
         if let wfId = selectedWorkflowId {
             if let idx = snippets.firstIndex(where: { $0.id == wfId }) {
                 if idx > 0 {
                     selectedWorkflowId = snippets[idx - 1].id
+                } else if isQuickSelectActive {
+                    // Step up to Dismiss row
+                    isDismissSelected = true
+                    selectedWorkflowId = nil
+                    selectedItemId = nil
+                    selectedItemIds = []
                 }
-                // Already at first snippet — stay there, don't wrap
             }
             return
         }
@@ -651,12 +705,19 @@ struct ContentView: View {
         // If on first clipboard item and snippets exist, move up into last snippet
         if let currentId = selectedItemId,
            let idx = itemIndexMap[currentId],
-           idx == 0,
-           !snippets.isEmpty {
-            selectedItemId = nil
-            selectedItemIds = []
-            selectedWorkflowId = snippets.last?.id
-            return
+           idx == 0 {
+            if !snippets.isEmpty {
+                selectedItemId = nil
+                selectedItemIds = []
+                selectedWorkflowId = snippets.last?.id
+                return
+            } else if isQuickSelectActive {
+                // Step up to Dismiss row
+                isDismissSelected = true
+                selectedItemId = nil
+                selectedItemIds = []
+                return
+            }
         }
         
         // Navigate within clipboard items
@@ -729,6 +790,32 @@ struct ContentView: View {
             let flags = event.modifierFlags
             let isCommandOnly = flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control) && !flags.contains(.option)
             let isOptionOnly = flags.contains(.option) && !flags.contains(.command) && !flags.contains(.shift) && !flags.contains(.control)
+
+            // MARK: - Option + V (Batch Paste All) and Option + C (Batch Copy All)
+            if isOptionOnly {
+                if event.keyCode == 9 { // ⌥V - Select All & Sequential Paste
+                    let itemsToPaste = displayItems
+                    if !itemsToPaste.isEmpty {
+                        selectedItemIds = Set(itemsToPaste.map { $0.id })
+                        clipboardManager.pasteMultipleContents(itemsToPaste.map { $0.content })
+                        return nil
+                    }
+                } else if event.keyCode == 8 { // ⌥C - Select All & Batch Copy
+                    let itemsToCopy = displayItems
+                    if !itemsToCopy.isEmpty {
+                        selectedItemIds = Set(itemsToCopy.map { $0.id })
+                        let joinedContent = itemsToCopy.map { $0.content }.joined(separator: "\n")
+                        let now = Date()
+                        for (idx, target) in itemsToCopy.reversed().enumerated() {
+                            target.timestamp = now.addingTimeInterval(Double(idx) * 0.001)
+                        }
+                        try? modelContext.save()
+                        clipboardManager.copyToClipboard(content: joinedContent, recordInDatabase: false)
+                        NotificationCenter.default.post(name: .closeUI, object: nil)
+                        return nil
+                    }
+                }
+            }
 
             if (isCommandOnly || isOptionOnly), let chars = event.charactersIgnoringModifiers, chars.count == 1 {
                 if let num = Int(chars) {
@@ -859,6 +946,12 @@ struct ContentView: View {
             case 36:
                 if isFocused { return event }
                 if showingDetail { showingDetail = false }
+                if isDismissSelected {
+                    isQuickSelectActive = false
+                    isDismissSelected = false
+                    NotificationCenter.default.post(name: .closeUI, object: nil)
+                    return nil
+                }
                 if let wfId = selectedWorkflowId,
                    let snippet = matchingWorkflows.first(where: { $0.id == wfId }) {
                     clipboardManager.paste(content: snippet.content)
@@ -1536,6 +1629,33 @@ struct ContentView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 6) {
+                        Color.clear
+                            .frame(height: 0)
+                            .id("list_top_anchor")
+
+                        if isQuickSelectActive {
+                            DismissRow(
+                                isSelected: isDismissSelected,
+                                onTap: {
+                                    isQuickSelectActive = false
+                                    isDismissSelected = false
+                                    NotificationCenter.default.post(name: .closeUI, object: nil)
+                                },
+                                onHover: { hovering in
+                                    if hovering && isQuickSelectActive {
+                                        isSelectionFromMouse = true
+                                        isDismissSelected = true
+                                        selectedWorkflowId = nil
+                                        selectedItemId = nil
+                                        selectedItemIds = []
+                                    }
+                                }
+                            )
+                            .id("dismiss_row_id")
+                            .padding(.horizontal, 4)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+
                         workflowSectionView
 
                         let now = Date()
@@ -1546,7 +1666,7 @@ struct ContentView: View {
 
                         let snippetsCount = matchingWorkflows.count
                         ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
-                            let isSelected = selectedWorkflowId == nil && selectedItemIds.contains(item.id)
+                            let isSelected = !isDismissSelected && selectedWorkflowId == nil && selectedItemIds.contains(item.id)
                             let badgeIndex = getBadgeIndex(index: index)
                             ClipboardRow(
                                 item: item,
@@ -1556,6 +1676,7 @@ struct ContentView: View {
                                 badgeIndex: badgeIndex,
                                 onRowTap: {
                                     clearNavigationFallbacks()
+                                    isDismissSelected = false
                                     let modifiers = NSEvent.modifierFlags
                                     if !modifiers.contains(.shift) && !modifiers.contains(.command) {
                                         isSelectionFromMouse = true
@@ -1565,15 +1686,18 @@ struct ContentView: View {
                                     }
                                 },
                                 onLeftClickWithModifiers: { modifiers in
+                                    isDismissSelected = false
                                     isSelectionFromMouse = true
                                     handleRowClick(itemId: item.id, modifiers: modifiers)
                                 },
                                 onRightClick: { modifiers in
+                                    isDismissSelected = false
                                     isSelectionFromMouse = true
                                     handleRowRightClick(itemId: item.id, modifiers: modifiers)
                                     showNativeContextMenu(for: item)
                                 },
                                 onChevronTap: {
+                                    isDismissSelected = false
                                     isSelectionFromMouse = true
                                     selectedItemId = item.id
                                     selectedItemIds = [item.id]
@@ -1584,6 +1708,7 @@ struct ContentView: View {
                                 onHover: { hovering in
                                     if hovering && isQuickSelectActive {
                                         isSelectionFromMouse = true
+                                        isDismissSelected = false
                                         selectedWorkflowId = nil
                                         selectedItemId = item.id
                                         selectedItemIds = [item.id]
@@ -1612,11 +1737,36 @@ struct ContentView: View {
                     .padding(.vertical, 8)
 
                 }
+                .onChange(of: scrollToTopTrigger) { _, _ in
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.12)) {
+                            proxy.scrollTo("list_top_anchor", anchor: .top)
+                        }
+                    }
+                }
+                .onChange(of: isDismissSelected) { _, isDismiss in
+                    if isDismiss && !isSelectionFromMouse {
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut(duration: 0.12)) {
+                                proxy.scrollTo("dismiss_row_id", anchor: .top)
+                            }
+                        }
+                    }
+                }
+                .onChange(of: selectedWorkflowId) { _, newValue in
+                    if let id = newValue, !isSelectionFromMouse {
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut(duration: 0.12)) {
+                                proxy.scrollTo(id, anchor: nil)
+                            }
+                        }
+                    }
+                }
                 .onChange(of: selectedItemId) { _, newValue in
                     if let id = newValue, !isSelectionFromMouse {
                         DispatchQueue.main.async {
                             withAnimation(.easeInOut(duration: 0.12)) {
-                                proxy.scrollTo(id)
+                                proxy.scrollTo(id, anchor: nil)
                             }
                         }
                     }
@@ -1630,15 +1780,17 @@ struct ContentView: View {
         if !matchingWorkflows.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(matchingWorkflows.enumerated()), id: \.element.id) { index, snippet in
-                    let isSelected = selectedWorkflowId == snippet.id
+                    let isSelected = !isDismissSelected && selectedWorkflowId == snippet.id
                     WorkflowRow(
                         snippet: snippet,
                         isSelected: isSelected,
                         badgeIndex: nil,
                         onTap: {
+                            isDismissSelected = false
                             clipboardManager.paste(content: snippet.content)
                         },
                         onChevronTap: {
+                            isDismissSelected = false
                             selectedWorkflowId = snippet.id
                             detailSnippet = snippet
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
@@ -1648,6 +1800,7 @@ struct ContentView: View {
                         onHover: { hovering in
                             if hovering && isQuickSelectActive {
                                 isSelectionFromMouse = true
+                                isDismissSelected = false
                                 selectedWorkflowId = snippet.id
                                 selectedItemId = nil
                                 selectedItemIds = []
@@ -1808,6 +1961,97 @@ struct GlassEffectView: NSViewRepresentable {
             nsView.cornerRadius = cornerRadius
         }
         nsView.tintColor = tintColor
+    }
+}
+
+// MARK: - DismissRow
+struct DismissRow: View {
+    let isSelected: Bool
+    let onTap: () -> Void
+    var onHover: ((Bool) -> Void)? = nil
+    
+    @State private var isHovered = false
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 12) {
+                ZStack {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.red.opacity(0.2))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .stroke(Color.red.opacity(0.4), lineWidth: 0.5)
+                            )
+                    } else {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.primary.opacity(0.06))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+                            )
+                    }
+                    
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(isSelected ? .red : .secondary)
+                }
+                .frame(width: 18, height: 18)
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Dismiss")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isSelected ? .primary : .primary.opacity(0.9))
+                    
+                    Text("Release key to close without pasting")
+                        .font(.system(size: 10, weight: .regular))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer(minLength: 0)
+                
+                Text("Esc")
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .foregroundColor(.secondary.opacity(0.8))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(Color.primary.opacity(0.06))
+                    )
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
+        }
+        .padding(.vertical, 8)
+        .padding(.leading, 8)
+        .padding(.trailing, 8)
+        .background(
+            ZStack {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.red.opacity(0.10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Color.red.opacity(0.3), lineWidth: 0.5)
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(isHovered ? Color.primary.opacity(0.06) : Color.clear, lineWidth: 0.5)
+                        )
+                }
+            }
+        )
+        .onHover { hovering in
+            if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+            withAnimation(.easeOut(duration: 0.12)) {
+                isHovered = hovering
+            }
+            onHover?(hovering)
+        }
     }
 }
 
