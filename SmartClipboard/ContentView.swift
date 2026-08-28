@@ -248,6 +248,7 @@ struct ContentView: View {
     @AppStorage("leftArrowAction") private var leftArrowAction: String = "googleSearch"
     @AppStorage("longLeftArrowAction") private var longLeftArrowAction: String = "delete"
     @AppStorage("themeStyle") private var themeStyle = "darkGlass"
+    @AppStorage("enableSelectAllHotkeys") private var enableSelectAllHotkeys = false
     
     @State private var leftArrowDownTime: Date?
     @State private var leftArrowLongPressTriggered = false
@@ -792,14 +793,16 @@ struct ContentView: View {
             let isOptionOnly = relevantModifiers == .option
 
             // MARK: - Option + V (Cmd+A, Cmd+V) and Option + C (Cmd+A, Cmd+C)
-            let hasOption = event.modifierFlags.contains(.option) && !event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.control)
-            if hasOption && (event.keyCode == 9 || event.keyCode == 8) { // kVK_ANSI_V = 9, kVK_ANSI_C = 8
-                if event.keyCode == 9 { // ⌥V - Select All & Paste
-                    clipboardManager.selectAllAndPaste()
-                } else { // ⌥C - Select All & Copy
-                    clipboardManager.selectAllAndCopy()
+            if enableSelectAllHotkeys {
+                let hasOption = event.modifierFlags.contains(.option) && !event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.control)
+                if hasOption && (event.keyCode == 9 || event.keyCode == 8) { // kVK_ANSI_V = 9, kVK_ANSI_C = 8
+                    if event.keyCode == 9 { // ⌥V - Select All & Paste
+                        clipboardManager.selectAllAndPaste()
+                    } else { // ⌥C - Select All & Copy
+                        clipboardManager.selectAllAndCopy()
+                    }
+                    return nil
                 }
-                return nil
             }
 
 

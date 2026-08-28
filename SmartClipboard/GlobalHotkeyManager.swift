@@ -33,6 +33,7 @@ final class GlobalHotkeyManager {
     var onNavigate: ((Int) -> Void)?
 
     private var hotKeyRefs: [EventHotKeyRef?] = []
+    private var selectAllKeyRefs: [EventHotKeyRef?] = []
     private var toggleUIKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
 
@@ -132,6 +133,9 @@ final class GlobalHotkeyManager {
         hotKeyRefs.compactMap { $0 }.forEach { UnregisterEventHotKey($0) }
         hotKeyRefs.removeAll()
 
+        selectAllKeyRefs.compactMap { $0 }.forEach { UnregisterEventHotKey($0) }
+        selectAllKeyRefs.removeAll()
+
         if let ref = toggleUIKeyRef {
             UnregisterEventHotKey(ref)
             toggleUIKeyRef = nil
@@ -143,6 +147,30 @@ final class GlobalHotkeyManager {
         }
 
         stopScrollTap()
+    }
+
+    /// Dynamically register or unregister the global Option+V and Option+C Select All hotkeys.
+    func updateSelectAllHotkeys(enabled: Bool) {
+        selectAllKeyRefs.compactMap { $0 }.forEach { UnregisterEventHotKey($0) }
+        selectAllKeyRefs.removeAll()
+
+        guard enabled else {
+            print("[GlobalHotkeyManager] Select All hotkeys (⌥V/⌥C) disabled")
+            return
+        }
+
+        let sig = fourCC("SCLP")
+        let optPairs: [(Int, Int)] = [
+            (kVK_ANSI_V, 20), (kVK_ANSI_C, 21)
+        ]
+        for (key, id) in optPairs {
+            var ref: EventHotKeyRef?
+            let hkID = EventHotKeyID(signature: sig, id: UInt32(id))
+            RegisterEventHotKey(UInt32(key), UInt32(optionKey),
+                                hkID, GetApplicationEventTarget(), 0, &ref)
+            selectAllKeyRefs.append(ref)
+        }
+        print("[GlobalHotkeyManager] Select All hotkeys (⌥V/⌥C) registered")
     }
 
     // MARK: - Scroll tap (quick select scroll-to-navigate)
@@ -245,12 +273,11 @@ final class GlobalHotkeyManager {
             hotKeyRefs.append(ref)
         }
 
-        // Option+1…9 → hotkey IDs 11…19; Option+V → ID 20; Option+C → ID 21
+        // Option+1…9 → hotkey IDs 11…19
         let optPairs: [(Int, Int)] = [
             (kVK_ANSI_1, 11), (kVK_ANSI_2, 12), (kVK_ANSI_3, 13),
             (kVK_ANSI_4, 14), (kVK_ANSI_5, 15), (kVK_ANSI_6, 16),
-            (kVK_ANSI_7, 17), (kVK_ANSI_8, 18), (kVK_ANSI_9, 19),
-            (kVK_ANSI_V, 20), (kVK_ANSI_C, 21)
+            (kVK_ANSI_7, 17), (kVK_ANSI_8, 18), (kVK_ANSI_9, 19)
         ]
         for (key, id) in optPairs {
             var ref: EventHotKeyRef?
@@ -259,6 +286,10 @@ final class GlobalHotkeyManager {
                                 hkID, GetApplicationEventTarget(), 0, &ref)
             hotKeyRefs.append(ref)
         }
+
+        // Check user setting for Option+V / Option+C Select All hotkeys (default false)
+        let isSelectAllEnabled = UserDefaults.standard.bool(forKey: "enableSelectAllHotkeys")
+        updateSelectAllHotkeys(enabled: isSelectAllEnabled)
     }
 
     func registerToggleUIHotkey(keyCode: Int, modifiers: NSEvent.ModifierFlags) {
