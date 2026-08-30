@@ -598,7 +598,9 @@ struct ContentView: View {
         
         // If we are on Dismiss row in Quick Select, step down to top item or top snippet
         if isDismissSelected {
-            isDismissSelected = false
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isDismissSelected = false
+            }
             let snippets = matchingWorkflows
             if !snippets.isEmpty {
                 selectedWorkflowId = snippets.first?.id
@@ -672,7 +674,9 @@ struct ContentView: View {
 
     private func navigatePreviousItem() {
         if let fallbackId = previousItemBeforeCopyId {
-            isDismissSelected = false
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isDismissSelected = false
+            }
             selectedItemId = fallbackId
             selectedItemIds = [fallbackId]
             clearNavigationFallbacks()
@@ -694,7 +698,9 @@ struct ContentView: View {
                     selectedWorkflowId = snippets[idx - 1].id
                 } else if isQuickSelectActive {
                     // Step up to Dismiss row
-                    isDismissSelected = true
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isDismissSelected = true
+                    }
                     selectedWorkflowId = nil
                     selectedItemId = nil
                     selectedItemIds = []
@@ -714,7 +720,9 @@ struct ContentView: View {
                 return
             } else if isQuickSelectActive {
                 // Step up to Dismiss row
-                isDismissSelected = true
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isDismissSelected = true
+                }
                 selectedItemId = nil
                 selectedItemIds = []
                 return
@@ -1581,9 +1589,9 @@ struct ContentView: View {
             
             if isQuickSelectActive {
                 HStack(spacing: 4) {
-                    Image(systemName: "hand.point.up.left.fill")
+                    Image(systemName: "bolt.fill")
                         .font(.system(size: 10, weight: .semibold))
-                    Text("Release key to paste")
+                    Text("Quick Mode")
                         .font(.system(size: 11, weight: .medium))
                 }
                 .foregroundColor(.secondary)
@@ -1622,7 +1630,7 @@ struct ContentView: View {
                             .frame(height: 0)
                             .id("list_top_anchor")
 
-                        if isQuickSelectActive {
+                        if isQuickSelectActive && isDismissSelected {
                             DismissRow(
                                 isSelected: isDismissSelected,
                                 onTap: {
