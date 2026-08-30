@@ -1589,9 +1589,9 @@ struct ContentView: View {
             
             if isQuickSelectActive {
                 HStack(spacing: 4) {
-                    Image(systemName: "bolt.fill")
+                    Image(systemName: "hand.point.up.left.fill")
                         .font(.system(size: 10, weight: .semibold))
-                    Text("Quick Mode")
+                    Text("Release key to paste")
                         .font(.system(size: 11, weight: .medium))
                 }
                 .foregroundColor(.secondary)

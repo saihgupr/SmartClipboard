@@ -13,7 +13,7 @@ struct ShortcutRecorderView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Global Hotkey")
                     .font(.system(size: 14, weight: .medium))
-                Text("Tap to toggle window, or hold for Quick Mode and release to paste.")
+                Text("Tap to toggle window, or hold to Quick Select and release to paste.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
