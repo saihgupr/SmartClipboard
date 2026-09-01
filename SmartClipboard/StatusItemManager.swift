@@ -164,10 +164,10 @@ final class StatusItemManager: NSObject {
         )
         
         panel.isMovableByWindowBackground = true
-        panel.isFloatingPanel = true
+        panel.isFloatingPanel = false
         panel.level = .floating
         panel.hidesOnDeactivate = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         
         panel.isOpaque = false
         panel.backgroundColor = .clear

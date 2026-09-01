@@ -1953,6 +1953,7 @@ struct VisualEffectView: NSViewRepresentable {
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
         nsView.material = material
         nsView.blendingMode = blendingMode
+        nsView.state = .active
         if cornerRadius > 0 {
             nsView.layer?.cornerRadius = cornerRadius
         }
@@ -3040,10 +3041,8 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
             return
         }
         
-        let pasteboardItem = NSPasteboardItem()
-        pasteboardItem.setString(dragInfo.content, forType: .string)
-        
-        let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+        let stringWriter = dragInfo.content as NSString
+        let draggingItem = NSDraggingItem(pasteboardWriter: stringWriter)
         
         let previewImage = Self.createDragPreviewImage(
             title: dragInfo.previewTitle ?? dragInfo.content,
@@ -3065,7 +3064,7 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     }
 
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
-        return .copy
+        return [.copy, .generic]
     }
     
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
