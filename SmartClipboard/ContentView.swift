@@ -2981,6 +2981,8 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
         return nil
     }
 
+    override var mouseDownCanMoveWindow: Bool { false }
+
     override func mouseDown(with event: NSEvent) {
         mouseDownPoint = event.locationInWindow
         mouseDownModifiers = event.modifierFlags
@@ -2995,12 +2997,9 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
                 onLeftClick?(event.modifierFlags)
             }
         }
-        super.mouseDown(with: event)
     }
 
     override func mouseDragged(with event: NSEvent) {
-        super.mouseDragged(with: event)
-        
         guard !didDrag, !isDraggingSessionActive, let startPoint = mouseDownPoint else { return }
         let currentPoint = event.locationInWindow
         let distance = hypot(currentPoint.x - startPoint.x, currentPoint.y - startPoint.y)
@@ -3013,8 +3012,6 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     }
 
     override func mouseUp(with event: NSEvent) {
-        super.mouseUp(with: event)
-        
         guard !didDrag && !isDraggingSessionActive else {
             didDrag = false
             mouseDownPoint = nil
@@ -3035,7 +3032,6 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
 
     override func rightMouseDown(with event: NSEvent) {
         onRightClick?(event.modifierFlags)
-        super.rightMouseDown(with: event)
     }
 
     private func startDragSession(with event: NSEvent) {
