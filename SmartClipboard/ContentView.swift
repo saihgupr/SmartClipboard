@@ -1710,6 +1710,23 @@ struct ContentView: View {
                                         selectedItemId = item.id
                                         selectedItemIds = [item.id]
                                     }
+                                },
+                                dragContentProvider: {
+                                    if selectedItemIds.contains(item.id) && selectedItemIds.count > 1 {
+                                        let selectedItemsInOrder = displayItems.filter { selectedItemIds.contains($0.id) }
+                                        let joinedContent = selectedItemsInOrder.map { $0.content }.joined(separator: "\n")
+                                        return DragSessionInfo(
+                                            content: joinedContent,
+                                            previewTitle: item.content,
+                                            itemCount: selectedItemsInOrder.count
+                                        )
+                                    } else {
+                                        return DragSessionInfo(
+                                            content: item.content,
+                                            previewTitle: item.content,
+                                            itemCount: 1
+                                        )
+                                    }
                                 }
                             )
                             .tag(item.id)
@@ -1802,6 +1819,13 @@ struct ContentView: View {
                                 selectedItemId = nil
                                 selectedItemIds = []
                             }
+                        },
+                        dragContentProvider: {
+                            return DragSessionInfo(
+                                content: snippet.content,
+                                previewTitle: snippet.title,
+                                itemCount: 1
+                            )
                         }
                     )
                     .padding(.horizontal, 4)
@@ -2060,6 +2084,7 @@ struct WorkflowRow: View {
     let onTap: () -> Void
     let onChevronTap: () -> Void
     var onHover: ((Bool) -> Void)? = nil
+    var dragContentProvider: (() -> DragSessionInfo?)? = nil
     
     @State private var isChevronHovered = false
     
@@ -2090,7 +2115,19 @@ struct WorkflowRow: View {
                 Spacer(minLength: 0)
             }
             .contentShape(Rectangle())
-            .onTapGesture { onTap() }
+            .overlay(
+                MouseDetectorView(
+                    isSelected: isSelected,
+                    onLeftClick: { _ in },
+                    onRightClick: { _ in },
+                    onTap: { onTap() },
+                    onHover: { hovering in
+                        onHover?(hovering)
+                    },
+                    dragContentProvider: dragContentProvider
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            )
             
             // Chevron — identical to ClipboardRow
             Image(systemName: "chevron.right")
@@ -2157,6 +2194,7 @@ struct ClipboardRow: View {
     let onRightClick: (NSEvent.ModifierFlags) -> Void
     let onChevronTap: () -> Void
     var onHover: ((Bool) -> Void)? = nil
+    var dragContentProvider: (() -> DragSessionInfo?)? = nil
     
     @State private var isChevronHovered = false
     
@@ -2207,21 +2245,23 @@ struct ClipboardRow: View {
             .contentShape(Rectangle())
             .overlay(
                 MouseDetectorView(
+                    isSelected: isSelected,
                     onLeftClick: { modifiers in
                         onLeftClickWithModifiers(modifiers)
                     },
                     onRightClick: { modifiers in
                         onRightClick(modifiers)
                     },
+                    onTap: {
+                        onRowTap()
+                    },
                     onHover: { hovering in
                         onHover?(hovering)
-                    }
+                    },
+                    dragContentProvider: dragContentProvider
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             )
-            .onTapGesture {
-                onRowTap()
-            }
             
             // Chevron button (right side, fully outside overlay and row tap gestures)
             Image(systemName: "chevron.right")
@@ -2860,34 +2900,58 @@ struct IncognitoIcon: View {
     }
 }
 
+// MARK: - DragSessionInfo
+struct DragSessionInfo {
+    let content: String
+    let previewTitle: String?
+    let itemCount: Int
+}
+
 // MARK: - MouseDetectorView
 struct MouseDetectorView: NSViewRepresentable {
+    let isSelected: Bool
     let onLeftClick: (NSEvent.ModifierFlags) -> Void
     let onRightClick: (NSEvent.ModifierFlags) -> Void
+    let onTap: () -> Void
     var onHover: ((Bool) -> Void)? = nil
+    var dragContentProvider: (() -> DragSessionInfo?)? = nil
 
     func makeNSView(context: Context) -> NSView {
         let view = MouseDetectingNSView()
+        view.isSelected = isSelected
         view.onLeftClick = onLeftClick
         view.onRightClick = onRightClick
+        view.onTap = onTap
         view.onHover = onHover
+        view.dragContentProvider = dragContentProvider
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
         if let view = nsView as? MouseDetectingNSView {
+            view.isSelected = isSelected
             view.onLeftClick = onLeftClick
             view.onRightClick = onRightClick
+            view.onTap = onTap
             view.onHover = onHover
+            view.dragContentProvider = dragContentProvider
         }
     }
 }
 
-class MouseDetectingNSView: NSView {
+class MouseDetectingNSView: NSView, NSDraggingSource {
+    var isSelected: Bool = false
     var onLeftClick: ((NSEvent.ModifierFlags) -> Void)?
     var onRightClick: ((NSEvent.ModifierFlags) -> Void)?
+    var onTap: (() -> Void)?
     var onHover: ((Bool) -> Void)?
+    var dragContentProvider: (() -> DragSessionInfo?)?
+    
     private var trackingArea: NSTrackingArea?
+    private var mouseDownPoint: NSPoint?
+    private var mouseDownModifiers: NSEvent.ModifierFlags = []
+    private var isDraggingSessionActive = false
+    private var didDrag = false
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
@@ -2918,13 +2982,189 @@ class MouseDetectingNSView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        onLeftClick?(event.modifierFlags)
+        mouseDownPoint = event.locationInWindow
+        mouseDownModifiers = event.modifierFlags
+        didDrag = false
+        isDraggingSessionActive = false
+        
+        let hasShiftOrCmd = event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.command)
+        if hasShiftOrCmd {
+            onLeftClick?(event.modifierFlags)
+        } else {
+            if !isSelected {
+                onLeftClick?(event.modifierFlags)
+            }
+        }
         super.mouseDown(with: event)
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        super.mouseDragged(with: event)
+        
+        guard !didDrag, !isDraggingSessionActive, let startPoint = mouseDownPoint else { return }
+        let currentPoint = event.locationInWindow
+        let distance = hypot(currentPoint.x - startPoint.x, currentPoint.y - startPoint.y)
+        
+        if distance >= 3.0 {
+            didDrag = true
+            isDraggingSessionActive = true
+            startDragSession(with: event)
+        }
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        
+        guard !didDrag && !isDraggingSessionActive else {
+            didDrag = false
+            mouseDownPoint = nil
+            return
+        }
+        
+        let hasShiftOrCmd = mouseDownModifiers.contains(.shift) || mouseDownModifiers.contains(.command)
+        if !hasShiftOrCmd {
+            if isSelected {
+                onLeftClick?(mouseDownModifiers)
+            }
+            onTap?()
+        }
+        
+        mouseDownPoint = nil
+        didDrag = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
         onRightClick?(event.modifierFlags)
         super.rightMouseDown(with: event)
+    }
+
+    private func startDragSession(with event: NSEvent) {
+        guard let dragInfo = dragContentProvider?(), !dragInfo.content.isEmpty else {
+            isDraggingSessionActive = false
+            return
+        }
+        
+        let pasteboardItem = NSPasteboardItem()
+        pasteboardItem.setString(dragInfo.content, forType: .string)
+        
+        let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+        
+        let previewImage = Self.createDragPreviewImage(
+            title: dragInfo.previewTitle ?? dragInfo.content,
+            count: dragInfo.itemCount
+        )
+        
+        let mouseInView = convert(event.locationInWindow, from: nil)
+        let imgSize = previewImage.size
+        let frame = NSRect(
+            x: mouseInView.x - 16,
+            y: mouseInView.y - (imgSize.height / 2),
+            width: imgSize.width,
+            height: imgSize.height
+        )
+        
+        draggingItem.setDraggingFrame(frame, contents: previewImage)
+        
+        beginDraggingSession(with: [draggingItem], event: event, source: self)
+    }
+
+    func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+        return .copy
+    }
+    
+    func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
+        isDraggingSessionActive = false
+        didDrag = false
+        mouseDownPoint = nil
+    }
+
+    static func createDragPreviewImage(title: String, count: Int) -> NSImage {
+        let cleanText = title
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayText = cleanText.count > 45 ? String(cleanText.prefix(45)) + "…" : cleanText
+        
+        let font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.labelColor
+        ]
+        
+        let textSize = (displayText as NSString).size(withAttributes: textAttributes)
+        let horizontalPadding: CGFloat = 12
+        let iconWidth: CGFloat = 16
+        let iconSpacing: CGFloat = 8
+        let badgeExtraWidth: CGFloat = count > 1 ? 26 : 0
+        
+        let totalWidth = min(max(textSize.width + horizontalPadding * 2 + iconWidth + iconSpacing + badgeExtraWidth, 90), 280)
+        let totalHeight: CGFloat = 32
+        
+        let image = NSImage(size: NSSize(width: totalWidth, height: totalHeight), flipped: false) { bounds in
+            let bgPath = NSBezierPath(roundedRect: bounds, xRadius: 8, yRadius: 8)
+            NSColor.windowBackgroundColor.withAlphaComponent(0.94).setFill()
+            bgPath.fill()
+            
+            NSColor.separatorColor.withAlphaComponent(0.3).setStroke()
+            bgPath.lineWidth = 1
+            bgPath.stroke()
+            
+            let iconRect = NSRect(x: horizontalPadding, y: (totalHeight - iconWidth) / 2, width: iconWidth, height: iconWidth)
+            if let docIcon = NSImage(systemSymbolName: count > 1 ? "doc.on.doc.fill" : "doc.text.fill", accessibilityDescription: nil) {
+                let config = NSImage.SymbolConfiguration(pointSize: 11, weight: .medium)
+                let tintedIcon = docIcon.withSymbolConfiguration(config)
+                tintedIcon?.draw(in: iconRect)
+            }
+            
+            let textX = horizontalPadding + iconWidth + iconSpacing
+            let textMaxWidth = totalWidth - textX - horizontalPadding - badgeExtraWidth
+            let textRect = NSRect(
+                x: textX,
+                y: (totalHeight - textSize.height) / 2,
+                width: max(textMaxWidth, 10),
+                height: textSize.height
+            )
+            
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineBreakMode = .byTruncatingTail
+            var attrs = textAttributes
+            attrs[.paragraphStyle] = paragraphStyle
+            
+            (displayText as NSString).draw(with: textRect, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], attributes: attrs)
+            
+            if count > 1 {
+                let badgeText = "\(count)"
+                let badgeFont = NSFont.systemFont(ofSize: 10, weight: .bold)
+                let badgeTextAttrs: [NSAttributedString.Key: Any] = [
+                    .font: badgeFont,
+                    .foregroundColor: NSColor.white
+                ]
+                let badgeTextSize = (badgeText as NSString).size(withAttributes: badgeTextAttrs)
+                let badgeWidth = max(badgeTextSize.width + 10, 20)
+                let badgeHeight: CGFloat = 18
+                let badgeRect = NSRect(
+                    x: totalWidth - horizontalPadding - badgeWidth + 4,
+                    y: (totalHeight - badgeHeight) / 2,
+                    width: badgeWidth,
+                    height: badgeHeight
+                )
+                
+                let badgePath = NSBezierPath(roundedRect: badgeRect, xRadius: 9, yRadius: 9)
+                NSColor.systemBlue.setFill()
+                badgePath.fill()
+                
+                let badgeTextDrawRect = NSRect(
+                    x: badgeRect.minX + (badgeWidth - badgeTextSize.width) / 2,
+                    y: badgeRect.minY + (badgeHeight - badgeTextSize.height) / 2,
+                    width: badgeTextSize.width,
+                    height: badgeTextSize.height
+                )
+                (badgeText as NSString).draw(in: badgeTextDrawRect, withAttributes: badgeTextAttrs)
+            }
+            
+            return true
+        }
+        
+        return image
     }
 }
 
