@@ -112,7 +112,7 @@ final class StatusItemManager: NSObject {
                 queue: .main
             ) { [weak self] _ in
                 self?.lastCloseTime = Date()
-                self?.isQuickSelectActive = false
+                self?.closeUI()
             }
         }
         
