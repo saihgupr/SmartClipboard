@@ -12,6 +12,9 @@ extension Notification.Name {
     static let activateQuickSelectMode = Notification.Name("activateQuickSelectMode")
     static let quickSelectNavigate = Notification.Name("quickSelectNavigate")
     static let dragSessionEnded = Notification.Name("dragSessionEnded")
+    /// Posted when a drag session ends with an empty/rejected `NSDragOperation`.
+    /// userInfo keys: "text" (String), "screenPoint" (NSValue wrapping NSPoint)
+    static let dragDropRejected = Notification.Name("dragDropRejected")
 }
 
 /// Tracks the active drag session state to prevent premature window dismissal while dragging.
@@ -137,11 +140,24 @@ final class StatusItemManager: NSObject {
             queue: .main
         ) { [weak self] _ in
             guard let self = self else { return }
-            if DragSessionState.shared.shouldCloseOnDragEnd || !self.isWindowFrontmost() {
-                DragSessionState.shared.shouldCloseOnDragEnd = false
-                self.lastCloseTime = Date()
-                self.closeUI()
-            }
+            DragSessionState.shared.shouldCloseOnDragEnd = false
+            self.lastCloseTime = Date()
+            self.closeUI()
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .dragDropRejected,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard
+                let text = notification.userInfo?["text"] as? String,
+                let pointValue = notification.userInfo?["screenPoint"] as? NSValue
+            else { return }
+            let screenPoint = pointValue.pointValue
+            let rawOperation = notification.userInfo?["operation"] as? UInt ?? 0
+            let operation = NSDragOperation(rawValue: rawOperation)
+            DragFallbackInjector.shared.handleDragEnd(text: text, at: screenPoint, operation: operation)
         }
         
         clipboardManager.onPaste = { [weak self] in
@@ -347,6 +363,9 @@ final class StatusItemManager: NSObject {
         isQuickSelectActive = false
         GlobalHotkeyManager.shared.stopScrollTap()
         mainWindow?.orderOut(nil)
+        if sharedSettingsWindow?.isVisible != true {
+            NSApp.hide(nil)
+        }
     }
     
     private func registerSavedHotkey() {

@@ -2947,7 +2947,11 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     var onTap: (() -> Void)?
     var onHover: ((Bool) -> Void)?
     var dragContentProvider: (() -> DragSessionInfo?)?
-    
+
+    /// Retains the text payload of the active drag session so it can be re-injected
+    /// if the destination rejects the drop.
+    private var lastDraggedText: String = ""
+
     private var trackingArea: NSTrackingArea?
     private var mouseDownPoint: NSPoint?
     private var mouseDownModifiers: NSEvent.ModifierFlags = []
@@ -3055,6 +3059,9 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
         DragSessionState.shared.isDragging = true
         DragSessionState.shared.shouldCloseOnDragEnd = false
 
+        // Stash text so we can re-inject it if the destination rejects the drop.
+        lastDraggedText = dragInfo.content
+
         let pasteboardItem = NSPasteboardItem()
         // 1. Plain text (UTF-8) - clean text for all text inputs and web forms
         pasteboardItem.setString(dragInfo.content, forType: .string)
@@ -3096,7 +3103,25 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
         didDrag = false
         mouseDownPoint = nil
         DragSessionState.shared.isDragging = false
-        
+
+        NSLog("[DragTrace] draggingSession endedAt screenPoint=%@ operation=%lu lastDraggedText.count=%d",
+              NSStringFromPoint(screenPoint), operation.rawValue, lastDraggedText.count)
+
+        // Always post the drag-end notification so DragFallbackInjector can decide
+        // whether injection is warranted based on the operation value.
+        if !lastDraggedText.isEmpty {
+            NotificationCenter.default.post(
+                name: .dragDropRejected,
+                object: nil,
+                userInfo: [
+                    "text": lastDraggedText,
+                    "screenPoint": NSValue(point: screenPoint),
+                    "operation": operation.rawValue
+                ]
+            )
+        }
+
+        lastDraggedText = ""
         NotificationCenter.default.post(name: .dragSessionEnded, object: nil)
     }
 

@@ -648,15 +648,19 @@ struct ShortcutsSettingsView: View {
             SettingsSection(title: "Global Access") {
                 ShortcutRecorderView()
             }
-            
+
             SettingsSection(title: "List Interaction") {
                 LeftArrowActionSettingView()
             }
-            
+
             SettingsSection(title: "Select All Hotkeys") {
                 SelectAllShortcutsSettingView()
             }
-            
+
+            SettingsSection(title: "Drag & Drop") {
+                DragFallbackSettingView()
+            }
+
             SnippetsSettingsView()
         }
     }
@@ -1022,6 +1026,27 @@ struct SelectAllShortcutsSettingView: View {
         .onChange(of: enableSelectAllHotkeys) { _, newValue in
             GlobalHotkeyManager.shared.updateSelectAllHotkeys(enabled: newValue)
         }
+    }
+}
+
+struct DragFallbackSettingView: View {
+    /// Default is `true` — we use object(forKey:) in the injector to distinguish
+    /// "not yet set" (nil → default ON) from an explicit user choice.
+    @AppStorage("enableDragFallbackPaste") private var enableDragFallbackPaste = true
+
+    var body: some View {
+        Toggle(isOn: $enableDragFallbackPaste) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Auto-paste when drag is rejected")
+                    .font(.system(size: 14, weight: .medium))
+                Text("When dragging an item into an app that doesn't accept drops (e.g. Antigravity IDE, YouTube Studio), SmartClipboard automatically injects the text via Accessibility API or ⌘V fallback.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .toggleStyle(.switch)
+        .focusEffectDisabled()
     }
 }
 
