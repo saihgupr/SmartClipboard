@@ -21,7 +21,7 @@ final class DragFallbackInjector {
     struct TargetInfo {
         let pid: pid_t
         let name: String
-        let isAntigravity: Bool
+        let isWebOrElectron: Bool
     }
 
     // MARK: - Public entry point
@@ -42,21 +42,22 @@ final class DragFallbackInjector {
             return
         }
 
-        os_log("[DragFallback] Drag ended. operation=%{public}lu screenPoint=(%{public}.0f,%{public}.0f) target='%{public}s' pid=%{public}d isAntigravity=%{public}d text.count=%{public}d",
+        os_log("[DragFallback] Drag ended. operation=%{public}lu screenPoint=(%{public}.0f,%{public}.0f) target='%{public}s' pid=%{public}d isWebOrElectron=%{public}d text.count=%{public}d",
                log: log, type: .info,
                operation.rawValue, screenPoint.x, screenPoint.y,
-               target.name, target.pid, target.isAntigravity ? 1 : 0, text.count)
+               target.name, target.pid, target.isWebOrElectron ? 1 : 0, text.count)
 
-        // For non-Antigravity apps: if it's a clean native accept (.copy, .move, .link), skip fallback to avoid double-paste
+        // For standard native Cocoa apps (non-web/non-Electron): if it's a clean native accept (.copy, .move, .link),
+        // skip fallback to avoid double-pasting.
         let cleanlyAccepted: NSDragOperation = [.copy, .move, .link]
-        if !target.isAntigravity && !operation.intersection(cleanlyAccepted).isEmpty {
+        if !target.isWebOrElectron && !operation.intersection(cleanlyAccepted).isEmpty {
             os_log("[DragFallback] Clean native accept by '%{public}s' (op=%{public}lu) — skipping fallback.",
                    log: log, type: .info, target.name, operation.rawValue)
             return
         }
 
-        os_log("[DragFallback] Triggering fallback for '%{public}s' (isAntigravity=%{public}d, op=%{public}lu) in 200ms.",
-               log: log, type: .info, target.name, target.isAntigravity ? 1 : 0, operation.rawValue)
+        os_log("[DragFallback] Triggering fallback for '%{public}s' (isWebOrElectron=%{public}d, op=%{public}lu) in 200ms.",
+               log: log, type: .info, target.name, target.isWebOrElectron ? 1 : 0, operation.rawValue)
 
         // Activate the target application so focus returns to it
         if let targetApp = NSRunningApplication(processIdentifier: target.pid) {
@@ -105,21 +106,92 @@ final class DragFallbackInjector {
                 height: boundsDict["Height"] ?? 0
             )
             if rect.contains(cgPoint) {
-                let bundleID = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? ""
-                let isAntigravity = ownerName.localizedCaseInsensitiveContains("antigravity")
-                    || bundleID.localizedCaseInsensitiveContains("antigravity")
-                return TargetInfo(pid: pid, name: ownerName, isAntigravity: isAntigravity)
+                let isWebOrElectron = self.isWebOrElectronApp(pid: pid, ownerName: ownerName)
+                return TargetInfo(pid: pid, name: ownerName, isWebOrElectron: isWebOrElectron)
             }
         }
 
         return nil
     }
 
+    private func isWebOrElectronApp(pid: pid_t, ownerName: String) -> Bool {
+        let nameLower = ownerName.lowercased()
+
+        guard let app = NSRunningApplication(processIdentifier: pid) else {
+            return isWebOrElectronName(nameLower)
+        }
+
+        let bundleID = (app.bundleIdentifier ?? "").lowercased()
+        let execPath = (app.executableURL?.path ?? "").lowercased()
+
+        // 1. Executable is Electron
+        if execPath.contains("electron") {
+            return true
+        }
+
+        // 2. Frameworks contain Electron or CEF
+        if let bundleURL = app.bundleURL {
+            let frameworksPath = bundleURL.appendingPathComponent("Contents/Frameworks").path
+            let fm = FileManager.default
+            if fm.fileExists(atPath: "\(frameworksPath)/Electron Framework.framework")
+                || fm.fileExists(atPath: "\(frameworksPath)/Chromium Embedded Framework.framework") {
+                return true
+            }
+        }
+
+        // 3. Known browser and web-based apps by name or bundle ID
+        if isWebOrElectronName(nameLower) || isWebOrElectronBundle(bundleID) {
+            return true
+        }
+
+        return false
+    }
+
+    private func isWebOrElectronName(_ name: String) -> Bool {
+        let keywords = [
+            "antigravity", "safari", "chrome", "chromium", "firefox",
+            "edge", "brave", "arc", "opera", "vivaldi", "orion",
+            "electron", "slack", "discord", "obsidian", "notion",
+            "figma", "linear", "teams", "chatgpt", "spotify",
+            "whatsapp", "code", "cursor"
+        ]
+        return keywords.contains { name.contains($0) }
+    }
+
+    private func isWebOrElectronBundle(_ bundleID: String) -> Bool {
+        let prefixesOrKeywords = [
+            "com.apple.safari",
+            "com.google.chrome",
+            "org.mozilla.firefox",
+            "company.thebrowser.browser",
+            "com.brave.browser",
+            "com.microsoft.edgemac",
+            "com.operasoftware.opera",
+            "com.vivaldi.vivaldi",
+            "com.kagi.kagimacos",
+            "com.google.antigravity",
+            "com.microsoft.vscode",
+            "com.todesktop",
+            "com.tinyspeck.slackmacgap",
+            "com.hnc.discord",
+            "md.obsidian",
+            "notion.id",
+            "com.figma.desktop",
+            "com.linear",
+            "com.microsoft.teams",
+            "com.openai.chat",
+            "com.spotify.client",
+            "net.whatsapp.whatsapp"
+        ]
+        return prefixesOrKeywords.contains { bundleID.contains($0) }
+    }
+
     // MARK: - Injection dispatch
 
     private func injectText(_ text: String, target: TargetInfo) {
-        if target.isAntigravity {
-            os_log("[DragFallback] Target is Antigravity IDE — using clipboard paste directly (Chromium AX stubs do not insert text).", log: log, type: .info)
+        if target.isWebOrElectron {
+            os_log("[DragFallback] Target '%{public}s' is web/Electron — using clipboard paste directly (bypassing web AX stubs).",
+                   log: log, type: .info, target.name)
             clipboardPasteViaPID(text: text, targetPID: target.pid)
             return
         }
