@@ -2989,6 +2989,10 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
         mouseDownModifiers = event.modifierFlags
         didDrag = false
         isDraggingSessionActive = false
+        // Arm the drag guard immediately on press — didResignKeyNotification can
+        // fire before we reach the 3px mouseDragged threshold.
+        DragSessionState.shared.isDragging = true
+        DragSessionState.shared.shouldCloseOnDragEnd = false
         
         let hasShiftOrCmd = event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.command)
         if hasShiftOrCmd {
@@ -3013,6 +3017,12 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     }
 
     override func mouseUp(with event: NSEvent) {
+        // If this was a plain click (no drag), disarm the drag guard immediately
+        // so didResignKeyNotification can close normally if the window loses focus.
+        if !didDrag && !isDraggingSessionActive {
+            DragSessionState.shared.isDragging = false
+        }
+        
         guard !didDrag && !isDraggingSessionActive else {
             didDrag = false
             mouseDownPoint = nil
@@ -3038,11 +3048,25 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     private func startDragSession(with event: NSEvent) {
         guard let dragInfo = dragContentProvider?(), !dragInfo.content.isEmpty else {
             isDraggingSessionActive = false
+            DragSessionState.shared.isDragging = false
             return
         }
         
-        let stringWriter = dragInfo.content as NSString
-        let draggingItem = NSDraggingItem(pasteboardWriter: stringWriter)
+        DragSessionState.shared.isDragging = true
+        DragSessionState.shared.shouldCloseOnDragEnd = false
+
+        let pasteboardItem = NSPasteboardItem()
+        // 1. Plain text (UTF-8) - clean text for all text inputs and web forms
+        pasteboardItem.setString(dragInfo.content, forType: .string)
+
+        // 2. URL representation (if the text is a valid web or file URL)
+        let trimmed = dragInfo.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let url = URL(string: trimmed), let scheme = url.scheme?.lowercased(),
+           ["http", "https", "file", "ftp"].contains(scheme) {
+            pasteboardItem.setString(url.absoluteString, forType: .URL)
+        }
+
+        let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
         
         let previewImage = Self.createDragPreviewImage(
             title: dragInfo.previewTitle ?? dragInfo.content,
@@ -3064,13 +3088,16 @@ class MouseDetectingNSView: NSView, NSDraggingSource {
     }
 
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
-        return [.copy, .generic]
+        return .every
     }
     
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
         isDraggingSessionActive = false
         didDrag = false
         mouseDownPoint = nil
+        DragSessionState.shared.isDragging = false
+        
+        NotificationCenter.default.post(name: .dragSessionEnded, object: nil)
     }
 
     static func createDragPreviewImage(title: String, count: Int) -> NSImage {

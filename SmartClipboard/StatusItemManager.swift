@@ -11,6 +11,14 @@ extension Notification.Name {
     static let cancelQuickSelectMode = Notification.Name("cancelQuickSelectMode")
     static let activateQuickSelectMode = Notification.Name("activateQuickSelectMode")
     static let quickSelectNavigate = Notification.Name("quickSelectNavigate")
+    static let dragSessionEnded = Notification.Name("dragSessionEnded")
+}
+
+/// Tracks the active drag session state to prevent premature window dismissal while dragging.
+final class DragSessionState: @unchecked Sendable {
+    static let shared = DragSessionState()
+    var isDragging: Bool = false
+    var shouldCloseOnDragEnd: Bool = false
 }
 
 /// A custom NSPanel that allows becoming the key window even without a title bar.
@@ -111,8 +119,28 @@ final class StatusItemManager: NSObject {
                 object: window,
                 queue: .main
             ) { [weak self] _ in
-                self?.lastCloseTime = Date()
-                self?.closeUI()
+                guard let self = self else { return }
+                // If a drag session is active, do not close the window now.
+                // Ordering out the source window cancels the active AppKit drag session.
+                if DragSessionState.shared.isDragging {
+                    DragSessionState.shared.shouldCloseOnDragEnd = true
+                    return
+                }
+                self.lastCloseTime = Date()
+                self.closeUI()
+            }
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: .dragSessionEnded,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            if DragSessionState.shared.shouldCloseOnDragEnd || !self.isWindowFrontmost() {
+                DragSessionState.shared.shouldCloseOnDragEnd = false
+                self.lastCloseTime = Date()
+                self.closeUI()
             }
         }
         
@@ -312,6 +340,10 @@ final class StatusItemManager: NSObject {
     }
     
     func closeUI() {
+        if DragSessionState.shared.isDragging {
+            DragSessionState.shared.shouldCloseOnDragEnd = true
+            return
+        }
         isQuickSelectActive = false
         GlobalHotkeyManager.shared.stopScrollTap()
         mainWindow?.orderOut(nil)
