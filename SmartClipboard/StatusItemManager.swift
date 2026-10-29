@@ -242,18 +242,25 @@ final class StatusItemManager: NSObject {
             && NSApp.keyWindow === window
     }
 
+    private var quickPasteHoldDuration: Double {
+        let stored = UserDefaults.standard.double(forKey: "quickPasteHoldDuration")
+        guard stored > 0 else { return 0.5 }
+        return min(max(stored, 0.2), 1.5)
+    }
+
     private func handleTriggerKeyDown() {
         triggerKeyDownTime = Date()
         let isVisible = isWindowFrontmost()
         wasWindowVisibleOnKeyDown = isVisible
 
         if !isVisible {
-            // Open in normal mode immediately; quick select activates only if held
+            // Open in normal mode immediately; quick paste activates only if held
             showMainWindow(relativeTo: nil, isQuickSelect: false)
         }
 
-        // After the long-press threshold, switch into quick select mode
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { [weak self] in
+        // After the long-press threshold, switch into quick paste mode
+        let holdDuration = quickPasteHoldDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) { [weak self] in
             guard let self, self.triggerKeyDownTime != nil else { return }
             self.isQuickSelectActive = true
             NotificationCenter.default.post(name: .activateQuickSelectMode, object: nil)
@@ -270,7 +277,10 @@ final class StatusItemManager: NSObject {
         GlobalHotkeyManager.shared.stopScrollTap()
         
         if wasWindowVisibleOnKeyDown {
-            if duration < 0.22 {
+            // Small grace window above the hold duration to account for
+            // the async activation dispatch racing key-up.
+            let closeThreshold = quickPasteHoldDuration + 0.04
+            if duration < closeThreshold {
                 // Quick tap while window was already open -> Close window
                 closeUI()
             } else if isQuickSelectActive {
@@ -279,7 +289,7 @@ final class StatusItemManager: NSObject {
             }
         } else {
             // Window was opened by this key press
-            if duration >= 0.18 {
+            if duration >= quickPasteHoldDuration {
                 // Key was held down -> Paste selected item
                 NotificationCenter.default.post(name: .quickSelectTriggerReleased, object: nil)
             } else {

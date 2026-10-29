@@ -1591,7 +1591,7 @@ struct ContentView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "hand.point.up.left.fill")
                         .font(.system(size: 10, weight: .semibold))
-                    Text("Release key to paste")
+                    Text("Quick Paste Mode")
                         .font(.system(size: 11, weight: .medium))
                 }
                 .foregroundColor(.secondary)

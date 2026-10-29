@@ -649,6 +649,10 @@ struct ShortcutsSettingsView: View {
                 ShortcutRecorderView()
             }
 
+            SettingsSection(title: "Quick Paste Mode") {
+                QuickPasteHoldSettingView()
+            }
+
             SettingsSection(title: "List Interaction") {
                 LeftArrowActionSettingView()
             }
@@ -1003,6 +1007,35 @@ struct LeftArrowActionSettingView: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+struct QuickPasteHoldSettingView: View {
+    @AppStorage("quickPasteHoldDuration") private var holdDuration: Double = 0.5
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Hold to Activate")
+                    .font(.system(size: 14, weight: .medium))
+                Spacer()
+                Text(String(format: "%.1f s", holdDuration))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(.blue.opacity(0.1))
+                    .cornerRadius(4)
+            }
+
+            Slider(value: $holdDuration, in: 0.2...1.5, step: 0.1)
+                .tint(.blue)
+
+            Text("How long to hold the global hotkey before Quick Paste Mode activates. Release the key to paste the selected item.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
