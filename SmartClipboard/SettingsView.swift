@@ -213,24 +213,26 @@ struct GeneralSettingsView: View {
             }
 
             SettingsSection(title: "Appearance") {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
                         Text("Theme Style")
                             .font(.system(size: 14, weight: .medium))
-                        Text("Choose between glassmorphism, solid dark, or solid light mode.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Spacer()
+                        Picker("", selection: $themeStyle) {
+                            Text("Dark Glass").tag("darkGlass")
+                            Text("Glass").tag("glass")
+                            Text("Dark").tag("dark")
+                            Text("Light").tag("light")
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 300)
                     }
-                    Spacer()
-                    Picker("", selection: $themeStyle) {
-                        Text("Dark Glass").tag("darkGlass")
-                        Text("Glass").tag("glass")
-                        Text("Dark").tag("dark")
-                        Text("Light").tag("light")
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .frame(width: 300)
+
+                    Text("Choose between glassmorphism, solid dark, or solid light mode.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }

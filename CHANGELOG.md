@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Fixed Theme Style settings row where the segmented picker overlapped the description text.
+
 ## [1.0.5] - 2026-07-18
 
 ### Changed
