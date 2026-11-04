@@ -202,14 +202,14 @@ final class StatusItemManager: NSObject {
     private func setupMainWindow() {
         let panel = KeyPanel(
             contentRect: NSRect(x: 0, y: 0, width: 380, height: 500),
-            styleMask: [.borderless],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
         
         panel.isMovableByWindowBackground = true
         panel.isFloatingPanel = false
-        panel.level = .floating
+        panel.level = .popUpMenu
         panel.hidesOnDeactivate = false
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         
@@ -238,7 +238,6 @@ final class StatusItemManager: NSObject {
         guard let window = mainWindow else { return false }
         return window.isVisible
             && window.occlusionState.contains(.visible)
-            && NSApp.isActive
             && NSApp.keyWindow === window
     }
 
@@ -308,8 +307,12 @@ final class StatusItemManager: NSObject {
             "isInPopover": button != nil,
             "isQuickSelect": isQuickSelect
         ])
-        NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
-        NSApp.activate(ignoringOtherApps: true)
+        if let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() {
+            PasteTargetStore.shared.pid = front.processIdentifier
+            PasteTargetStore.shared.bundleID = front.bundleIdentifier
+        }
+        // Non-activating panel: never activate self, so the previous app
+        // (e.g. Gemini mini popup) stays active and visible.
         
         if let button = button, let buttonWindow = button.window {
             let buttonScreenRect = button.convert(button.bounds, to: nil)
@@ -373,7 +376,7 @@ final class StatusItemManager: NSObject {
         isQuickSelectActive = false
         GlobalHotkeyManager.shared.stopScrollTap()
         mainWindow?.orderOut(nil)
-        if sharedSettingsWindow?.isVisible != true {
+        if sharedSettingsWindow?.isVisible != true, NSApp.isActive {
             NSApp.hide(nil)
         }
     }

@@ -320,9 +320,20 @@ class ClipboardManager: ObservableObject {
         }
     }
 
-    private func simulatePaste() {
+    private func simulatePaste(toPID: pid_t? = PasteTargetStore.shared.pid) {
+        let ownPID = pid_t(ProcessInfo.processInfo.processIdentifier)
+        let target: pid_t? = (toPID != nil && toPID != ownPID) ? toPID : nil
+        postCmdV(toPID: target)
+        PasteTargetStore.shared.pid = nil
+        PasteTargetStore.shared.bundleID = nil
+    }
+
+    /// Posts a ⌘V event. If `pid` is provided, sends directly to that process
+    /// (no focus/activation required — covers non-activating floaters).
+    /// Falls back to the session event tap if PID is unknown.
+    private func postCmdV(toPID pid: pid_t?) {
         let source = CGEventSource(stateID: .combinedSessionState)
-        
+
         // Disable local keyboard events while pasting to prevent interference
         source?.setLocalEventsFilterDuringSuppressionState([.permitLocalMouseEvents, .permitSystemDefinedEvents],
                                                            state: .eventSuppressionStateSuppressionInterval)
@@ -330,19 +341,25 @@ class ClipboardManager: ObservableObject {
         // Add flag that left/right modifier key has been pressed
         let cmdFlag = CGEventFlags(rawValue: UInt64(NSEvent.ModifierFlags.command.rawValue) | 0x000008)
         let vCode: CGKeyCode = 0x09 // kVK_ANSI_V
-        
-        let keyVDown = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: true)
-        let keyVUp = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: false)
-        
-        keyVDown?.flags = cmdFlag
-        keyVUp?.flags = cmdFlag
-        
-        // Post down event
-        keyVDown?.post(tap: .cgSessionEventTap)
-        
-        // ⚡ Bolt: Add small gap between down and up for app event loops to process correctly
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-            keyVUp?.post(tap: .cgSessionEventTap)
+
+        guard let keyVDown = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: true),
+              let keyVUp = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: false)
+        else { return }
+
+        keyVDown.flags = cmdFlag
+        keyVUp.flags = cmdFlag
+
+        if let pid {
+            // Direct delivery — bypasses focus requirements
+            keyVDown.postToPid(pid)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+                keyVUp.postToPid(pid)
+            }
+        } else {
+            keyVDown.post(tap: .cgSessionEventTap)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+                keyVUp.post(tap: .cgSessionEventTap)
+            }
         }
     }
 
@@ -420,19 +437,20 @@ class ClipboardManager: ObservableObject {
             NSApp.hide(nil)
         }
         let delay: Double = (isUIVisible && NSApp.isActive) ? 0.25 : 0.05
+        let targetPID = PasteTargetStore.shared.pid
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-            self?.pasteSequentiallyStrings(targetContents)
+            self?.pasteSequentiallyStrings(targetContents, targetPID: targetPID)
         }
     }
 
-    private func pasteSequentiallyStrings(_ contents: [String], index: Int = 0) {
+    private func pasteSequentiallyStrings(_ contents: [String], index: Int = 0, targetPID: pid_t? = PasteTargetStore.shared.pid) {
         guard index < contents.count else {
             isPastingSequentially = false
             return
         }
         
         copyToClipboard(content: contents[index])
-        simulatePaste()
+        simulatePaste(toPID: targetPID)
         
         if index < contents.count - 1 {
             let separatorDelay: Double = 0.40
@@ -463,7 +481,7 @@ class ClipboardManager: ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
                     retu?.post(tap: .cgSessionEventTap)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        self.pasteSequentiallyStrings(contents, index: index + 1)
+                        self.pasteSequentiallyStrings(contents, index: index + 1, targetPID: targetPID)
                     }
                 }
             }
@@ -550,8 +568,9 @@ class ClipboardManager: ObservableObject {
             if NSApp.isActive {
                 NSApp.hide(nil)
             }
+            let targetPID = PasteTargetStore.shared.pid
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-                self?.pasteSequentially(targetItems)
+                self?.pasteSequentially(targetItems, targetPID: targetPID)
             }
         } else {
             isPastingSequentially = true
@@ -559,7 +578,7 @@ class ClipboardManager: ObservableObject {
         }
     }
 
-    private func pasteSequentially(_ items: [ClipboardItem], index: Int = 0) {
+    private func pasteSequentially(_ items: [ClipboardItem], index: Int = 0, targetPID: pid_t? = PasteTargetStore.shared.pid) {
         guard index < items.count else {
             isPastingSequentially = false
             return
@@ -569,7 +588,7 @@ class ClipboardManager: ObservableObject {
         copyToClipboard(content: items[index].content)
         
         // Simulate paste (Cmd+V)
-        simulatePaste()
+        simulatePaste(toPID: targetPID)
         
         // Determine the next step delay
         if index < items.count - 1 {
@@ -607,7 +626,7 @@ class ClipboardManager: ObservableObject {
                     
                     // After Enter is finished, trigger the next paste with a safe margin
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.40) { [weak self] in
-                        self?.pasteSequentially(items, index: index + 1)
+                        self?.pasteSequentially(items, index: index + 1, targetPID: targetPID)
                     }
                 }
             }
