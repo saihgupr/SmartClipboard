@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - Fixed Theme Style settings row where the segmented picker overlapped the description text.
 - Show main panel above floating mini-windows (e.g. Gemini small-talk overlay) and paste directly to the previous app via postToPid so paste lands in non-activating floaters.
 - Open the main panel as a non-activating panel so the Gemini mini popup stays visible while picking an item.
-- Search now runs against a pre-folded byte index: ~5 ms per keystroke on a 15k-item history instead of ~65 ms, with identical match results. Arrow-key navigation scrolls instantly instead of queueing an animation per keypress.
+- Search now runs against a pre-folded byte index: ~5 ms per keystroke on a 15k-item history instead of ~65 ms. Date and time queries ("today", "2:30 pm", "07/13") parse once and compare precomputed fields instead of formatting every timestamp. Arrow-key navigation scrolls instantly, pasting no longer waits on a SwiftData save, and global hotkey pastes fetch only the requested row instead of the whole history.
 
 ## [1.0.5] - 2026-07-18
 

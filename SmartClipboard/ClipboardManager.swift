@@ -268,10 +268,13 @@ class ClipboardManager: ObservableObject {
     }
     
     func copyToClipboard(item: ClipboardItem) {
-        // Move to top when explicitly copying via Quick Copy or similar
-        item.timestamp = Date()
-        try? modelContext.save()
+        // Put the content on the pasteboard first; moving the item to the top of
+        // the history is bookkeeping and should not delay the click path.
         copyToClipboard(content: item.content, recordInDatabase: false)
+        DispatchQueue.main.async { [weak self] in
+            item.timestamp = Date()
+            try? self?.modelContext.save()
+        }
     }
 
     func copyToClipboard(content: String, recordInDatabase: Bool = false) {
@@ -293,11 +296,14 @@ class ClipboardManager: ObservableObject {
     }
 
     func paste(item: ClipboardItem, isGlobalHotkey: Bool = false) {
-        // Move to top by updating timestamp
-        item.timestamp = Date()
-        try? modelContext.save()
-        
-        paste(content: item.content, isGlobalHotkey: isGlobalHotkey)
+        // Start the paste (and hide the panel) before touching SwiftData; a save
+        // here costs ~4 ms and used to run before the window closed.
+        let content = item.content
+        paste(content: content, isGlobalHotkey: isGlobalHotkey)
+        DispatchQueue.main.async { [weak self] in
+            item.timestamp = Date()
+            try? self?.modelContext.save()
+        }
     }
 
     func paste(content: String, isGlobalHotkey: Bool = false) {
@@ -410,21 +416,35 @@ class ClipboardManager: ObservableObject {
     /// Fetches the item at the given 0-based index (pinned first, newest-first) and pastes it.
     func pasteItem(at index: Int) {
         let isUIVisible = (NSApp.windows.first(where: { $0.className.contains("KeyPanel") })?.isVisible ?? false) || NSApp.isActive
-        
-        let items: [ClipboardItem]
+
+        guard index >= 0 else { return }
         if isUIVisible, !visibleItems.isEmpty {
-            items = visibleItems
-        } else {
-            var descriptor = FetchDescriptor<ClipboardItem>(
-                sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
-            )
-            guard let allItems = try? modelContext.fetch(descriptor) else { return }
-            let pinned = allItems.filter { $0.isPinned }
-            let unpinned = allItems.filter { !$0.isPinned }
-            items = pinned + unpinned
+            guard index < visibleItems.count else { return }
+            paste(item: visibleItems[index], isGlobalHotkey: !isUIVisible)
+            return
         }
-        guard index < items.count else { return }
-        paste(item: items[index], isGlobalHotkey: !isUIVisible)
+        // Cold path: fetch just the requested row instead of materializing the
+        // whole history (that used to take ~140-230 ms per hotkey press).
+        guard let item = itemAtDisplayIndex(index) else { return }
+        paste(item: item, isGlobalHotkey: !isUIVisible)
+    }
+
+    private func itemAtDisplayIndex(_ index: Int) -> ClipboardItem? {
+        var pinnedDescriptor = FetchDescriptor<ClipboardItem>(
+            predicate: #Predicate<ClipboardItem> { $0.isPinned },
+            sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+        )
+        pinnedDescriptor.fetchLimit = index + 1
+        let pinned = (try? modelContext.fetch(pinnedDescriptor)) ?? []
+        if index < pinned.count { return pinned[index] }
+
+        var unpinnedDescriptor = FetchDescriptor<ClipboardItem>(
+            predicate: #Predicate<ClipboardItem> { $0.isPinned == false },
+            sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+        )
+        unpinnedDescriptor.fetchOffset = index - pinned.count
+        unpinnedDescriptor.fetchLimit = 1
+        return (try? modelContext.fetch(unpinnedDescriptor))?.first
     }
 
     /// Fetches the most-recent `count` items and pastes them oldest→newest.

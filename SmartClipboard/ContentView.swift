@@ -261,19 +261,6 @@ struct ContentView: View {
     private let geminiService = GeminiService()
     private let ollamaService = OllamaService()
     
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.timeStyle = .short
-        return f
-    }()
-
-    private static let fullFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .short
-        f.timeStyle = .short
-        return f
-    }()
-    
     private static let queryDateFormatters: [DateFormatter] = {
         let formats = ["M/d", "M-d", "M.d", "MMM d", "MMMM d", "d MMM", "d MMMM"]
         return formats.map { format in
@@ -288,11 +275,11 @@ struct ContentView: View {
 
     private func formatTimestamp(_ date: Date, todayStart: Date, tomorrowStart: Date, yesterdayStart: Date) -> String {
         if date >= todayStart && date < tomorrowStart {
-            return Self.timeFormatter.string(from: date)
+            return ClipboardSearchIndex.timeFormatter.string(from: date)
         } else if date >= yesterdayStart && date < todayStart {
-            return "Yesterday, " + Self.timeFormatter.string(from: date)
+            return "Yesterday, " + ClipboardSearchIndex.timeFormatter.string(from: date)
         } else {
-            return Self.fullFormatter.string(from: date)
+            return ClipboardSearchIndex.fullFormatter.string(from: date)
         }
     }
 
@@ -1329,37 +1316,35 @@ struct ContentView: View {
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
         let yesterdayStart = calendar.date(byAdding: .day, value: -1, to: todayStart)!
 
-        func isDateMatch(_ itemDate: Date) -> Bool {
-            if let qM = qMonth, let qD = qDay {
-                if calendar.component(.month, from: itemDate) == qM,
-                   calendar.component(.day, from: itemDate) == qD { return true }
-            }
-            if let qW = qWeekday, calendar.component(.weekday, from: itemDate) == qW { return true }
-            if matchesYesterday && itemDate >= yesterdayStart && itemDate < todayStart { return true }
-            if matchesToday && itemDate >= todayStart && itemDate < tomorrowStart { return true }
-            if mightBeTime {
-                let timeStr = Self.timeFormatter.string(from: itemDate)
-                if timeStr.localizedCaseInsensitiveContains(query) {
-                    if itemDate >= todayStart && itemDate < tomorrowStart { return true }
-                    if query.contains(":") || lowerQuery.contains("am") || lowerQuery.contains("pm") { return true }
-                }
-            }
-            if mightBeDateString {
-                let fullStr = Self.fullFormatter.string(from: itemDate)
-                if fullStr.localizedCaseInsensitiveContains(query) { return true }
-            }
-            return false
-        }
+        let needle = ClipboardSearchIndex.needle(for: query)
+        // Date/time parts of the query are matched against precomputed entry
+        // fields, so a date query costs the same byte scan as a text query.
+        let timeParts = mightBeTime ? ClipboardSearchIndex.parseTime(query) : nil
+        let dateQuery = ClipboardSearchIndex.DateQuery(
+            month: qMonth,
+            day: qDay,
+            weekday: qWeekday,
+            matchesYesterday: matchesYesterday,
+            matchesToday: matchesToday,
+            mightBeDateString: mightBeDateString,
+            hours: timeParts?.hours ?? [],
+            minuteValue: timeParts?.minuteValue,
+            minuteDigits: timeParts?.minuteDigits ?? 0,
+            dateNeedle: mightBeDateString ? needle : [],
+            todayStart: todayStart,
+            tomorrowStart: tomorrowStart,
+            yesterdayStart: yesterdayStart
+        )
 
         // Indexed path: one byte scan over pre-folded content (~5 ms for 15k
         // items) instead of ICU case-insensitive comparison (~65 ms).
         if searchIndex.isReady {
-            let needle = ClipboardSearchIndex.needle(for: query)
             var ids: [UUID] = []
             ids.reserveCapacity(256)
             for entry in searchIndex.entries {
                 if deletedItemIds.contains(entry.id) { continue }
-                if ClipboardSearchIndex.contains(entry.bytes, needle) || isDateMatch(entry.timestamp) {
+                if ClipboardSearchIndex.contains(entry.bytes, needle)
+                    || (dateQuery.isActive && dateQuery.matches(entry)) {
                     ids.append(entry.id)
                 }
             }
@@ -1367,14 +1352,21 @@ struct ContentView: View {
             return
         }
 
-        // Index is still warming up on first launch: fall back to the old scan.
-        searchResults = history.filter { item in
-            if deletedItemIds.contains(item.id) { return false }
-            return item.content.localizedCaseInsensitiveContains(query) || isDateMatch(item.timestamp)
+        // Index is still warming up on first launch: fall back to a direct scan.
+        var fallback: [ClipboardItem] = []
+        for item in history {
+            if deletedItemIds.contains(item.id) { continue }
+            let entry = ClipboardSearchIndex.entry(
+                for: ClipboardSearchIndex.Seed(id: item.id, content: item.content, timestamp: item.timestamp))
+            if ClipboardSearchIndex.contains(entry.bytes, needle)
+                || (dateQuery.isActive && dateQuery.matches(entry)) {
+                fallback.append(item)
+            }
         }
+        searchResults = fallback
     }
 
-    /// Rebuilds the folded byte index off the main thread (~120 ms for 15k items).
+    /// Rebuilds the folded byte index off the main thread (~175 ms for 15k items).
     /// Reopening the panel takes the fast path and does no work at all.
     private func rebuildSearchIndex() async {
         let count = history.count
