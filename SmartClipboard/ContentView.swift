@@ -312,31 +312,23 @@ struct ContentView: View {
 
     private var matchingWorkflows: [WorkflowSnippet] {
         let rawQuery = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !rawQuery.isEmpty else { return [] }
-        
-        if rawQuery.hasPrefix("/") {
-            let cleanQuery = String(rawQuery.dropFirst())
-            if cleanQuery.isEmpty {
-                return allWorkflows
-            }
-            return allWorkflows.filter { item in
-                let trig = item.trigger.lowercased()
-                let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
-                let title = item.title.lowercased()
-                
-                let trigMatches = trig.hasPrefix(rawQuery) || cleanTrig.hasPrefix(cleanQuery)
-                let titleMatches = title.hasPrefix(cleanQuery)
-                
-                return trigMatches || titleMatches
-            }
-        } else {
-            return allWorkflows.filter { item in
-                let trig = item.trigger.lowercased()
-                let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
-                let title = item.title.lowercased()
-                
-                return cleanTrig.hasPrefix(rawQuery) || title.hasPrefix(rawQuery) || cleanTrig.contains(rawQuery) || title.contains(rawQuery)
-            }
+        // Snippets are a slash-command feature: "/fixbugs" or "/f". Plain text
+        // searches never surface them, so typing "x" cannot pull up "/fixbugs".
+        guard rawQuery.hasPrefix("/") else { return [] }
+
+        let cleanQuery = String(rawQuery.dropFirst())
+        if cleanQuery.isEmpty {
+            return allWorkflows
+        }
+        return allWorkflows.filter { item in
+            let trig = item.trigger.lowercased()
+            let cleanTrig = trig.hasPrefix("/") ? String(trig.dropFirst()) : trig
+            let title = item.title.lowercased()
+
+            let trigMatches = trig.hasPrefix(rawQuery) || cleanTrig.hasPrefix(cleanQuery)
+            let titleMatches = title.hasPrefix(cleanQuery)
+
+            return trigMatches || titleMatches
         }
     }
 

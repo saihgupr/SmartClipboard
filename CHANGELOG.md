@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file.
 - Search now runs against a pre-folded byte index: ~5 ms per keystroke on a 15k-item history instead of ~65 ms. Date and time queries ("today", "2:30 pm", "07/13") parse once and compare precomputed fields instead of formatting every timestamp. Pasting no longer waits on a SwiftData save, and global hotkey pastes fetch only the requested row instead of the whole history.
 - Arrow-key navigation no longer re-filters the entire clipboard history on every keypress; the filtered and paginated lists are cached and rebuilt only when history, query, pins, or deletions change.
 
+### Changed
+- Snippets now appear only when the search starts with `/`. Typing plain text no longer surfaces slash commands such as `/fixbugs`.
+
 ## [1.0.5] - 2026-07-18
 
 ### Changed
