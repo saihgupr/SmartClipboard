@@ -39,6 +39,12 @@ class ClipboardManager: ObservableObject {
     
     /// The currently visible/displayed clipboard items in the UI.
     @Published var visibleItems: [ClipboardItem] = []
+
+    /// Bumped when list ordering inputs change (e.g. pin toggles) so the view's
+    /// cached derived lists are rebuilt.
+    @Published private(set) var listRevision = 0
+
+    func invalidateListOrder() { listRevision &+= 1 }
     
     @Published var incognitoMode: Bool = UserDefaults.standard.bool(forKey: "incognitoMode") {
         didSet {
@@ -184,6 +190,7 @@ class ClipboardManager: ObservableObject {
     func togglePin(item: ClipboardItem) {
         item.isPinned.toggle()
         try? modelContext.save()
+        listRevision &+= 1
     }
     
     func toggleFavorite(item: ClipboardItem) {

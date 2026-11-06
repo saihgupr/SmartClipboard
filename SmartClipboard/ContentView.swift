@@ -226,6 +226,7 @@ struct ContentView: View {
     @State private var pageLimit = 1
     private let pageSize = 40
     @State private var searchIndex = ClipboardSearchIndex()
+    @State private var listCache = DerivedListCache()
     
     @State private var selectedItemId: UUID?
     @State private var selectedWorkflowId: UUID?
@@ -283,14 +284,31 @@ struct ContentView: View {
         }
     }
 
-    private var allFilteredItems: [ClipboardItem] {
-        let baseItems = searchQuery.isEmpty ? history : searchResults
-        let filtered = baseItems.filter { !deletedItemIds.contains($0.id) }
-        
-        let pinned = filtered.filter { $0.isPinned }
-        let unpinned = filtered.filter { !$0.isPinned }
-        return pinned + unpinned
+    private var derivedListKey: DerivedListCache.Key {
+        DerivedListCache.Key(
+            historyCount: history.count,
+            historyFirst: history.first?.id,
+            historyLast: history.last?.id,
+            query: searchQuery,
+            resultsCount: searchResults.count,
+            resultsFirst: searchResults.first?.id,
+            deletedCount: deletedItemIds.count,
+            revision: clipboardManager.listRevision
+        )
     }
+
+    /// Cached per-input derived lists. Arrow-key navigation used to re-filter the
+    /// whole history here, which measured ~18 ms per keypress on 15k items.
+    private var derivedList: DerivedListCache.Snapshot {
+        listCache.snapshot(
+            key: derivedListKey,
+            base: searchQuery.isEmpty ? history : searchResults,
+            deleted: deletedItemIds,
+            limit: pageLimit * pageSize
+        )
+    }
+
+    private var allFilteredItems: [ClipboardItem] { derivedList.filtered }
 
     private var matchingWorkflows: [WorkflowSnippet] {
         let rawQuery = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
@@ -322,21 +340,13 @@ struct ContentView: View {
         }
     }
 
-    var displayItems: [ClipboardItem] {
-        Array(allFilteredItems.prefix(pageLimit * pageSize))
-    }
+    var displayItems: [ClipboardItem] { derivedList.display }
 
-    var top10ItemIds: [UUID] {
-        Array(displayItems.prefix(10).map { $0.id })
-    }
+    var top10ItemIds: [UUID] { Array(derivedList.displayIds.prefix(10)) }
 
-    var itemIndexMap: [UUID: Int] {
-        Dictionary(uniqueKeysWithValues: displayItems.enumerated().map { ($1.id, $0) })
-    }
+    var itemIndexMap: [UUID: Int] { derivedList.indexMap }
 
-    private var displayItemIds: [UUID] {
-        displayItems.map { $0.id }
-    }
+    private var displayItemIds: [UUID] { derivedList.displayIds }
 
     var selectedItem: ClipboardItem? {
         if let id = selectedItemId, let idx = itemIndexMap[id], idx < displayItems.count {
@@ -1014,6 +1024,7 @@ struct ContentView: View {
                 }
                 try? modelContext.save()
             }
+            clipboardManager.invalidateListOrder()
         } else if action == "favorite" {
             let allFavorite = targets.allSatisfy { $0.isFavorite }
             withAnimation {
@@ -1208,6 +1219,7 @@ struct ContentView: View {
                 }
                 try? self.modelContext.save()
             }
+            self.clipboardManager.invalidateListOrder()
         }
         let pinItem = NSMenuItem(title: allPinned ? "Unpin" : "Pin", action: #selector(MenuItemActionTarget.execute), keyEquivalent: "")
         pinItem.target = pinTarget
