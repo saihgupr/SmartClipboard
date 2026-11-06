@@ -81,6 +81,9 @@ class ClipboardManager: ObservableObject {
         }
         GlobalHotkeyManager.shared.install()
 
+        // Terminal-style copy-on-select (default off, see Settings → General).
+        CopyOnSelectMonitor.shared.start()
+
         // Check permissions immediately; auto-prompt if missing
         refreshAccessibilityPermission()
         if !hasAccessibilityPermission {
@@ -165,6 +168,10 @@ class ClipboardManager: ObservableObject {
                     if UserDefaults.standard.bool(forKey: "incognitoMode") {
                         existingItem.isIncognito = true
                     }
+                } else if (try coalescableItem(for: truncatedString)) != nil {
+                    // Copy-on-select extension: the user dragged the highlight
+                    // further, so the newest entry absorbs the longer text
+                    // instead of leaving a near-duplicate behind.
                 } else {
                     // New unique item - insert it
                     let modeOn = UserDefaults.standard.bool(forKey: "incognitoMode")
@@ -261,6 +268,8 @@ class ClipboardManager: ObservableObject {
                 if UserDefaults.standard.bool(forKey: "incognitoMode") {
                     existingItem.isIncognito = true
                 }
+            } else if (try coalescableItem(for: truncatedString)) != nil {
+                // Selection grew after the last copy — merged in place above.
             } else {
                 let modeOn = UserDefaults.standard.bool(forKey: "incognitoMode")
                 let item = ClipboardItem(content: truncatedString, isIncognito: modeOn)
@@ -274,6 +283,45 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    /// If the newest history item is a very recent selection that `newContent`
+    /// extends (or shrinks) — e.g. the user dragged the highlight further
+    /// after it already auto-copied — update it in place and return it instead
+    /// of inserting a near-duplicate. Returns nil when no merge applies.
+    /// Never merges into pinned or favorited items.
+    private func coalescableItem(for newContent: String) throws -> ClipboardItem? {
+        var descriptor = FetchDescriptor<ClipboardItem>(
+            sortBy: [SortDescriptor(\ClipboardItem.timestamp, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        guard let latest = try modelContext.fetch(descriptor).first else { return nil }
+        guard !latest.isPinned && !latest.isFavorite else { return nil }
+        guard Self.shouldCoalesceExtension(oldContent: latest.content,
+                                           oldTimestamp: latest.timestamp,
+                                           newContent: newContent,
+                                           now: Date()) else { return nil }
+        latest.content = newContent
+        latest.timestamp = Date()
+        if UserDefaults.standard.bool(forKey: "incognitoMode") {
+            latest.isIncognito = true
+        }
+        return latest
+    }
+
+    /// Pure merge decision, extracted for unit testing.
+    /// - `window`: how old the previous item may be to still count as the
+    ///   same in-progress selection (default 8 s).
+    nonisolated static func shouldCoalesceExtension(oldContent: String,
+                                        oldTimestamp: Date,
+                                        newContent: String,
+                                        now: Date,
+                                        window: TimeInterval = 8) -> Bool {
+        guard !oldContent.isEmpty, !newContent.isEmpty, oldContent != newContent else { return false }
+        let shorter = oldContent.count < newContent.count ? oldContent : newContent
+        guard shorter.count >= 2 else { return false }
+        guard now.timeIntervalSince(oldTimestamp) <= window else { return false }
+        return newContent.contains(oldContent) || oldContent.contains(newContent)
+    }
+
     func copyToClipboard(item: ClipboardItem) {
         // Put the content on the pasteboard first; moving the item to the top of
         // the history is bookkeeping and should not delay the click path.

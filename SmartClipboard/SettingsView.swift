@@ -134,6 +134,7 @@ struct GeneralSettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("historyRetentionDays") private var historyRetentionDays: Int = 180
     @AppStorage("themeStyle") private var themeStyle = "darkGlass"
+    @AppStorage("enableCopyOnSelect") private var enableCopyOnSelect = false
     @State private var dbSizeString = "Calculating..."
 
     var body: some View {
@@ -210,6 +211,32 @@ struct GeneralSettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .focusEffectDisabled()
+            }
+
+            SettingsSection(title: "Auto-Copy") {
+                Toggle(isOn: $enableCopyOnSelect) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Copy on Select")
+                            .font(.system(size: 14, weight: .medium))
+                        Text("Automatically copy highlighted text to the clipboard, like terminal copy-on-select. Works in any app.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if enableCopyOnSelect && !clipboardManager.hasAccessibilityPermission {
+                            Text("Requires Accessibility permission (see banner in the main window).")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .toggleStyle(.switch)
+                .focusEffectDisabled()
+                .onChange(of: enableCopyOnSelect) { _, newValue in
+                    if newValue && !clipboardManager.hasAccessibilityPermission {
+                        clipboardManager.requestAccessibilityPermission()
+                    }
+                }
             }
 
             SettingsSection(title: "Appearance") {

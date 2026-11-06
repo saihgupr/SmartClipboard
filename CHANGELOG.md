@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Copy on Select: optional terminal-style highlight-to-copy. Highlighting text in any app copies it to the clipboard automatically. Off by default; enable in Settings → General → Auto-Copy. Skips password fields and SmartClipboard's own windows. Smart about drags: the highlight must settle briefly before copying (no mid-drag spam), and extending a just-copied selection merges into the same history entry instead of adding a near-duplicate.
+
 ### Fixed
 - Fixed Theme Style settings row where the segmented picker overlapped the description text.
 - Show main panel above floating mini-windows (e.g. Gemini small-talk overlay) and paste directly to the previous app via postToPid so paste lands in non-activating floaters.
