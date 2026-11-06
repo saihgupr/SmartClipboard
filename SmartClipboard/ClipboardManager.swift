@@ -29,6 +29,7 @@ class ClipboardManager: ObservableObject {
     private var timer: Timer?
     private let modelContext: ModelContext
     private var isPastingSequentially = false
+    private var lastPruneDate: Date?
     
     /// Optional callback invoked when a paste operation is triggered from the UI.
     var onPaste: (() -> Void)?
@@ -54,7 +55,7 @@ class ClipboardManager: ObservableObject {
         startPolling()
 
         // Run an initial pruning of old records
-        pruneOldRecords()
+        pruneOldRecords(force: true)
         
         // Seed default workflows if empty
         seedDefaultWorkflowsIfNeeded()
@@ -219,8 +220,10 @@ class ClipboardManager: ObservableObject {
     }
     
     /// Deletes items older than the threshold set in settings
-    private func pruneOldRecords() {
+    private func pruneOldRecords(force: Bool = false) {
         guard historyRetentionDays > 0 else { return } // 0 means "Forever"
+        if !force, let last = lastPruneDate, Date().timeIntervalSince(last) < 300 { return }
+        lastPruneDate = Date()
         
         let retentionDays = historyRetentionDays
         let cutoff = Calendar.current.date(byAdding: .day, value: -retentionDays, to: Date())!
