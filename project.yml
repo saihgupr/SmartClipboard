@@ -16,3 +16,27 @@ targets:
       CODE_SIGN_ENTITLEMENTS: SmartClipboard/SmartClipboard.entitlements
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       MARKETING_VERSION: 1.0.5
+  SmartClipboardTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: SmartClipboardTests
+    dependencies:
+      - target: SmartClipboard
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.saihgupr.SmartClipboardTests
+      GENERATE_INFOPLIST_FILE: YES
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: "-"
+      TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SmartClipboard.app/Contents/MacOS/SmartClipboard"
+      BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  SmartClipboard:
+    build:
+      targets:
+        SmartClipboard: all
+    test:
+      config: Debug
+      targets:
+        - SmartClipboardTests

@@ -32,23 +32,42 @@ xcodegen generate
 echo "🔪 Stopping current instance..."
 killall SmartClipboard &>/dev/null || true
 
-# 3. Build the app
+# 3. Run unit tests (skip with SKIP_TESTS=1)
+if [ "${SKIP_TESTS:-0}" != "1" ]; then
+    echo "🧪 Running unit tests..."
+    TEST_LOG=$(mktemp)
+    if ! xcodebuild test -scheme SmartClipboard -destination 'platform=macOS' -derivedDataPath ./build \
+        CODE_SIGN_IDENTITY="$SIGN_IDENTITY" \
+        CODE_SIGN_STYLE="Manual" \
+        DEVELOPMENT_TEAM="" > "$TEST_LOG" 2>&1; then
+        echo "❌ Tests failed:"
+        grep -E "error:|failed \(" "$TEST_LOG" | head -20
+        rm -f "$TEST_LOG"
+        exit 1
+    fi
+    grep -E "Executed [0-9]+ tests" "$TEST_LOG" | tail -1
+    rm -f "$TEST_LOG"
+else
+    echo "⏭️  Skipping tests (SKIP_TESTS=1)"
+fi
+
+# 4. Build the app
 echo "🏗️ Building SmartClipboard (Release)..."
 xcodebuild -scheme SmartClipboard -configuration Release -derivedDataPath ./build build \
     CODE_SIGN_IDENTITY="$SIGN_IDENTITY" \
     CODE_SIGN_STYLE="Manual" \
     DEVELOPMENT_TEAM="" 2>&1 | tail -3
 
-# 4. Install to /Applications
+# 5. Install to /Applications
 echo "📦 Installing to /Applications..."
 rm -rf "$APP_PATH"
 cp -R ./build/Build/Products/Release/SmartClipboard.app "$APP_PATH"
 
-# 5. Sign with stable identity
+# 6. Sign with stable identity
 echo "🖋️  Re-signing binary..."
 codesign --force --deep --sign "$SIGN_IDENTITY" "$APP_PATH"
 
-# 6. Only reset TCC when using ad-hoc (stable identity preserves permissions)
+# 7. Only reset TCC when using ad-hoc (stable identity preserves permissions)
 if [ "$USING_ADHOC" = true ]; then
     echo "🔐 Resetting accessibility entry (ad-hoc build changes hash)..."
     tccutil reset Accessibility "$BUNDLE_ID" 2>/dev/null || true
@@ -56,12 +75,12 @@ else
     echo "✅ Stable identity — skipping TCC reset (permissions preserved)"
 fi
 
-# 7. Refresh icon cache
+# 8. Refresh icon cache
 /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister \
     -f -r "$APP_PATH"
 touch "$APP_PATH"
 
-# 8. Launch
+# 9. Launch
 echo "🚀 Launching SmartClipboard..."
 open "$APP_PATH"
 
