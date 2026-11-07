@@ -39,15 +39,8 @@ final class CopyOnSelectMonitor {
     /// only expose selections after this is set; repeat it on app switches.
     private var accessibilityOptInPid: pid_t = 0
 
-    /// Rate limit for the diagnostic "nothing selected" log line.
-    private var lastNoSelectionLog = Date.distantPast
-
     /// UserDefaults key for the feature toggle. Default off (bool defaults to false).
     static let enabledKey = "enableCopyOnSelect"
-
-    /// Diagnostic logging toggle (Settings writes are not exposed in the UI).
-    static let debugKey = "copyOnSelectDebug"
-    private static let debugLogURL = URL(fileURLWithPath: "/tmp/smartclipboard-copyonselect.log")
 
     var isEnabled: Bool {
         UserDefaults.standard.bool(forKey: Self.enabledKey)
@@ -92,15 +85,13 @@ final class CopyOnSelectMonitor {
         // accessibility tree that reports the current selection.
         enableAccessibilityIfNeeded(for: front)
 
-        guard let result = currentSelectedText(in: front), !result.text.isEmpty else {
+        guard let selection = currentSelectedText(in: front), !selection.isEmpty else {
             // No highlight (clickaway/caret move) — drop any unsettled drag.
             pendingSelection = nil
             pendingSince = nil
-            logNoSelection(app: front)
             return
         }
 
-        let selection = result.text
         let copyText = String(selection.prefix(maxLength))
         let pasteboardString = NSPasteboard.general.string(forType: .string)
 
@@ -109,7 +100,6 @@ final class CopyOnSelectMonitor {
         if selection != pendingSelection {
             pendingSelection = selection
             pendingSince = Date()
-            debugLog("pending len=\(selection.count) via=\(result.method) front=\(front.bundleIdentifier ?? "?")")
             return
         }
         guard let since = pendingSince,
@@ -123,7 +113,6 @@ final class CopyOnSelectMonitor {
 
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(copyText, forType: .string)
-        debugLog("copied len=\(copyText.count) via=\(result.method) front=\(front.bundleIdentifier ?? "?")")
     }
 
     /// Pure decision helper, extracted for unit testing.
@@ -150,37 +139,36 @@ final class CopyOnSelectMonitor {
 
         let appElement = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(appElement, 0.5)
-        let manual = AXUIElementSetAttributeValue(appElement,
-                                                  "AXManualAccessibility" as CFString,
-                                                  kCFBooleanTrue)
-        let enhanced = AXUIElementSetAttributeValue(appElement,
-                                                    "AXEnhancedUserInterface" as CFString,
-                                                    kCFBooleanTrue)
-        debugLog("opt-in \(app.localizedName ?? "?") [\(app.bundleIdentifier ?? "?")] manual=\(manual.rawValue) enhanced=\(enhanced.rawValue)")
+        _ = AXUIElementSetAttributeValue(appElement,
+                                         "AXManualAccessibility" as CFString,
+                                         kCFBooleanTrue)
+        _ = AXUIElementSetAttributeValue(appElement,
+                                         "AXEnhancedUserInterface" as CFString,
+                                         kCFBooleanTrue)
     }
 
     /// Returns the currently highlighted text in the frontmost app via
     /// Accessibility, or nil when there is no selection / not applicable.
-    private func currentSelectedText(in app: NSRunningApplication) -> (method: String, text: String)? {
+    private func currentSelectedText(in app: NSRunningApplication) -> String? {
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(appElement, 0.5)
 
         if let focused = elementAttribute(appElement, kAXFocusedUIElementAttribute as CFString) {
-            if let result = selectedText(from: focused) { return result }
+            if let text = selectedText(from: focused) { return text }
             if hasUnreadableSelection(focused),
-               let result = selectedTextFromAncestors(of: focused) { return result }
+               let text = selectedTextFromAncestors(of: focused) { return text }
         }
 
         let systemWide = AXUIElementCreateSystemWide()
         if let focused = elementAttribute(systemWide, kAXFocusedUIElementAttribute as CFString) {
-            if let result = selectedText(from: focused) { return result }
+            if let text = selectedText(from: focused) { return text }
             if hasUnreadableSelection(focused),
-               let result = selectedTextFromAncestors(of: focused) { return result }
+               let text = selectedTextFromAncestors(of: focused) { return text }
         }
 
         if let window = elementAttribute(appElement, kAXFocusedWindowAttribute as CFString),
-           let result = selectedText(from: window) {
-            return result
+           let text = selectedText(from: window) {
+            return text
         }
 
         return nil
@@ -196,29 +184,29 @@ final class CopyOnSelectMonitor {
         return AXValueGetValue(rangeValue as! AXValue, .cfRange, &cfRange) && cfRange.length > 0
     }
 
-    private func selectedTextFromAncestors(of element: AXUIElement) -> (method: String, text: String)? {
+    private func selectedTextFromAncestors(of element: AXUIElement) -> String? {
         var current = element
         for _ in 0..<12 {
             guard let parent = elementAttribute(current, kAXParentAttribute as CFString) else { return nil }
             guard !CFEqual(parent, current) else { return nil }
-            if let result = selectedText(from: parent) { return result }
+            if let text = selectedText(from: parent) { return text }
             current = parent
         }
         return nil
     }
 
     /// Reads a selection using every attribute web views are known to expose.
-    private func selectedText(from element: AXUIElement) -> (method: String, text: String)? {
+    private func selectedText(from element: AXUIElement) -> String? {
         guard !isSecureField(element) else { return nil }
 
         if let text = stringAttribute(element, kAXSelectedTextAttribute as CFString), !text.isEmpty {
-            return ("AXSelectedText", text)
+            return text
         }
 
         if let markerRange = rawAttribute(element, "AXSelectedTextMarkerRange" as CFString) {
             for name in ["AXStringForTextMarkerRange", "AXAttributedStringForTextMarkerRange"] {
                 if let text = parameterizedString(element, name as CFString, markerRange), !text.isEmpty {
-                    return ("textMarkerRange", text)
+                    return text
                 }
             }
         }
@@ -228,10 +216,10 @@ final class CopyOnSelectMonitor {
                                               kAXStringForRangeParameterizedAttribute as CFString,
                                               rangeValue),
                !text.isEmpty {
-                return ("selectedTextRange", text)
+                return text
             }
             if let text = textFromRangeValue(element, rangeValue), !text.isEmpty {
-                return ("valueRange", text)
+                return text
             }
         }
 
@@ -290,41 +278,5 @@ final class CopyOnSelectMonitor {
         guard range.location >= 0,
               range.location + range.length <= nsText.length else { return nil }
         return nsText.substring(with: NSRange(location: range.location, length: range.length))
-    }
-
-    // MARK: - Diagnostics
-
-    private func logNoSelection(app: NSRunningApplication) {
-        guard UserDefaults.standard.bool(forKey: Self.debugKey) else { return }
-        let now = Date()
-        guard now.timeIntervalSince(lastNoSelectionLog) >= 1 else { return }
-        lastNoSelectionLog = now
-
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
-        AXUIElementSetMessagingTimeout(appElement, 0.5)
-        let focused = elementAttribute(appElement, kAXFocusedUIElementAttribute as CFString)
-        let role = focused.flatMap { stringAttribute($0, kAXRoleAttribute as CFString) } ?? "none"
-        var selectionError: AXError = .failure
-        if let focused {
-            var value: CFTypeRef?
-            selectionError = AXUIElementCopyAttributeValue(focused,
-                                                           kAXSelectedTextAttribute as CFString,
-                                                           &value)
-        }
-        debugLog("no-selection front=\(app.bundleIdentifier ?? "?") role=\(role) selErr=\(selectionError.rawValue)")
-    }
-
-    private func debugLog(_ message: @autoclosure () -> String) {
-        guard UserDefaults.standard.bool(forKey: Self.debugKey) else { return }
-        let line = "\(Date().timeIntervalSince1970) \(message())\n"
-        guard let data = line.data(using: .utf8) else { return }
-
-        if let handle = try? FileHandle(forWritingTo: Self.debugLogURL) {
-            defer { try? handle.close() }
-            try? handle.seekToEnd()
-            try? handle.write(contentsOf: data)
-        } else {
-            try? data.write(to: Self.debugLogURL)
-        }
     }
 }
