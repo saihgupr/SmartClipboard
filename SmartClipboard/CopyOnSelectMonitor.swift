@@ -28,6 +28,19 @@ final class CopyOnSelectMonitor {
     private var pendingSelection: String?
     private var pendingSince: Date?
 
+    /// Last observed `NSPasteboard.general.changeCount`. An unexpected bump
+    /// means something else wrote the clipboard (user pressed Cmd+C, a paste
+    /// ran, another app copied) — the explicit copy wins and the currently
+    /// highlighted text must not overwrite it.
+    private var lastSeenChangeCount: Int?
+
+    /// Highlight that was on screen when the clipboard last changed
+    /// externally (or when we first started observing). It predates the
+    /// clipboard contents, so it stays suppressed until the highlight itself
+    /// changes. This is what keeps copy-on-select from clobbering structured
+    /// copies such as Keyboard Maestro action selections.
+    private var suppressedSelection: String?
+
     /// How long a highlight must sit unchanged before we copy it. This keeps
     /// mid-drag intermediates off the pasteboard; only the settled text copies.
     private let settleInterval: TimeInterval = 0.5
@@ -67,6 +80,8 @@ final class CopyOnSelectMonitor {
             // Reset so re-enabling picks up the current selection fresh.
             pendingSelection = nil
             pendingSince = nil
+            suppressedSelection = nil
+            lastSeenChangeCount = nil
             return
         }
         guard AXIsProcessTrusted() else { return }
@@ -81,24 +96,70 @@ final class CopyOnSelectMonitor {
         // while the user highlights inside it. Skip then as well.
         if NSApp.isActive { return }
 
-        // Chromium/Electron apps need this opt-in before they build an
-        // accessibility tree that reports the current selection.
-        enableAccessibilityIfNeeded(for: front)
+        let pasteboard = NSPasteboard.general
+        let currentChange = pasteboard.changeCount
+        let isBaseline = (lastSeenChangeCount == nil)
+        let externallyChanged = !isBaseline && currentChange != lastSeenChangeCount
 
-        guard let selection = currentSelectedText(in: front), !selection.isEmpty else {
-            // No highlight (clickaway/caret move) — drop any unsettled drag.
+        var selection = currentSelectedText(in: front)
+        if selection == nil, isChromiumCandidate(front) {
+            // Chromium/Electron apps need this opt-in before they build an
+            // accessibility tree that reports the current selection. Only
+            // attempted for those apps so ordinary AppKit apps (e.g. KM) are
+            // never touched.
+            enableAccessibilityIfNeeded(for: front)
+            selection = currentSelectedText(in: front)
+        }
+
+        if isBaseline {
+            // Whatever is highlighted right now predates us — treat it as
+            // stale so we never clobber the pre-existing clipboard (which may
+            // hold a structured copy like KM actions) until the highlight
+            // actually changes.
+            lastSeenChangeCount = currentChange
             pendingSelection = nil
             pendingSince = nil
+            suppressedSelection = selection
             return
         }
 
-        let copyText = String(selection.prefix(maxLength))
-        let pasteboardString = NSPasteboard.general.string(forType: .string)
+        if externallyChanged {
+            // Someone else wrote the clipboard while this text was
+            // highlighted (user pressed Cmd+C, a paste ran, another app
+            // copied). The explicit copy wins — suppress this highlight so a
+            // later poll doesn't overwrite it with stale text.
+            lastSeenChangeCount = currentChange
+            pendingSelection = nil
+            pendingSince = nil
+            suppressedSelection = selection
+            return
+        }
+
+        guard let sel = selection, !sel.isEmpty else {
+            // No highlight (clickaway/caret move) — drop any unsettled drag
+            // and lift any suppression; the next highlight is genuinely new.
+            pendingSelection = nil
+            pendingSince = nil
+            suppressedSelection = nil
+            return
+        }
+
+        let copyText = String(sel.prefix(maxLength))
+        let pasteboardString = pasteboard.string(forType: .string)
+
+        guard Self.shouldCopy(selection: copyText,
+                              pasteboardString: pasteboardString,
+                              suppressedSelection: suppressedSelection) else {
+            return
+        }
+        // A highlight that isn't suppressed is genuinely new — it supersedes
+        // any previously suppressed text.
+        suppressedSelection = nil
 
         // Debounce: while the highlight keeps changing the user is still
         // dragging, so wait until it sits still before copying.
-        if selection != pendingSelection {
-            pendingSelection = selection
+        if sel != pendingSelection {
+            pendingSelection = sel
             pendingSince = Date()
             return
         }
@@ -107,18 +168,18 @@ final class CopyOnSelectMonitor {
         pendingSelection = nil
         pendingSince = nil
 
-        guard Self.shouldCopy(selection: copyText, pasteboardString: pasteboardString) else {
-            return
-        }
-
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(copyText, forType: .string)
+        pasteboard.clearContents()
+        pasteboard.setString(copyText, forType: .string)
+        lastSeenChangeCount = pasteboard.changeCount
     }
 
     /// Pure decision helper, extracted for unit testing.
-    static func shouldCopy(selection: String, pasteboardString: String?) -> Bool {
+    static func shouldCopy(selection: String,
+                           pasteboardString: String?,
+                           suppressedSelection: String? = nil) -> Bool {
         if selection.isEmpty { return false }
         if selection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return false }
+        if let suppressed = suppressedSelection, selection == suppressed { return false }
         if pasteboardString == selection { return false }
         return true
     }
@@ -129,6 +190,22 @@ final class CopyOnSelectMonitor {
     }
 
     // MARK: - Accessibility
+
+    /// Whether the app is a known Chromium/Electron host whose accessibility
+    /// tree ships disabled. Only those apps get the `AXManualAccessibility` /
+    /// `AXEnhancedUserInterface` opt-in; ordinary AppKit apps are never
+    /// touched. Matching is intentionally loose — a false positive just
+    /// restores the old always-opt-in behavior for that app.
+    private func isChromiumCandidate(_ app: NSRunningApplication) -> Bool {
+        let bid = (app.bundleIdentifier ?? "").lowercased()
+        guard !bid.isEmpty else { return false }
+        let markers = ["chrome", "chromium", "electron", "vscode", "cursor",
+                       "thebrowser", "browser", "arc", "brave", "edgemac",
+                       "opera", "vivaldi", "slack", "discord", "obsidian",
+                       "notion", "figma", "todesktop", "antigravity",
+                       "spotify", "chatgpt", "orion"]
+        return markers.contains { bid.contains($0) }
+    }
 
     /// Turns on the accessibility tree for apps that ship it disabled. This is
     /// a no-op (attribute unsupported) for ordinary AppKit apps.

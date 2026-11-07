@@ -25,6 +25,35 @@ final class CopyOnSelectTests: XCTestCase {
         XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", pasteboardString: "other"))
     }
 
+    // MARK: - Explicit-copy suppression (KM action copy fix)
+
+    func testSuppressedHighlightIsNotCopied() {
+        // The highlight predates an explicit clipboard write (e.g. Cmd+C of
+        // KM actions) — it must not overwrite the fresh clipboard contents.
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello",
+                                                      pasteboardString: "other",
+                                                      suppressedSelection: "hello"))
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello",
+                                                      pasteboardString: nil,
+                                                      suppressedSelection: "hello"))
+    }
+
+    func testNewHighlightLiftsSuppression() {
+        // A genuinely different highlight is new user intent — it copies.
+        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello world",
+                                                     pasteboardString: "other",
+                                                     suppressedSelection: "hello"))
+    }
+
+    func testNoSuppressionBehavesAsBefore() {
+        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello",
+                                                     pasteboardString: "other",
+                                                     suppressedSelection: nil))
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello",
+                                                      pasteboardString: "hello",
+                                                      suppressedSelection: nil))
+    }
+
     func testEnabledKeyDefaultsOff() {
         // bool(forKey:) returns false when unset — the feature must default off.
         // Use a scratch defaults suite via UserDefaults directly is overkill;
