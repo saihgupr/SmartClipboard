@@ -5,19 +5,24 @@ import SwiftData
 final class CopyOnSelectTests: XCTestCase {
 
     func testRejectsEmptyAndWhitespace() {
-        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "", lastCopied: "", pasteboardString: nil))
-        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "   ", lastCopied: "", pasteboardString: nil))
-        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "\n\t ", lastCopied: "", pasteboardString: nil))
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "", pasteboardString: nil))
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "   ", pasteboardString: nil))
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "\n\t ", pasteboardString: nil))
     }
 
     func testAcceptsFreshSelection() {
-        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", lastCopied: "", pasteboardString: "other"))
-        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", lastCopied: "", pasteboardString: nil))
+        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", pasteboardString: "other"))
+        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", pasteboardString: nil))
     }
 
-    func testSkipsDuplicates() {
-        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello", lastCopied: "hello", pasteboardString: "other"))
-        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello", lastCopied: "", pasteboardString: "hello"))
+    func testSkipsSelectionAlreadyOnPasteboard() {
+        XCTAssertFalse(CopyOnSelectMonitor.shouldCopy(selection: "hello", pasteboardString: "hello"))
+    }
+
+    func testRecopiesSameSelectionAfterPasteboardChanged() {
+        // Selecting the same text again should copy it when the clipboard has
+        // moved on since the last copy-on-select.
+        XCTAssertTrue(CopyOnSelectMonitor.shouldCopy(selection: "hello", pasteboardString: "other"))
     }
 
     func testEnabledKeyDefaultsOff() {
