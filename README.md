@@ -92,6 +92,8 @@ SmartClipboard is designed to look modern and native on macOS. Choose between fo
 | `Cmd + C` | Detail View | Copy item to clipboard without closing window (or copies text selection if active) |
 | `Escape` | Any | Close detail view / dismiss SmartClipboard window |
 
+> **Password fields:** macOS Secure Input blocks global shortcuts that do not include Cmd or Ctrl while a password field is focused, so a bare backtick cannot reach the app there. Assign a shortcut with one of those modifiers (for example Cmd+Shift+backtick) if you want the panel to open from password fields.
+
 ## Getting Started
 
 ### Prerequisites

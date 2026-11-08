@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Snippets now appear only when the search starts with `/`. Typing plain text no longer surfaces slash commands such as `/fixbugs`.
+- The shortcut recorder now warns that macOS Secure Input blocks global hotkeys without ⌘ or ⌃ inside password fields, and suggests shortcuts such as ⌘⇧` or ⌃` that keep working there.
 
 ## [1.0.5] - 2026-07-18
 

@@ -9,71 +9,91 @@ struct ShortcutRecorderView: View {
     @State private var eventMonitor: Any?
     
     var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Global Hotkey")
-                    .font(.system(size: 14, weight: .medium))
-                Text("Tap to toggle window, or hold for Quick Paste Mode and release to paste.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 8) {
-                Button(action: {
-                    if isRecording {
-                        stopRecording()
-                    } else {
-                        startRecording()
-                    }
-                }) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(isRecording ? Color.blue.gradient : Color.primary.opacity(0.1).gradient)
-                            .frame(minWidth: 140, minHeight: 36)
-                        
-                        HStack(spacing: 8) {
-                            if isRecording {
-                                Text("Listening...")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(.white)
-                            } else if keyCode == 0 && modifiersRaw == 0 {
-                                Text("Record Shortcut")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Text(shortcutString)
-                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                    .foregroundColor(isRecording ? .white : .primary)
-                            }
-                            
-                            if isRecording {
-                                Image(systemName: "record.circle.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Global Hotkey")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("Tap to toggle window, or hold for Quick Paste Mode and release to paste.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    Button(action: {
+                        if isRecording {
+                            stopRecording()
+                        } else {
+                            startRecording()
+                        }
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isRecording ? Color.blue.gradient : Color.primary.opacity(0.1).gradient)
+                                .frame(minWidth: 140, minHeight: 36)
+
+                            HStack(spacing: 8) {
+                                if isRecording {
+                                    Text("Listening...")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(.white)
+                                } else if keyCode == 0 && modifiersRaw == 0 {
+                                    Text("Record Shortcut")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text(shortcutString)
+                                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                        .foregroundColor(isRecording ? .white : .primary)
+                                }
+
+                                if isRecording {
+                                    Image(systemName: "record.circle.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
+                                }
                             }
                         }
                     }
-                }
-                .buttonStyle(.plain)
-                
-                if keyCode != 0 || modifiersRaw != 0 {
-                    Button(action: clearShortcut) {
-                        Image(systemName: "xmark.circle.fill")
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 18))
-                    }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Clear Shortcut")
-                    .help("Clear Shortcut")
+
+                    if keyCode != 0 || modifiersRaw != 0 {
+                        Button(action: clearShortcut) {
+                            Image(systemName: "xmark.circle.fill")
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundColor(.secondary)
+                                .font(.system(size: 18))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Clear Shortcut")
+                        .help("Clear Shortcut")
+                    }
+                }
+            }
+
+            if showsSecureInputWarning {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.orange)
+                    Text("macOS Secure Input blocks shortcuts without ⌘ or ⌃ inside password fields. Use a shortcut such as ⌘⇧` or ⌃` if you want the panel to open there.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
         .onDisappear {
             stopRecording()
         }
+    }
+
+    private var showsSecureInputWarning: Bool {
+        guard !isRecording, keyCode != 0 || modifiersRaw != 0 else { return false }
+        let modifiers = NSEvent.ModifierFlags(rawValue: UInt(modifiersRaw))
+        return !modifiers.contains(.command) && !modifiers.contains(.control)
     }
     
     private var shortcutString: String {
